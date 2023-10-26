@@ -8,6 +8,9 @@ RUN npx next telemetry disable
 EXPOSE 3000
 
 FROM typingjerboa-node-base AS typingjerboa-node-dev
+ENV NODE_ENV=development
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
 RUN rm -rf src
 CMD npm run dev
 
