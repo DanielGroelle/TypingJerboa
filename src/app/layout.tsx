@@ -16,7 +16,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <header className="flex border-solid border-2 border-b-white">
+          <div className="flex-1 border-solid border-2 border-x-white">
+            TypingJerboa
+          </div>
+          <div className="flex-1 border-solid border-2 border-x-white">
+            0 Gems
+          </div>
+          <div className="flex-1 border-solid border-2 border-x-white">
+            Login
+          </div>
+        </header>
+
+        {children}
+      </body>
     </html>
   )
 };
