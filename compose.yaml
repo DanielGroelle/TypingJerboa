@@ -1,0 +1,50 @@
+services:
+  node-dev:
+    build:
+      context: .
+      target: typingjerboa-node-dev
+    image: typingjerboa-node-dev
+    volumes:
+      - ./src:/app/src
+    environment:
+      - HI=HI
+    ports:
+      - "3000:3000"
+
+  node-prod:
+    build:
+      context: .
+      target: typingjerboa-node-prod
+    image: typingjerboa-node-prod
+    environment:
+      - HI=HI
+    ports:
+      - "3000:80"
+  
+  postgres-dev:
+    build:
+      context: .
+      target: typingjerboa-postgres-dev
+    image: typingjerboa-postgres-dev
+    volumes:
+      - /var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=HI
+      - POSTGRES_USER=HI
+      - POSTGRES_DB=HI
+    ports:
+      - "5432:2345"
+
+  postgres-prod:
+    build:
+      context: .
+      target: typingjerboa-postgres-prod
+    image: typingjerboa-postgres-prod
+    volumes:
+      - /var/lib/postgres
+    environment:
+      - POSTGRES_PASSWORD=HI
+      - POSTGRES_USER=HI
+      - POSTGRES_DB=HI
+    ports:
+      - "5432:5432"
