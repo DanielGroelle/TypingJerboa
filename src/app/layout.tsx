@@ -15,21 +15,32 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <header className="flex border-solid border-2 border-b-white">
-          <div className="flex-1 border-solid border-2 border-x-white">
-            TypingJerboa
+    <html lang="en" className="h-full">
+      <body className={`flex flex-col h-full ${inter.className}`}>
+        <header className="flex border-solid border-b-2 border-white">
+          <div className="flex-2 px-4 py-2 text-center border-solid border-r-2 border-white">
+            <a href="#">TypingJerboa</a>
           </div>
-          <div className="flex-1 border-solid border-2 border-x-white">
-            0 Gems
+          <div className="flex-1 px-4 py-2 text-center border-solid border-x-2 border-white">
+
           </div>
-          <div className="flex-1 border-solid border-2 border-x-white">
-            Login
+          <div className="flex-2 px-4 py-2 text-center border-solid border-l-2 border-white">
+            <a href="#">Login</a>
           </div>
         </header>
 
-        {children}
+        <div className="grow py-4 px-16">
+          {children}
+        </div>
+
+        <footer className="flex border-solid border-t-2 border-t-white py-4">
+          <div className="flex-1 text-center border-solid border-white">
+            <a href="#">About</a>
+          </div>
+          <div className="flex-1 text-center border-solid border-white">
+            Copyright whatever
+          </div>
+        </footer>
       </body>
     </html>
   )
