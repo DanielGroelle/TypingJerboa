@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Link from "next/link";
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,7 +20,7 @@ export default function RootLayout({
       <body className={`flex flex-col h-full ${inter.className}`}>
         <header className="flex border-solid border-b-2 border-white">
           <div className="flex-2 px-4 py-2 text-center border-solid border-r-2 border-white">
-            <a href="#">TypingJerboa</a>
+            <Link href="/">TypingJerboa</Link>
           </div>
           <div className="flex-1 px-4 py-2 text-center border-solid border-x-2 border-white">
 
@@ -35,7 +36,7 @@ export default function RootLayout({
 
         <footer className="flex border-solid border-t-2 border-t-white py-4">
           <div className="flex-1 text-center border-solid border-white">
-            <a href="#">About</a>
+            <Link href="/about">About</Link>
           </div>
           <div className="flex-1 text-center text-sm border-solid border-white">
             Copyright whatever
