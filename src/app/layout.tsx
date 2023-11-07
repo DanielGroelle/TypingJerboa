@@ -25,11 +25,11 @@ export default function RootLayout({
 
           </div>
           <div className="flex-2 px-4 py-2 text-center border-solid border-l-2 border-white">
-            <a href="#">Login</a>
+            <a href="#">Register</a>
           </div>
         </header>
 
-        <div className="grow py-4 px-16">
+        <div className="grow py-4 sm:px-16 px-8">
           {children}
         </div>
 
@@ -37,7 +37,7 @@ export default function RootLayout({
           <div className="flex-1 text-center border-solid border-white">
             <a href="#">About</a>
           </div>
-          <div className="flex-1 text-center border-solid border-white">
+          <div className="flex-1 text-center text-sm border-solid border-white">
             Copyright whatever
           </div>
         </footer>
