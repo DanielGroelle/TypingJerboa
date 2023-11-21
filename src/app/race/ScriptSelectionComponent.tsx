@@ -24,8 +24,6 @@ function startRace() {
 }
 
 export default function ScriptSelectionComponent({raceParagraphCallback}: {raceParagraphCallback: (paragraph: string) => void}) {
-
-
   return (
     <div className="">
       Select the script you&apos;d like to use

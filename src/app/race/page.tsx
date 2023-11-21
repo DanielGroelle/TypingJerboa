@@ -1,4 +1,4 @@
-import ClientRace from "./Client-Page";
+import ClientRace from "./client-page";
 
 export default function Race() {
   return (
