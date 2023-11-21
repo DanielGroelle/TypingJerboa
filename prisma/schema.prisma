@@ -15,16 +15,16 @@ model User {
   id        String   @default(cuid()) @id
   username  String   @unique
   createdAt DateTime @default(now()) @map(name: "created_at")
-  races Race[]
+  races     Race[]
   @@map(name: "users")
 }
 
 model Race {
-  id String @default(cuid()) @id
-  startTime DateTime @default(now()) @map(name: "start_time")
-  script String
-  paragraph String?
-  user User @relation(fields: [userId], references: [id])
-  userId String @unique @map(name: "user_id")
+  id             String   @default(cuid()) @id
+  startTime      DateTime @default(now()) @map(name: "start_time")
+  languageScript String   @map(name: "language_script") 
+  paragraph      String
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String   @unique @map(name: "user_id")
   @@map(name: "races")
 }
