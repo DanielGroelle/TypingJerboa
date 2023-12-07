@@ -8,6 +8,8 @@ services:
       - ./src:/app/src
     environment:
       - HI=HI
+      - POSTGRES_PRISMA_URL=${POSTGRES_PRISMA_INTERNAL_URL}
+      - POSTGRES_URL_NON_POOLING=${POSTGRES_INTERNAL_URL_NON_POOLING}
     ports:
       - "3000:3000"
 

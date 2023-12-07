@@ -5,6 +5,7 @@ COPY ./package*.json ./
 RUN npm i
 COPY . .
 RUN npx next telemetry disable
+RUN npx prisma generate
 EXPOSE 3000
 
 FROM typingjerboa-node-base AS typingjerboa-node-dev
