@@ -1,6 +1,11 @@
 import prisma from "../src/lib/prisma";
 
 async function main() {
+  //WARNING DROPS ALL RACES, PARAGRAPHS, AND LANGUAGESCRIPTS
+  await prisma.race.deleteMany();
+  await prisma.paragraph.deleteMany();
+  await prisma.languageScript.deleteMany();
+
   const CYRILLIC_RUSSIAN = await prisma.languageScript.create({
     data: {
       languageScript: 'cyrillic-russian',

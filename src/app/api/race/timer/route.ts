@@ -8,13 +8,15 @@ export async function GET(req: NextRequest) {
 }
 
 const Z_REQUEST = z.object({
-  languageScriptId: z.number()
+  languageScript: z.string()
 });
 
 export async function POST(req: NextRequest) {
-  const request = Z_REQUEST.safeParse(await req.json());
-
-  if (!request.success) {
+  let request;
+  try {
+    request = Z_REQUEST.parse(await req.json());
+  }
+  catch(e: unknown) {
     return new Response("Request was structured incorrectly", {status: 400})
   }
 
@@ -24,11 +26,12 @@ export async function POST(req: NextRequest) {
   //fetch the number of paragraphs for a given languageScript
   const languageScriptResult = await prisma.paragraph.findFirst({
     select: {
-      languageScriptIndex: true
+      languageScriptIndex: true,
+      languageScriptId: true
     },
     where: {
       languageScript: {
-        id: request.data.languageScriptId
+        languageScript: request.languageScript
       }
     },
     orderBy: {
@@ -37,27 +40,33 @@ export async function POST(req: NextRequest) {
   });
 
   if (languageScriptResult === null) {
-    return new Response("LanguageScriptId not found", {status: 400});
+    return new Response("LanguageScript not found", {status: 400});
   }
 
+  //pick random paragraph index
   const lastParagraphIndex = languageScriptResult.languageScriptIndex;
   const chosenParagraphIndex = Math.floor(Math.random() * (lastParagraphIndex + 1));
 
-  //fetch the paragraph id
-  const chosenParagraphIdResult = await prisma.paragraph.findFirst({
+  const languageScriptId = languageScriptResult.languageScriptId;
+
+  //fetch the paragraph id and text
+  const chosenParagraphIdTextResult = await prisma.paragraph.findFirst({
     select: {
-      id: true
+      id: true,
+      text: true
     },
     where: {
-      languageScriptIndex: chosenParagraphIndex
+      languageScriptIndex: chosenParagraphIndex,
+      languageScriptId: languageScriptId
     }
   });
 
-  if (chosenParagraphIdResult === null) {
+  if (chosenParagraphIdTextResult === null) {
     return new Response("Paragraph id not found", {status: 400});
   }
 
-  const chosenParagraphId = chosenParagraphIdResult.id
+  const chosenParagraphId = chosenParagraphIdTextResult.id
+  const chosenParagraphText = chosenParagraphIdTextResult.text;
 
   const createResult = await prisma.race.create({
     data: {
@@ -71,5 +80,5 @@ export async function POST(req: NextRequest) {
     return new Response("Race creation failed", {status: 400});
   }
 
-  return new Response(JSON.stringify({startTime}));
+  return new Response(JSON.stringify({startTime, paragraphText: chosenParagraphText}));
 }

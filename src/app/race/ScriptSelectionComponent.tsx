@@ -1,8 +1,14 @@
 "use client";
 
+import {z} from "zod";
 import {LanguageScripts} from "@/js/language-scripts";
 
-function startRace() {
+const Z_RESPONSE = z.object({
+  startTime: z.string(),
+  paragraphText: z.string()
+})
+
+async function startRace() {
   //find the select element
   const scriptElement = document.querySelector("#script");
   if (!(scriptElement instanceof HTMLSelectElement)) {
@@ -12,15 +18,20 @@ function startRace() {
   //access the selected value in the select
   const scriptSelected = scriptElement.options[scriptElement.selectedIndex].value;
   console.log(scriptSelected);
-  
-  //TODO: makes an api fetch to get a text paragraph for the race
-  if (scriptSelected === LanguageScripts.CYRILLIC_RUSSIAN) {
-    return "Обернувшись, он заметил человека небольшого роста, в старом поношенном вицмундире, и не без ужаса узнал в нем Акакия Акакиевича. Лицо чиновника было бледно, как снег, и глядело совершенным мертвецом.";
-  }
-  else if (scriptSelected === LanguageScripts.LATIN_ENGLISH) {
-    return "The theory of music emphasizes the elements from which music is composed. One such structure is the melody, which is a grouping of musical notes that combine into a basic, but immensely flexible structure. Another is the chord, which is two or more notes played simultaneously to create a harmony.";
-  }
-  throw "Script selected not found";
+
+  const res = await fetch(`api/race/timer`, {
+    method: "POST",
+    body: JSON.stringify({
+      languageScript: scriptSelected
+    }),
+    mode: "cors",
+    cache: "default"
+  });
+
+  const response = Z_RESPONSE.parse(await res.json());
+  console.log(response);
+
+  return response.paragraphText;
 }
 
 export default function ScriptSelectionComponent({raceParagraphCallback}: {raceParagraphCallback: (paragraph: string) => void}) {
@@ -32,7 +43,7 @@ export default function ScriptSelectionComponent({raceParagraphCallback}: {raceP
           <option value={LanguageScripts.CYRILLIC_RUSSIAN}>Cyrillic (Russian)</option>
           <option value={LanguageScripts.LATIN_ENGLISH}>Latin (English)</option>
         </select>
-        <button className="border-solid border-white border rounded-lg p-2" onClick={()=>raceParagraphCallback(startRace())}>Start Race</button>
+        <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={() => {void (async ()=>raceParagraphCallback(await startRace()))()}} value="Start Race"/>
       </div>
     </div>
   );
