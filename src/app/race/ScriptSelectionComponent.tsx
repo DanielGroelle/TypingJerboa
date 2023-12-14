@@ -8,7 +8,7 @@ const Z_RESPONSE = z.object({
   paragraphText: z.string()
 })
 
-async function startRace() {
+async function startRace(setRaceParagraph: (paragraph: string) => void, setStartTime: (startTime: Date | null) => void) {
   //find the select element
   const scriptElement = document.querySelector("#script");
   if (!(scriptElement instanceof HTMLSelectElement)) {
@@ -19,6 +19,7 @@ async function startRace() {
   const scriptSelected = scriptElement.options[scriptElement.selectedIndex].value;
   console.log(scriptSelected);
 
+  //fetch startTime and paragraphText
   const res = await fetch(`api/race/timer`, {
     method: "POST",
     body: JSON.stringify({
@@ -31,10 +32,12 @@ async function startRace() {
   const response = Z_RESPONSE.parse(await res.json());
   console.log(response);
 
-  return response.paragraphText;
+  setRaceParagraph(response.paragraphText);
+  setStartTime(new Date(response.startTime));
 }
 
-export default function ScriptSelectionComponent({raceParagraphCallback}: {raceParagraphCallback: (paragraph: string) => void}) {
+export default function ScriptSelectionComponent({setRaceParagraph, setStartTime}:
+  {setRaceParagraph: (paragraph: string) => void, setStartTime: (startTime: Date | null) => void}) {
   return (
     <div className="">
       Select the script you&apos;d like to use
@@ -43,7 +46,7 @@ export default function ScriptSelectionComponent({raceParagraphCallback}: {raceP
           <option value={LanguageScripts.CYRILLIC_RUSSIAN}>Cyrillic (Russian)</option>
           <option value={LanguageScripts.LATIN_ENGLISH}>Latin (English)</option>
         </select>
-        <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={() => {void (async ()=>raceParagraphCallback(await startRace()))()}} value="Start Race"/>
+        <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={() => {void (async ()=>await startRace(setRaceParagraph, setStartTime))()}} value="Start Race"/>
       </div>
     </div>
   );
