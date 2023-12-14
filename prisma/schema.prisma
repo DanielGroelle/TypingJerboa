@@ -56,3 +56,12 @@ model Race {
   userId         Int?      @map(name: "user_id")
   @@map(name: "races")
 }
+
+model Newspost {
+  id     Int    @default(autoincrement()) @id
+  title  String 
+  author String 
+  body   String
+  tags   String[]
+  @@map(name: "newsposts")
+}
