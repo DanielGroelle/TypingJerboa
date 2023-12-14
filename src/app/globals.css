@@ -25,3 +25,16 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+/* text color classes for /race */
+.empty {
+  color: auto;
+}
+
+.correct {
+  color: green;
+}
+
+.incorrect {
+  color: red;
+}
