@@ -30,7 +30,6 @@ async function startRace(setRaceParagraph: (paragraph: string) => void, setStart
   });
 
   const response = Z_RESPONSE.parse(await res.json());
-  console.log(response);
 
   setRaceParagraph(response.paragraphText);
   setStartTime(new Date(response.startTime));

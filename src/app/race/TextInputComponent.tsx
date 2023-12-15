@@ -4,23 +4,28 @@ import React, {useState, ChangeEvent, ClipboardEvent, MouseEvent} from "react";
 import "../globals.css";
 
 export default function TextInputComponent({raceParagraphArray}: {raceParagraphArray: string[]}) {
-  const [correctCharacters, setCorrectCharacters] = useState<string[]>([]);
+  const [userInput, setUserInput] = useState("");
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    const userInput = event.currentTarget.value;
+    const newUserInput = event.currentTarget.value;
+    setUserInput(newUserInput);
 
-    const newCorrectCharacters = raceParagraphArray.reduce((accumulator: string[], char, i)=>{
-      if (userInput[i] === undefined) {
-        return accumulator.concat("empty");
-      }
-      if (char !== userInput[i]) {
-        return accumulator.concat("incorrect");
-      }
-      return accumulator.concat("correct");
-    }, []);
-
-    setCorrectCharacters(newCorrectCharacters);
+    //check if userinput matches raceparagraph
+    if (newUserInput.length >= raceParagraphArray.length) {
+      console.log("finish!!");
+    }
   };
+
+  //returns the appropriate class based on if the input char matches the raceParagraph char
+  function correctIncorrectClassName(char: string, i: number) {
+    if (userInput[i] === undefined) {
+      return "empty";
+    }
+    if (char !== userInput[i]) {
+      return "incorrect";
+    }
+    return "correct";
+  }
 
   const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
     event.preventDefault();
@@ -35,13 +40,13 @@ export default function TextInputComponent({raceParagraphArray}: {raceParagraphA
   }
 
   return (
-    <div>
+    <div className="w-1/2">
       <div className="border-solid border-white border select-none" onContextMenu={handleParagraphContextMenu}>
         {raceParagraphArray.map((character, i)=>{
-          return <span className={correctCharacters[i] ?? "empty"} key={i}>{character}</span>
+          return <span className={correctIncorrectClassName(character, i)} key={i}>{character}</span>
         })}
       </div>
-      <textarea className="text-black resize-none" onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+      <textarea className="text-black resize-none min-w-full" onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
     </div>
   );
 }
