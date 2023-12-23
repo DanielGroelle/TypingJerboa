@@ -37,4 +37,7 @@ body {
 
 .incorrect {
   color: red;
+  background-color: darkred;
+  text-decoration-line: underline;
+  text-decoration-color: red;
 }

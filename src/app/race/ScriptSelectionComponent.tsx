@@ -29,6 +29,8 @@ async function startRace(setRaceParagraph: (paragraph: string) => void, setStart
     cache: "default"
   });
 
+  //TODO: handle 404
+
   const response = Z_RESPONSE.parse(await res.json());
 
   setRaceParagraph(response.paragraphText);

@@ -5,23 +5,37 @@ import "../globals.css";
 
 export default function TextInputComponent({raceParagraphArray}: {raceParagraphArray: string[]}) {
   const [userInput, setUserInput] = useState("");
+  const [mistakes, setMistakes] = useState(0);
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const newUserInput = event.currentTarget.value;
+    const oldLength = userInput.length;
+    const newLength = newUserInput.length
     setUserInput(newUserInput);
 
-    //check if userinput matches raceparagraph
+    //check if a mistake was made
+    //mistakes only count if the previous character is not a mistake
+    if (newLength > oldLength &&
+    correctIncorrectClassName(newLength - 1, newUserInput) === "incorrect" &&
+    correctIncorrectClassName(newLength - 2, newUserInput) !== "incorrect") {
+      const newMistakes = mistakes + 1;
+      setMistakes(newMistakes);
+      console.log("mistake!", newMistakes);
+    }
+
+    //check if the race is finished
     if (newUserInput.length >= raceParagraphArray.length) {
       console.log("finish!!");
     }
   };
 
-  //returns the appropriate class based on if the input char matches the raceParagraph char
-  function correctIncorrectClassName(char: string, i: number) {
+  //returns the appropriate class based on if the current raceParagraph char matches the userInput char
+  //needs to take in the userInput string in case the state variable hasnt updated yet
+  function correctIncorrectClassName(i: number, userInput: string) {
     if (userInput[i] === undefined) {
       return "empty";
     }
-    if (char !== userInput[i]) {
+    if (raceParagraphArray[i] !== userInput[i]) {
       return "incorrect";
     }
     return "correct";
@@ -43,7 +57,7 @@ export default function TextInputComponent({raceParagraphArray}: {raceParagraphA
     <div className="w-1/2">
       <div className="border-solid border-white border select-none" onContextMenu={handleParagraphContextMenu}>
         {raceParagraphArray.map((character, i)=>{
-          return <span className={correctIncorrectClassName(character, i)} key={i}>{character}</span>
+          return <span className={correctIncorrectClassName(i, userInput)} key={i}>{character}</span>
         })}
       </div>
       <textarea className="text-black resize-none min-w-full" onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
