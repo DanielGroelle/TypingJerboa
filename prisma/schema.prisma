@@ -61,10 +61,11 @@ model Race {
 }
 
 model Newspost {
-  id     Int    @default(autoincrement()) @id
-  title  String 
-  author String 
-  body   String
-  tags   String[]
+  id       Int      @default(autoincrement()) @id
+  title    String 
+  author   String
+  postDate DateTime @map(name: "post_date") 
+  body     String
+  tags     String[]
   @@map(name: "newsposts")
 }
