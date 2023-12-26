@@ -1,29 +1,12 @@
 import prisma from "@/lib/prisma";
 import {z} from "zod";
 
-export async function GET(req: Request) {
-  const returnedRaces = await prisma.race.findMany({
-    select: {
-      id: true,
-      startTime: true,
-      endTime: true,
-      mistakes: true,
-      paragraph: true
-    }
-  })
-
-  if (returnedRaces === null) {
-    return new Response("Fetch races failed", {status: 400});
-  }
-
-  return new Response(JSON.stringify({races: returnedRaces}));
-}
-
 const Z_REQUEST = z.object({
   mistakes: z.number(),
-  endTime: z.date(),
+  endTime: z.string(),
   raceId: z.string()
 });
+
 //end race
 export async function POST(req: Request) {
   let request;
@@ -39,7 +22,7 @@ export async function POST(req: Request) {
     where: {id: request.raceId},
     data: {
       mistakes: request.mistakes,
-      endTime: request.endTime
+      endTime: new Date(request.endTime)
     }
   });
 

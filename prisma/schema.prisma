@@ -36,8 +36,8 @@ model LanguageScript {
 model Paragraph {
   id                  Int            @default(autoincrement()) @id
   text                String
-  source              String
-  author              String
+  source              String?
+  author              String?
   languageScript      LanguageScript @relation(fields: [languageScriptId], references: [id]) 
   languageScriptId    Int            @map(name: "language_script_id")
   languageScriptIndex Int            @map(name: "language_script_index")

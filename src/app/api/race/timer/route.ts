@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
 const Z_REQUEST = z.object({
   languageScript: z.string()
 });
+
 //start race and get paragraphText and startTime
 export async function POST(req: NextRequest) {
   let request;

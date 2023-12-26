@@ -7,7 +7,7 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
   const [userInput, setUserInput] = useState("");
   const [mistakes, setMistakes] = useState(0);
 
-  async function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
+  function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     const newUserInput = event.currentTarget.value;
     const oldLength = userInput.length;
     const newLength = newUserInput.length
@@ -24,19 +24,20 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
 
     //check if the race is finished
     if (newUserInput.length >= raceParagraphArray.length) {
-      console.log("finish!!");
       //finish the race by sending the endTime and mistakes
-      const res = await fetch(`api/race`, {
-        method: "POST",
-        body: JSON.stringify({
-          mistakes: mistakes,
-          endTime: new Date(),
-          raceId
-        }),
-        mode: "cors",
-        cache: "default"
-      });
-
+      void (async ()=>{
+        const res = await fetch(`api/race`, {
+          method: "POST",
+          body: JSON.stringify({
+            mistakes: mistakes,
+            endTime: new Date(),
+            raceId
+          }),
+          mode: "cors",
+          cache: "default"
+        });
+      })();
+      //TODO: use SuperJSON for request stringification. sending dates is annoying rn
       //TODO: handle error
     }
   }
@@ -72,7 +73,7 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
           return <span className={correctIncorrectClassName(i, userInput)} key={i}>{character}</span>
         })}
       </div>
-      <textarea className="text-black resize-none min-w-full" onChange={void (async () => (handleChange))} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+      <textarea className="text-black resize-none min-w-full" onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
     </div>
   );
 }
