@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 const Z_REQUEST = z.object({
   languageScript: z.string()
 });
-
+//start race and get paragraphText and startTime
 export async function POST(req: NextRequest) {
   let request;
   try {
@@ -69,6 +69,9 @@ export async function POST(req: NextRequest) {
   const chosenParagraphText = chosenParagraphIdTextResult.text;
 
   const createResult = await prisma.race.create({
+    select: {
+      id: true
+    },
     data: {
       startTime: startTime,
       paragraphId: chosenParagraphId
@@ -80,5 +83,5 @@ export async function POST(req: NextRequest) {
     return new Response("Race creation failed", {status: 400});
   }
 
-  return new Response(JSON.stringify({startTime, paragraphText: chosenParagraphText}));
+  return new Response(JSON.stringify({startTime, paragraphText: chosenParagraphText, raceId: createResult.id}));
 }

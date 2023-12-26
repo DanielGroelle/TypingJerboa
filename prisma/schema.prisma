@@ -36,6 +36,8 @@ model LanguageScript {
 model Paragraph {
   id                  Int            @default(autoincrement()) @id
   text                String
+  source              String
+  author              String
   languageScript      LanguageScript @relation(fields: [languageScriptId], references: [id]) 
   languageScriptId    Int            @map(name: "language_script_id")
   languageScriptIndex Int            @map(name: "language_script_index")
@@ -45,9 +47,10 @@ model Paragraph {
 }
 
 model Race {
-  id             Int       @default(autoincrement()) @id
+  id             String    @default(cuid()) @id
   startTime      DateTime  @map(name: "start_time")
   endTime        DateTime? @map(name: "end_time")
+  mistakes       Int?
   paragraph      Paragraph @relation(fields: [paragraphId], references: [id])
   paragraphId    Int       @map(name: "paragraph_id")
   session        Session?  @relation(fields: [sessionToken], references: [token])

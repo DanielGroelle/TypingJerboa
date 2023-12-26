@@ -3,11 +3,11 @@
 import React, {useState, ChangeEvent, ClipboardEvent, MouseEvent} from "react";
 import "../globals.css";
 
-export default function TextInputComponent({raceParagraphArray}: {raceParagraphArray: string[]}) {
+export default function TextInputComponent({raceParagraphArray, raceId}: {raceParagraphArray: string[], raceId: string | null}) {
   const [userInput, setUserInput] = useState("");
   const [mistakes, setMistakes] = useState(0);
 
-  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+  async function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     const newUserInput = event.currentTarget.value;
     const oldLength = userInput.length;
     const newLength = newUserInput.length
@@ -20,14 +20,26 @@ export default function TextInputComponent({raceParagraphArray}: {raceParagraphA
     correctIncorrectClassName(newLength - 2, newUserInput) !== "incorrect") {
       const newMistakes = mistakes + 1;
       setMistakes(newMistakes);
-      console.log("mistake!", newMistakes);
     }
 
     //check if the race is finished
     if (newUserInput.length >= raceParagraphArray.length) {
       console.log("finish!!");
+      //finish the race by sending the endTime and mistakes
+      const res = await fetch(`api/race`, {
+        method: "POST",
+        body: JSON.stringify({
+          mistakes: mistakes,
+          endTime: new Date(),
+          raceId
+        }),
+        mode: "cors",
+        cache: "default"
+      });
+
+      //TODO: handle error
     }
-  };
+  }
 
   //returns the appropriate class based on if the current raceParagraph char matches the userInput char
   //needs to take in the userInput string in case the state variable hasnt updated yet
@@ -60,7 +72,7 @@ export default function TextInputComponent({raceParagraphArray}: {raceParagraphA
           return <span className={correctIncorrectClassName(i, userInput)} key={i}>{character}</span>
         })}
       </div>
-      <textarea className="text-black resize-none min-w-full" onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+      <textarea className="text-black resize-none min-w-full" onChange={void (async () => (handleChange))} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
     </div>
   );
 }

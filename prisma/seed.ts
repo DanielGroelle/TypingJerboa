@@ -1,5 +1,6 @@
 import prisma from "../src/lib/prisma";
 
+//npx prisma db seed
 async function main() {
   //DROPS ALL RACES, PARAGRAPHS, AND LANGUAGESCRIPTS
   // await prisma.race.deleteMany();
@@ -11,7 +12,9 @@ async function main() {
       languageScript: 'cyrillic-russian',
       paragraphs: {
         create: {
-          text: "Обернувшись, он заметил человека небольшого роста, в старом поношенном вицмундире, и не без ужаса узнал в нем Акакия Акакиевича. Лицо чиновника было бледно, как снег, и глядело совершенным мертвецом.",
+          text: "Лежи в цветах - сама, как сад в цвету. Твоя постель из пепла и гранита. Я руки над тобой переплету и окроплю слезами эти плиты. А завтра снова принесу цветов и забросаю ими твой покров.",
+          source: "Ромео и Джульетта",
+          author: "У.Шейкспир",
           languageScriptIndex: 0
         },
       },
@@ -22,7 +25,9 @@ async function main() {
       languageScript: 'latin-english',
       paragraphs: {
         create: {
-          text: "The theory of music emphasizes the elements from which music is composed. One such structure is the melody, which is a grouping of musical notes that combine into a basic, but immensely flexible structure. Another is the chord, which is two or more notes played simultaneously to create a harmony.",
+          text: "Music finds a comfortable parallel with that of human language. Much as language has words, sentences, and stories, music has tones, melodies, and songs.",
+          source: "Civilization IV",
+          author: "Sid Meier",
           languageScriptIndex: 0
         },
       },
