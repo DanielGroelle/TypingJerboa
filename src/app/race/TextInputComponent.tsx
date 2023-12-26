@@ -26,7 +26,7 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
     if (newUserInput.length >= raceParagraphArray.length) {
       //finish the race by sending the endTime and mistakes
       void (async ()=>{
-        const res = await fetch(`api/race`, {
+        const res = await fetch(`/api/race`, {
           method: "POST",
           body: JSON.stringify({
             mistakes: mistakes,

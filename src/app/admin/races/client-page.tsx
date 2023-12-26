@@ -41,6 +41,30 @@ export default function ClientAdminRaces() {
     void (async ()=>setRaces(await getRaces()))();
   },[])
 
+  function handleClick(raceId: string) {
+    console.log("id", raceId);
+    void (async ()=>{
+      try{
+        const res = await fetch(`/api/admin/race`, {
+          method: "DELETE",
+          body: JSON.stringify({
+            id: raceId
+          }),
+          mode: "cors",
+          cache: "default"
+        });
+      }
+      catch(e: unknown) {
+        throw "Delete failed";
+      }
+    })();
+  
+    const i = races.findIndex((race)=>race.id === raceId);
+    const newRaces = races.toSpliced(i, 1);
+
+    setRaces([...newRaces])
+  }
+
   return (
     <div>
       Races
@@ -51,6 +75,7 @@ export default function ClientAdminRaces() {
           endTime: {race.endTime}<br/>
           mistakes: {race.mistakes}<br/>
           paragraph: {race.paragraph.text}
+          <button className="border-solid border-red-700 border rounded-lg p-2" onClick={()=>handleClick(race.id)}>X</button>
         </div>
       )}
     </div>

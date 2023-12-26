@@ -21,7 +21,7 @@ async function startRace(setRaceParagraph: (paragraph: string) => void, setStart
   console.log(scriptSelected);
 
   //fetch startTime and paragraphText
-  const res = await fetch(`api/race/timer`, {
+  const res = await fetch(`/api/race/timer`, {
     method: "POST",
     body: JSON.stringify({
       languageScript: scriptSelected
