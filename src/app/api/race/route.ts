@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import {z} from "zod";
+import { z } from "zod";
 
 const Z_REQUEST = z.object({
   mistakes: z.number(),

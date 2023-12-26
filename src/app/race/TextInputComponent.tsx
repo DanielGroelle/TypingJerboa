@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useState, ChangeEvent, ClipboardEvent, MouseEvent} from "react";
+import React, { useState, ChangeEvent, ClipboardEvent, MouseEvent } from "react";
 import "../globals.css";
 
 export default function TextInputComponent({raceParagraphArray, raceId}: {raceParagraphArray: string[], raceId: string | null}) {

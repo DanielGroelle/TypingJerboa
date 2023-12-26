@@ -1,7 +1,7 @@
 "use client";
 
-import {z} from "zod";
-import {LanguageScripts} from "@/js/language-scripts";
+import { z } from "zod";
+import { LanguageScripts } from "@/js/language-scripts";
 
 const Z_RESPONSE = z.object({
   startTime: z.string(),
