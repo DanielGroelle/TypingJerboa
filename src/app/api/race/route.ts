@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const Z_REQUEST = z.object({
@@ -8,13 +9,13 @@ const Z_REQUEST = z.object({
 });
 
 //end race
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   let request;
   try {
     request = Z_REQUEST.parse(await req.json());
   }
   catch(e: unknown) {
-    return new Response("Request was structured incorrectly", {status: 400})
+    return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400})
   }
 
   //update the race with the endTime and the mistakes
@@ -27,8 +28,8 @@ export async function POST(req: Request) {
   });
 
   if (raceFinishResult === null) {
-    return new Response("Race finish failed", {status: 400})
+    return NextResponse.json({error: "Race finish failed"}, {status: 400})
   }
 
-  return new Response(JSON.stringify({raceFinishResult}));
+  return new NextResponse(JSON.stringify({raceFinishResult}));
 }

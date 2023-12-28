@@ -18,21 +18,22 @@ async function startRace(setRaceParagraph: (paragraph: string) => void, setStart
 
   //access the selected value in the select
   const scriptSelected = scriptElement.options[scriptElement.selectedIndex].value;
-  console.log(scriptSelected);
 
-  //fetch startTime and paragraphText
-  const res = await fetch(`/api/race/timer`, {
-    method: "POST",
-    body: JSON.stringify({
-      languageScript: scriptSelected
-    }),
-    mode: "cors",
-    cache: "default"
-  });
-
-  //TODO: handle 404
-
-  const response = Z_RESPONSE.parse(await res.json());
+  let response;
+  try {
+    //fetch startTime and paragraphText
+    response = Z_RESPONSE.parse(await (await fetch(`/api/race/timer`, {
+      method: "POST",
+      body: JSON.stringify({
+        languageScript: scriptSelected
+      }),
+      mode: "cors",
+      cache: "default"
+    })).json());
+  }
+  catch(e: unknown) {
+    throw "startRace failed";
+  }
 
   setRaceParagraph(response.paragraphText);
   setStartTime(new Date(response.startTime));

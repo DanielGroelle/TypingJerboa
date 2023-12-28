@@ -1,5 +1,7 @@
+import ClientLogin from "./client-page";
+
 export default function Login() {
-    return (
-        <div>login</div>
-    );
+  return (
+    <ClientLogin />
+  );
 }

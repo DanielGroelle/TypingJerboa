@@ -19,6 +19,7 @@ model Session {
 model User {
   id           Int      @default(autoincrement()) @id
   username     String   @unique
+  password     String
   createdAt    DateTime @default(now()) @map(name: "created_at")
   session      Session? @relation(fields: [sessionToken], references: [token])
   sessionToken String?  @unique @map(name: "session_token")

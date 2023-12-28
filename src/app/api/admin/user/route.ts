@@ -2,36 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 
-export async function getRaces() {
-  const returnedRaces = await prisma.race.findMany({
+export async function getUsers() {
+  const returnedUsers = await prisma.user.findMany({
     select: {
       id: true,
-      startTime: true,
-      endTime: true,
-      mistakes: true,
-      paragraph: {
-        select: {text: true}
-      }
+      username: true,
+      password: true
     }
   })
   
-  return returnedRaces;
+  return returnedUsers;
 }
-//return all races
-export async function GET() {
-  const returnedRaces = await getRaces();
 
-  if (returnedRaces === null) {
-    return NextResponse.json({error: "Fetch races failed"}, {status: 400});
+//return all users
+export async function GET() {
+  const returnedUsers = await getUsers();
+
+  if (returnedUsers === null) {
+    return NextResponse.json({error: "Fetch users failed"}, {status: 400});
   }
 
-  return new NextResponse(JSON.stringify({races: [...returnedRaces]}));
+  return new NextResponse(JSON.stringify({users: [...returnedUsers]}));
 }
 
 const Z_REQUEST = z.object({
-  id: z.string()
+  id: z.number()
 });
-//delete single race
+//delete single user
 export async function DELETE(req: NextRequest) {
   let request;
   try {
@@ -41,7 +38,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  const deleteResult = await prisma.race.delete({
+  const deleteResult = await prisma.user.delete({
     where: {id: request.id}
   })
 

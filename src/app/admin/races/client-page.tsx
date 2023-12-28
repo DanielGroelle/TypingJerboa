@@ -5,13 +5,13 @@ import { z } from "zod";
 
 const Z_RACE = z.object({
   id: z.string(),
-    startTime: z.string(),
-    endTime: z.string().nullable(),
-    mistakes: z.number().nullable(),
-    paragraph: z.object({
-        text: z.string()
-    })
-});//
+  startTime: z.string(),
+  endTime: z.string().nullable(),
+  mistakes: z.number().nullable(),
+  paragraph: z.object({
+      text: z.string()
+  })
+});
 type Race = z.infer<typeof Z_RACE>;
 
 const Z_RESPONSE = z.object({
@@ -42,10 +42,9 @@ export default function ClientAdminRaces() {
   },[])
 
   function handleClick(raceId: string) {
-    console.log("id", raceId);
     void (async ()=>{
       try{
-        const res = await fetch(`/api/admin/race`, {
+        await fetch(`/api/admin/race`, {
           method: "DELETE",
           body: JSON.stringify({
             id: raceId
@@ -67,7 +66,7 @@ export default function ClientAdminRaces() {
 
   return (
     <div>
-      Races
+      Races <br/>
       {races.map((race)=> 
         <div className="border-solid border-white border" key={race.id}>
           id: {race.id}<br/>
@@ -78,6 +77,7 @@ export default function ClientAdminRaces() {
           <button className="border-solid border-red-700 border rounded-lg p-2" onClick={()=>handleClick(race.id)}>X</button>
         </div>
       )}
+      {races.length === 0 ? "No races found" : ""}
     </div>
   );
 }

@@ -1,16 +1,10 @@
 import prisma from "@/lib/prisma";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-
-export async function GET(req: NextRequest) {
-
-  return new Response();
-}
 
 const Z_REQUEST = z.object({
   languageScript: z.string()
 });
-
 //start race and get paragraphText and startTime
 export async function POST(req: NextRequest) {
   let request;
@@ -18,7 +12,7 @@ export async function POST(req: NextRequest) {
     request = Z_REQUEST.parse(await req.json());
   }
   catch(e: unknown) {
-    return new Response("Request was structured incorrectly", {status: 400})
+    return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400})
   }
 
   //5 second countdown before start
@@ -41,7 +35,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (languageScriptResult === null) {
-    return new Response("LanguageScript not found", {status: 400});
+    return NextResponse.json({error: "LanguageScript not found"}, {status: 400});
   }
 
   //pick random paragraph index
@@ -63,7 +57,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (chosenParagraphIdTextResult === null) {
-    return new Response("Paragraph id not found", {status: 400});
+    return NextResponse.json({error: "Paragraph id not found"}, {status: 400});
   }
 
   const chosenParagraphId = chosenParagraphIdTextResult.id
@@ -81,8 +75,8 @@ export async function POST(req: NextRequest) {
   });
 
   if (createResult === null) {
-    return new Response("Race creation failed", {status: 400});
+    return NextResponse.json({error: "Race creation failed"}, {status: 400});
   }
 
-  return new Response(JSON.stringify({startTime, paragraphText: chosenParagraphText, raceId: createResult.id}));
+  return new NextResponse(JSON.stringify({startTime, paragraphText: chosenParagraphText, raceId: createResult.id}));
 }

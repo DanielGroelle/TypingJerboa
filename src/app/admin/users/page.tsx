@@ -1,7 +1,7 @@
+import ClientAdminUsers from "./client-page";
+
 export default function AdminUsers() {
   return (
-    <div>
-      adminusers
-    </div>
+    <ClientAdminUsers />
   );
 }

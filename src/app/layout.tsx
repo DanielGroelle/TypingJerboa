@@ -26,7 +26,7 @@ export default function RootLayout({
 
           </div>
           <div className="flex-2 px-4 py-2 text-center border-solid border-l-2 border-white">
-            <Link href="/login">Register</Link>
+            <Link href="/register">Register</Link>
           </div>
         </header>
 
