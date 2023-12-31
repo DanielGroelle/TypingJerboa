@@ -7,32 +7,35 @@ export async function getUsers() {
     select: {
       id: true,
       username: true,
-      password: true
+      admin: true
     }
-  })
+  });
   
-  return returnedUsers;
+  //convert admin data to a simple true or false
+  const users = returnedUsers.map((user)=>{return {...user, admin: user.admin !== null}});
+
+  return users;
 }
 
 //return all users
 export async function GET() {
-  const returnedUsers = await getUsers();
+  const users = await getUsers();
 
-  if (returnedUsers === null) {
+  if (users === null) {
     return NextResponse.json({error: "Fetch users failed"}, {status: 400});
   }
 
-  return new NextResponse(JSON.stringify({users: [...returnedUsers]}));
+  return new NextResponse(JSON.stringify({users}));
 }
 
-const Z_REQUEST = z.object({
+const Z_DELETE_REQUEST = z.object({
   id: z.number()
 });
 //delete single user
 export async function DELETE(req: NextRequest) {
   let request;
   try {
-    request = Z_REQUEST.parse(await req.json());
+    request = Z_DELETE_REQUEST.parse(await req.json());
   }
   catch(e: unknown) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
@@ -46,5 +49,41 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({error: "Delete was unsuccessful"}, {status: 400});
   }
 
-  return new NextResponse(JSON.stringify({deleteResult}));
+  //TODO: delete associated session token and races
+
+  return NextResponse.json({deleteResult});
+}
+
+//return if a single user is an admin based on sessionToken
+export async function userIsAdmin(token: string) {
+  const user = await prisma.user.findUnique({
+    select: {id: true},
+    where: {sessionToken: token}
+  });
+
+  //no user found
+  if (user === null) {
+    return false;
+  }
+
+  return await prisma.admin.findUnique({where: {id: user.id}}) !== null;
+}
+
+const Z_POST_REQUEST = z.object({
+  token: z.string() 
+});
+//TODO: probably move this somewhere else
+//return if single user is admin or not
+export async function POST(req: NextRequest) {
+  let request;
+  try {
+    request = Z_POST_REQUEST.parse(await req.json());
+  }
+  catch(e: unknown) {
+    return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
+  }
+
+  const isAdmin = await userIsAdmin(request.token);
+
+  return NextResponse.json({isAdmin});
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import {comparePassword} from "@/lib/bcrypt";
+import { createId } from "@paralleldrive/cuid2";
+import { comparePassword } from "@/lib/bcrypt";
 import prisma from "@/lib/prisma";
 
 const Z_REQUEST = z.object({
@@ -18,7 +19,11 @@ export async function POST(req: NextRequest) {
   }
 
   const returnedUser = await prisma.user.findFirst({
-    select: {password: true}, 
+    select: {
+      id: true,
+      username: true,
+      password: true
+    }, 
     where: {username: request.username}
   })
 
@@ -26,13 +31,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Username not found"}, {status: 400});
   }
 
-  const hashedPassword = returnedUser.password as string;
-
-  if (!await comparePassword(request.unhashedPassword, hashedPassword)) {
+  if (!await comparePassword(request.unhashedPassword, returnedUser.password)) {
     return NextResponse.json({error: "Password incorrect"}, {status: 400});
   }
 
-  //TODO: give user a session token and a cookie to remember theyre logged in
+  //create and send token
+  const token = createId();
+  const dayMs = 1000 * 60 * 60 * 24;
 
-  return new NextResponse(JSON.stringify({success: "yay"}));
+  const createdSession = await prisma.session.create({
+    data: {
+      token: token,
+      expiry: new Date(Date.now() + dayMs),
+      user: {
+        connect: {
+          id: returnedUser.id
+        }
+      }
+    }
+  });
+
+  if (createdSession === null) {
+    return NextResponse.json({error: "Failed to create session"}, {status: 400});
+  }
+
+  const response = new NextResponse();
+  response.cookies.set("token", token, {
+    httpOnly: true
+  });
+  return response;
 }

@@ -1,42 +1,39 @@
 "use client"
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent } from "react";
 
-export default function ClientLogin() {
-  function handleLogin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+function handleLogin(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  const router = useRouter();
 
-    const usernameSelector = document.querySelector("#username");
-    const passwordSelector = document.querySelector("#password");
-    if (!(usernameSelector instanceof HTMLInputElement)) {
-      throw "Username selector was not an HTMLInputElement";
-    }
-    if (!(passwordSelector instanceof HTMLInputElement)) {
-      throw "Password selector was not an HTMLInputElement";
-    }
-
-    const username = usernameSelector.value;
-    const password = passwordSelector.value;
-
-    void (async()=>{
-      try {
-        await (await fetch(`/api/login`, {
-          method: "POST",
-          body: JSON.stringify({
-            username: username,
-            unhashedPassword: password
-          }),
-          mode: "cors",
-          cache: "default"
-        })).json();
-      }
-      catch(e: unknown) {
-        throw "Login failed";
-      }
-    })();
+  //get username and password from form
+  const usernameSelector = document.querySelector("#username");
+  const passwordSelector = document.querySelector("#password");
+  if (!(usernameSelector instanceof HTMLInputElement)) {
+    throw "Username selector was not an HTMLInputElement";
+  }
+  if (!(passwordSelector instanceof HTMLInputElement)) {
+    throw "Password selector was not an HTMLInputElement";
   }
 
+  const username = usernameSelector.value;
+  const password = passwordSelector.value;
+
+  void fetch(`/api/login`, {
+    method: "POST",
+    body: JSON.stringify({
+      username: username,
+      unhashedPassword: password
+    }),
+    mode: "cors",
+    cache: "default"
+  })
+  .then(()=>router.refresh());
+}
+
+export default function ClientLogin() {
   return (
     <div className="">
       Login

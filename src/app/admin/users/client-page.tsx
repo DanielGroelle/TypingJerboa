@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { z } from "zod";
 
 const Z_USER = z.object({
   id: z.number(),
   username: z.string(),
-  password: z.string()
+  admin: z.boolean()
 });
 type User = z.infer<typeof Z_USER>;
 
@@ -37,7 +37,7 @@ export default function ClientAdminUsers() {
     void (async ()=>setUsers(await getUsers()))();
   },[])
 
-  function handleClick(userId: number) {
+  function handleDelete(userId: number) {
     void (async ()=>{
       try{
         await fetch(`/api/admin/user`, {
@@ -60,15 +60,45 @@ export default function ClientAdminUsers() {
     setUsers([...newUsers])
   }
 
+  function handleAdminCheckbox(event: ChangeEvent<HTMLInputElement>, userId: number) {
+    const adminChecked = event.currentTarget.checked;
+    
+    void (async ()=>{
+      try{
+        await fetch(`/api/admin/user/edit`, {
+          method: "POST",
+          body: JSON.stringify({
+            id: userId,
+            username: null,
+            admin: adminChecked
+          }),
+          mode: "cors",
+          cache: "default"
+        });
+      }
+      catch(e: unknown) {
+        throw "Update failed";
+      }
+    })();
+
+    const newUsers = users.map((user)=>{return {...user, admin: !user.admin}})
+    setUsers(newUsers)
+  }
+
   return (
     <div>
       Users <br/>
       {users.map((user)=> 
-        <div className="border-solid border-white border" key={user.id}>
-          id: {user.id}<br/>
-          username: {user.username}<br/>
-          password: {user.password}
-          <button className="border-solid border-red-700 border rounded-lg p-2" onClick={()=>handleClick(user.id)}>X</button>
+        <div className="flex border-solid border-white border" key={user.id}>
+          <div className="flex-1">
+            id: {user.id}<br/>
+            username: {user.username}<br/>
+            admin: {String(user.admin)}
+            <input type="checkbox" checked={user.admin} onChange={(event)=>handleAdminCheckbox(event, user.id)}></input>
+          </div>
+          <div>
+            <button className="border-solid border-red-700 border rounded-lg p-2" onClick={()=>handleDelete(user.id)}>X</button>
+          </div>
         </div>
       )}
       {users.length === 0 ? "No users found" : ""}

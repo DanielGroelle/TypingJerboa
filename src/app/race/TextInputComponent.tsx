@@ -26,19 +26,23 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
     if (newUserInput.length >= raceParagraphArray.length) {
       //finish the race by sending the endTime and mistakes
       void (async ()=>{
-        const res = await fetch(`/api/race`, {
-          method: "POST",
-          body: JSON.stringify({
-            mistakes: mistakes,
-            endTime: new Date(),
-            raceId
-          }),
-          mode: "cors",
-          cache: "default"
-        });
+        try {
+          await (await fetch(`/api/race`, {
+            method: "POST",
+            body: JSON.stringify({
+              mistakes: mistakes,
+              endTime: new Date(),
+              raceId
+            }),
+            mode: "cors",
+            cache: "default"
+          })).json();
+        }
+        catch(e: unknown) {
+          throw "Failed finishing race";
+        }
       })();
       //TODO: use SuperJSON for request stringification. sending dates is annoying rn
-      //TODO: handle error
     }
   }
 

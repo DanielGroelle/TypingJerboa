@@ -16,6 +16,12 @@ model Session {
   @@map(name:"sessions")
 }
 
+model Admin {
+  id   Int  @id
+  user User @relation(fields: [id], references: [id])
+  @@map(name: "admins")
+}
+
 model User {
   id           Int      @default(autoincrement()) @id
   username     String   @unique
@@ -24,6 +30,7 @@ model User {
   session      Session? @relation(fields: [sessionToken], references: [token])
   sessionToken String?  @unique @map(name: "session_token")
   races        Race[]
+  admin        Admin?
   @@map(name: "users")
 }
 

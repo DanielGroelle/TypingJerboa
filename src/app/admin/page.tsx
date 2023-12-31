@@ -1,8 +1,6 @@
 import Link from "next/link";
 
 export default function Admin() {
-  //TODO: make inaccessible unless logged in and with proper privilege
-
   return (
     <div>
       <h1 className="text-4xl">Administrator Panel</h1>

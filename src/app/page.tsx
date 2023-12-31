@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AdminPanelComponent from "./AdminPanelComponent";
 
 export default function Home() {
   return (
@@ -35,15 +36,7 @@ export default function Home() {
                 Latest news about the site
             </div>
         </div>
-        {/*TODO: make this only display to privileged users*/}
-        <div className="pb-4">
-            <div className="text-2xl">
-                <Link href="/admin">Admin</Link>
-            </div>
-            <div>
-                Administrator panel
-            </div>
-        </div>
+        <AdminPanelComponent />
     </main>
   )
 }
