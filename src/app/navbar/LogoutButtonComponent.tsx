@@ -1,9 +1,10 @@
 "use client"
 
 import { useRouter } from "next/navigation";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
-function handleLogout() {
-  const router = useRouter();
+function handleLogout(router: AppRouterInstance) {
+  
   
   void fetch(`/api/logout`, {
     method: "GET",
@@ -15,7 +16,8 @@ function handleLogout() {
 }
 
 export default async function LogoutButtonComponent() {
+  const router = useRouter();
   return (
-    <button onClick={handleLogout}>Logout</button>
+    <button onClick={()=>handleLogout(router)}>Logout</button>
   );
 }

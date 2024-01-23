@@ -4,8 +4,12 @@
 
 # Dev
 
-``docker compose up node-dev postgres-dev --remove-orphans --build``
+``npm run dev:up``
 
 # Prod
 
-``docker compose up node-prod postgres-prod --remove-orphans --build``
+``npm run prod:up``
+
+# Testing
+
+``npm run test:up``

@@ -1,15 +1,31 @@
 services:
+  node-test:
+    build:
+      context: .
+      target: typingjerboa-node-test
+    image: typingjerboa-node-test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    environment:
+      - POSTGRES_PRISMA_URL=${POSTGRES_TEST_PRISMA_INTERNAL_URL} #internal used for test
+      - POSTGRES_URL_NON_POOLING=${POSTGRES_TEST_INTERNAL_URL_NON_POOLING}
+    ports:
+      - "3000:3000"
+
   node-dev:
     build:
       context: .
       target: typingjerboa-node-dev
     image: typingjerboa-node-dev
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
     volumes:
       - ./src:/app/src
     environment:
-      - HI=HI
-      - POSTGRES_PRISMA_URL=${POSTGRES_PRISMA_INTERNAL_URL}
-      - POSTGRES_URL_NON_POOLING=${POSTGRES_INTERNAL_URL_NON_POOLING}
+      - POSTGRES_PRISMA_URL=${POSTGRES_DEV_PRISMA_INTERNAL_URL} #internal used for dev
+      - POSTGRES_URL_NON_POOLING=${POSTGRES_DEV_INTERNAL_URL_NON_POOLING}
     ports:
       - "3000:3000"
 
@@ -18,11 +34,34 @@ services:
       context: .
       target: typingjerboa-node-prod
     image: typingjerboa-node-prod
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
     environment:
-      - HI=HI
+      - POSTGRES_PRISMA_URL=${POSTGRES_PROD_PRISMA_INTERNAL_URL}
+      - POSTGRES_URL_NON_POOLING=${POSTGRES_PROD_INTERNAL_URL_NON_POOLING}
     ports:
       - "3000:80"
   
+  postgres-test:
+    build:
+      context: .
+      target: typingjerboa-postgres-dev
+    image: typingjerboa-postgres-dev
+    volumes:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_TEST_DB} -U ${POSTGRES_TEST_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=${POSTGRES_TEST_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_TEST_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_TEST_DB}
+    ports:
+      - "2345:5432"
+
   postgres-dev:
     build:
       context: .
@@ -30,10 +69,15 @@ services:
     image: typingjerboa-postgres-dev
     volumes:
       - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DEV_DB} -U ${POSTGRES_DEV_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_DEV_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_DEV_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DEV_DB}
     ports:
       - "2345:5432"
 
@@ -44,9 +88,14 @@ services:
     image: typingjerboa-postgres-prod
     volumes:
       - /var/lib/postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_PROD_DB} -U ${POSTGRES_PROD_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_PROD_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PROD_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_PROD_DB}
     ports:
       - "5432:5432"

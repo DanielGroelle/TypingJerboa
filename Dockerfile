@@ -8,6 +8,11 @@ RUN npx next telemetry disable
 RUN npx prisma generate
 EXPOSE 3000
 
+FROM typingjerboa-node-base AS typingjerboa-node-test
+ENV NODE_ENV=test
+# single & to make npm run dev a background process so npm test can run
+CMD npx prisma migrate dev && npm run dev & npm test
+
 FROM typingjerboa-node-base AS typingjerboa-node-dev
 ENV NODE_ENV=development
 ENV CHOKIDAR_USEPOLLING=true
@@ -22,6 +27,8 @@ CMD npm run start
 # postgres
 FROM postgres:16-alpine AS typingjerboa-postgres-base
 EXPOSE 5432
+
+FROM typingjerboa-postgres-base AS typingjerboa-postgres-test
 
 FROM typingjerboa-postgres-base AS typingjerboa-postgres-dev
 

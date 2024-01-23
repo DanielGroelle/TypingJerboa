@@ -1,12 +1,10 @@
 "use client"
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent } from "react";
 
 function handleLogin(event: FormEvent<HTMLFormElement>) {
   event.preventDefault();
-  const router = useRouter();
 
   //get username and password from form
   const usernameSelector = document.querySelector("#username");
@@ -30,7 +28,7 @@ function handleLogin(event: FormEvent<HTMLFormElement>) {
     mode: "cors",
     cache: "default"
   })
-  .then(()=>router.refresh());
+  .then(()=>window.location.href=`${window.location.protocol}//${window.location.host}/`); //redirect to home
 }
 
 export default function ClientLogin() {

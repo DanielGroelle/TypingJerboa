@@ -25,7 +25,7 @@ export async function GET() {
     return NextResponse.json({error: "Fetch users failed"}, {status: 400});
   }
 
-  return new NextResponse(JSON.stringify({users}));
+  return NextResponse.json({users});
 }
 
 const Z_DELETE_REQUEST = z.object({
