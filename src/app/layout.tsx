@@ -26,12 +26,22 @@ export default function RootLayout({
         </div>
 
         <footer className="flex border-solid border-t-2 border-t-white py-4">
-          <div className="flex-1 text-center border-solid border-white">
+          <div className="flex-1 text-center">
             <Link href="/about">About</Link>
           </div>
-          <div className="flex-1 text-center text-sm border-solid border-white">
-            Copyright whatever
+          <div className="flex-1 text-center">
+            <Link target="_blank" href="https://github.com/DanielGroelle/TypingJerboa/issues">Report an Issue</Link>
           </div>
+          <div className="flex-1 text-center text-sm">
+            <Link href="/license">Copyright & Licensing</Link>
+          </div>
+          {/* <div className="flex-1 text-center text-sm">
+            <label htmlFor="display-language" className="m-1">Display Language:</label>
+            <select name="display-language" id="display-language" className="bg-black border-solid border-2 border-white rounded-lg">
+              <option value="english">English</option>
+              <option value="russian">Russian</option>
+            </select>
+          </div> */}
         </footer>
       </body>
     </html>

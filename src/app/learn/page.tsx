@@ -1,5 +1,5 @@
 export default function Learn() {
-    return (
-        <div>learn</div>
-    );
+  return (
+    <div>learn</div>
+  );
 }
