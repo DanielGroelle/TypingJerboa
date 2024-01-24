@@ -24,9 +24,11 @@ export default function License() {
         ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
         OTHER DEALINGS IN THE SOFTWARE.</p>
       <br/>
-      <p>For more information, please refer to <a target="_blank" href="http://unlicense.org">http://unlicense.org/</a></p>
+      <p>For more information, please refer to <a target="_blank" href="http://unlicense.org" className="underline">http://unlicense.org/</a></p>
       <br/>
-      <a title="Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:PD-icon.svg" className="block w-12"><img width="48" alt="PD-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/PD-icon.svg/128px-PD-icon.svg.png"></img></a>
+      <a title="Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:PD-icon.svg" className="block w-12">
+        <img width="48" alt="PD-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/PD-icon.svg/128px-PD-icon.svg.png"></img>
+      </a>
     </div>
   );
 }

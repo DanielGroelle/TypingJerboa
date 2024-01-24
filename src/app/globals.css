@@ -8,6 +8,10 @@
   --background-end-rgb: 0, 0, 0;
 }
 
+h1 {
+  font-size: x-large;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
