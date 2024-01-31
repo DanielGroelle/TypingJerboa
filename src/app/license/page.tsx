@@ -1,6 +1,6 @@
 export default function License() {
   return (
-    <div>
+    <article>
       <p>This is free and unencumbered software released into the public domain.</p>
       <br/>
       <p>Anyone is free to copy, modify, publish, use, compile, sell, or
@@ -29,6 +29,6 @@ export default function License() {
       <a title="Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:PD-icon.svg" className="block w-12">
         <img width="48" alt="PD-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/PD-icon.svg/128px-PD-icon.svg.png"></img>
       </a>
-    </div>
+    </article>
   );
 }

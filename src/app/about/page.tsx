@@ -4,7 +4,7 @@ import TypingJerboaLogo from "../images/TypingJerboaLogoWhiteKB.png";
 
 export default function About() {
   return (
-    <div>
+    <article>
       <h1>About TypingJerboa</h1>
       <br/>
       <p>TypingJerboa is a website built for the purpose of teaching others how to type in a language that uses a unique script. Currently it supports Latin English and Russian Cyrillic.</p>
@@ -26,6 +26,6 @@ export default function About() {
 
       <Image src={TypingJerboaLogo} alt=""></Image>
       <p>The jerboa is the website&apos;s mascot. Learn more <a target="_blank" href="https://en.wikipedia.org/wiki/Jerboa" className="underline">here.</a></p>
-    </div>
+    </article>
   );
 }

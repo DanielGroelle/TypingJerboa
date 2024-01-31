@@ -10,7 +10,7 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     const newUserInput = event.currentTarget.value;
     const oldLength = userInput.length;
-    const newLength = newUserInput.length
+    const newLength = newUserInput.length;
     setUserInput(newUserInput);
 
     //check if a mistake was made
