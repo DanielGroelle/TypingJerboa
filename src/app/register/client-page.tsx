@@ -3,40 +3,40 @@
 import Link from "next/link";
 import { FormEvent } from "react";
 
-export default function ClientRegister() {
-  function handleRegister(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+function handleRegister(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
 
-    const usernameSelector = document.querySelector("#username");
-    const passwordSelector = document.querySelector("#password");
-    if (!(usernameSelector instanceof HTMLInputElement)) {
-      throw "Username selector was not an HTMLInputElement";
-    }
-    if (!(passwordSelector instanceof HTMLInputElement)) {
-      throw "Password selector was not an HTMLInputElement";
-    }
-
-    const username = usernameSelector.value;
-    const password = passwordSelector.value;
-
-    void (async()=>{
-      try {
-        await (await fetch(`/api/register`, {
-          method: "POST",
-          body: JSON.stringify({
-            username: username,
-            unhashedPassword: password
-          }),
-          mode: "cors",
-          cache: "default"
-        })).json();
-      }
-      catch(e: unknown) {
-        throw "Registration failed";
-      }
-    })();
+  const usernameSelector = document.querySelector("#username");
+  const passwordSelector = document.querySelector("#password");
+  if (!(usernameSelector instanceof HTMLInputElement)) {
+    throw "Username selector was not an HTMLInputElement";
+  }
+  if (!(passwordSelector instanceof HTMLInputElement)) {
+    throw "Password selector was not an HTMLInputElement";
   }
 
+  const username = usernameSelector.value;
+  const password = passwordSelector.value;
+
+  void (async()=>{
+    try {
+      await (await fetch(`/api/register`, {
+        method: "POST",
+        body: JSON.stringify({
+          username: username,
+          unhashedPassword: password
+        }),
+        mode: "cors",
+        cache: "default"
+      })).json();
+    }
+    catch(e: unknown) {
+      throw "Registration failed";
+    }
+  })();
+}
+
+export default function ClientRegister() {
   return (
     <div className="">
       Register

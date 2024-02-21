@@ -6,11 +6,11 @@ import TimerComponent from "./TimerComponent";
 import React, { useState } from "react";
 
 export default function ClientRace() {
-  const [raceParagraph, setRaceParagraph] = useState("Text");
+  const [raceParagraph, setRaceParagraph] = useState(null as string | null);
   const [startTime, setStartTime] = useState(null as Date | null);
   const [raceId, setRaceId] = useState(null as string | null);
 
-  const raceParagraphArray = [...raceParagraph];
+  const raceParagraphArray = [...raceParagraph ?? ""];
 
   return (
     <div>
