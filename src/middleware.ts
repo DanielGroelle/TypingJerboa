@@ -1,15 +1,42 @@
 import { NextResponse, NextRequest } from "next/server";
 import { z } from "zod";
 
-const Z_RESPONSE = z.object({
+const Z_ADMIN_RESPONSE = z.object({
   isAdmin: z.boolean()
 });
- 
+
+const Z_EXPIRY_RESPONSE = z.object({
+  expiry: z.number()
+});
+
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const token = request.cookies.get("token")?.value;
 
-  //TODO: validate that the session token is still alive
+  //validate that the session token is still alive
+  if (token) {
+    let response;
+    try {
+      //must be an api fetch because PrismaClient cant run in vercel edge functions
+      response = Z_EXPIRY_RESPONSE.parse(await (await fetch(new URL("/api/user/token", process.env.BASE_URL), {
+        method: "POST",
+        body: JSON.stringify({
+          token: token
+        }),
+        mode: "cors",
+        cache: "default"
+      })).json());
+    }
+    catch(e: unknown) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  
+    if (Date.now() > response.expiry.valueOf()) {
+      const response = new NextResponse;
+      response.cookies.delete("token");
+      return response;
+    }
+  }
 
   //if user is logged in and tries to access login page
   if (path === "/login" && token) {
@@ -26,7 +53,7 @@ export async function middleware(request: NextRequest) {
     let response;
     try {
       //must be an api fetch because PrismaClient cant run in vercel edge functions
-      response = Z_RESPONSE.parse(await (await fetch(new URL("/api/admin/user", process.env.BASE_URL), {
+      response = Z_ADMIN_RESPONSE.parse(await (await fetch(new URL("/api/admin/user", process.env.BASE_URL), {
         method: "POST",
         body: JSON.stringify({
           token: token

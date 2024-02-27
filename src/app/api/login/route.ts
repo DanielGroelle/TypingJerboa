@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     request = Z_REQUEST.parse(await req.json());
   }
   catch(e: unknown) {
-    return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400})
+    return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
   const returnedUser = await prisma.user.findFirst({
@@ -28,11 +28,11 @@ export async function POST(req: NextRequest) {
   })
 
   if (returnedUser === null) {
-    return NextResponse.json({error: "Username not found"}, {status: 400});
+    return NextResponse.json({error: "Username or password is not correct"}, {status: 401});
   }
 
   if (!await comparePassword(request.unhashedPassword, returnedUser.password)) {
-    return NextResponse.json({error: "Password incorrect"}, {status: 400});
+    return NextResponse.json({error: "Username or password is not correct"}, {status: 401});
   }
 
   //create and send token

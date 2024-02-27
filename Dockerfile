@@ -18,7 +18,7 @@ ENV NODE_ENV=development
 ENV CHOKIDAR_USEPOLLING=true
 ENV WATCHPACK_POLLING=true
 RUN rm -rf src
-CMD npm run dev
+CMD npx prisma migrate dev && npm run dev
 
 FROM typingjerboa-node-base AS typingjerboa-node-prod
 RUN npm run build
