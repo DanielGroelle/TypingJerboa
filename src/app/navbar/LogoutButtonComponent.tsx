@@ -15,7 +15,7 @@ function handleLogout(router: AppRouterInstance) {
   });
 }
 
-export default async function LogoutButtonComponent() {
+export default function LogoutButtonComponent() {
   const router = useRouter();
   return (
     <button onClick={()=>handleLogout(router)}>Logout</button>

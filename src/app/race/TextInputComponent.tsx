@@ -3,18 +3,18 @@
 import React, { useState, useEffect, ChangeEvent, ClipboardEvent, MouseEvent } from "react";
 import "../globals.css";
 
-export default function TextInputComponent({raceParagraphArray, raceId}: {raceParagraphArray: string[], raceId: string | null}) {
+export default function TextInputComponent({raceParagraphArray, raceId, startTime}: {raceParagraphArray: string[], raceId: string | null, startTime: Date | null}) {
   const [userInput, setUserInput] = useState("");
   const [mistakes, setMistakes] = useState(0);
-  const [textAreaDisabled, setTextAreaDisabled] = useState(true);
 
   useEffect(()=>{
     if (raceParagraphArray.length !== 0) {
-      setTimeout(()=>{
-        setTextAreaDisabled(false);
-      }, 5000);
+      const textInput = document.getElementById("main-text-input");
+      if (textInput) {
+        textInput.focus();
+      }
     }
-  }, [raceParagraphArray])
+  }, [raceParagraphArray]);
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const newUserInput = event.currentTarget.value;
@@ -25,7 +25,10 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
     //newLength < oldLength means user is backspacing which is fine
     const MISTAKE_TOLERANCE = 5;
     if (newLength < oldLength || charStatus(newUserInput, newLength - MISTAKE_TOLERANCE - 1) !== "incorrect") {
-      setUserInput(newUserInput);
+      //make sure the race has started
+      if (startTime && startTime.getTime() < new Date().getTime()) {
+        setUserInput(newUserInput);
+      }
     }
 
     //check if a mistake was made
@@ -48,7 +51,6 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
         //finish the race by sending the endTime and mistakes
         void (async ()=>{
           try {
-            setTextAreaDisabled(true);
             await (await fetch(`/api/race`, {
               method: "POST",
               body: JSON.stringify({
@@ -84,11 +86,9 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
   const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
     event.preventDefault();
   };
-
   const handleTextAreaContextMenu = (event: MouseEvent<HTMLTextAreaElement>) => {
     event.preventDefault();
   }
-
   const handleParagraphContextMenu = (event: MouseEvent<HTMLParagraphElement>) => {
     event.preventDefault();
   }
@@ -105,7 +105,7 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
             return <span className="incorrect" key={i}>&nbsp;</span>
         })}
       </div>
-      <textarea className="text-black resize-none min-w-full" disabled={textAreaDisabled} value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+      <textarea id="main-text-input" className="text-black resize-none min-w-full" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
     </div>
   );
 }
