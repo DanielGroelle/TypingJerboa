@@ -10,14 +10,16 @@ export default function ClientRace() {
   const [startTime, setStartTime] = useState(null as Date | null);
   const [raceId, setRaceId] = useState(null as string | null);
 
+  const [scriptSelectionHidden, setScriptSelectionHidden] = useState(false);
+
   const raceParagraphArray = [...raceParagraph ?? ""];
 
   return (
     <div>
       <div className="flex flex-col m-10">
         <div className="flex w-full justify-between">
-          <ScriptSelectionComponent setRaceParagraph={setRaceParagraph} setStartTime={setStartTime} setRaceId={setRaceId}/>
-          <TimerComponent startTime={startTime} />
+          {!scriptSelectionHidden ? <ScriptSelectionComponent props={{setRaceParagraph, setStartTime, setRaceId, setScriptSelectionHidden}} /> : ""}
+          <TimerComponent startTime={startTime}/>
         </div>
         <TextInputComponent raceParagraphArray={raceParagraphArray} raceId={raceId}/>
       </div>

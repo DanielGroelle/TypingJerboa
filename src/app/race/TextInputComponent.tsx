@@ -10,7 +10,9 @@ export default function TextInputComponent({raceParagraphArray, raceId}: {racePa
 
   useEffect(()=>{
     if (raceParagraphArray.length !== 0) {
-      setTextAreaDisabled(false);
+      setTimeout(()=>{
+        setTextAreaDisabled(false);
+      }, 5000);
     }
   }, [raceParagraphArray])
 
