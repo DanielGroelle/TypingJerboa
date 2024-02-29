@@ -10,6 +10,8 @@ export default function TimerComponent({startTime}: {startTime: Date | null}) {
       const countdown = setInterval(()=>{
         const newTimer = (startTime.getTime() - Date.now()) / 1000;
         setTimer(newTimer);
+        
+        //if the timer hits zero stop the interval
         if (newTimer <= 0) {
           setTimer(0.0);
           clearInterval(countdown);

@@ -1,18 +1,67 @@
 "use client";
 
-import React, { useState, useEffect, ChangeEvent, ClipboardEvent, MouseEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, ClipboardEvent, MouseEvent, useRef } from "react";
 import "../globals.css";
+
+function handleWPM(startTime: Date | null, userInput: string): number {
+  if (!startTime) return 0;
+
+  const minutesPassed = (Date.now() - startTime.getTime()) / 1000 / 60;
+  const newWPM = (userInput.length / 5) / minutesPassed;
+
+  return newWPM;
+}
+
+function endRace(mistakes: number, raceId: string | null) {
+  void (async ()=>{
+    try {
+      await (await fetch(`/api/race`, {
+        method: "POST",
+        body: JSON.stringify({
+          mistakes: mistakes,
+          endTime: new Date(),
+          raceId
+        }),
+        mode: "cors",
+        cache: "default"
+      })).json();
+    }
+    catch(e: unknown) {
+      throw "Failed finishing race";
+    }
+  })();
+  //TODO: use SuperJSON for request stringification. sending dates is annoying rn
+}
 
 export default function TextInputComponent({raceParagraphArray, raceId, startTime}: {raceParagraphArray: string[], raceId: string | null, startTime: Date | null}) {
   const [userInput, setUserInput] = useState("");
+  const userInputRef = useRef("");
+
   const [mistakes, setMistakes] = useState(0);
+  const [WPM, setWPM] = useState(0);
 
   useEffect(()=>{
+    //on race start
     if (raceParagraphArray.length !== 0) {
+      //focus on the text box
       const textInput = document.getElementById("main-text-input");
       if (textInput) {
         textInput.focus();
       }
+
+      //set the wpm every 100ms
+      const intervalId = setInterval(()=>{
+        //needs to be a reference to avoid closure keeping userInput as an empty string
+        setWPM(handleWPM(startTime, userInputRef.current));
+
+        //if race finished, clear the interval
+        if (userInputRef.current === raceParagraphArray.join("")) {
+          clearInterval(intervalId);
+        }
+      }, 100);
+
+      //cleanup the interval when user leaves the page
+      return () => clearInterval(intervalId);
     }
   }, [raceParagraphArray]);
 
@@ -28,6 +77,9 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
       //make sure the race has started
       if (startTime && startTime.getTime() < new Date().getTime()) {
         setUserInput(newUserInput);
+        userInputRef.current = newUserInput;
+
+        setWPM(handleWPM(startTime, newUserInput));
       }
     }
 
@@ -40,38 +92,13 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
       setMistakes(newMistakes);
     }
 
-    //check if the race is finished
-    if (newUserInput.length === raceParagraphArray.length) {
-      let hasMistake = false;
-      for (let i = 1; i <= MISTAKE_TOLERANCE; i++) {
-        hasMistake ||= charStatus(newUserInput, newLength - i) === "incorrect";
-      }
-
-      if (!hasMistake) {
-        //finish the race by sending the endTime and mistakes
-        void (async ()=>{
-          try {
-            await (await fetch(`/api/race`, {
-              method: "POST",
-              body: JSON.stringify({
-                mistakes: mistakes,
-                endTime: new Date(),
-                raceId
-              }),
-              mode: "cors",
-              cache: "default"
-            })).json();
-          }
-          catch(e: unknown) {
-            throw "Failed finishing race";
-          }
-        })();
-        //TODO: use SuperJSON for request stringification. sending dates is annoying rn
-      }
+    //check if the userInput is equal to the raceParagraph
+    if (newUserInput === raceParagraphArray.join("")) {
+      endRace(mistakes, raceId);
     }
   }
 
-  //returns the appropriate class based on if the current raceParagraph char matches the userInput char
+  //returns the appropriate class name based on if the current raceParagraph char matches the userInput char
   //needs to take in the userInput string in case the state variable hasnt updated yet
   const charStatus = (userInput: string, i: number) => {
     if (userInput[i] === undefined) {
@@ -95,6 +122,10 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
 
   return (
     <div className="w-1/2">
+      <div>
+        {/*if the race is started show wpm*/}
+        {raceParagraphArray.length !== 0 ? `${WPM.toFixed(1)}wpm` : ""}
+      </div>
       <div className="border-solid border-white border select-none" onContextMenu={handleParagraphContextMenu}>
         {raceParagraphArray.map((character, i)=>{
           return <span className={charStatus(userInput, i)} key={i}>{character}</span>

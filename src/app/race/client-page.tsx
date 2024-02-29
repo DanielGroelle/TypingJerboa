@@ -28,9 +28,9 @@ export default function ClientRace() {
       <div className="flex flex-col m-10">
         <div className="flex w-full justify-between">
           {!scriptSelectionHidden ? <ScriptSelectionComponent setRaceInfo={setRaceInfo} /> : ""}
-          {!timerHidden ? <TimerComponent startTime={startTime}/> : ""}
+          {!timerHidden ? <TimerComponent startTime={startTime} /> : ""}
         </div>
-        <TextInputComponent raceParagraphArray={raceParagraphArray} raceId={raceId} startTime={startTime}/>
+        <TextInputComponent raceParagraphArray={raceParagraphArray} raceId={raceId} startTime={startTime} />
       </div>
     </div>
   );
