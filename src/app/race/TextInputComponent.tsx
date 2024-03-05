@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent, ClipboardEvent, MouseEvent, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import "../globals.css";
 
 function handleWPM(startTime: Date | null, userInput: string): number {
@@ -12,10 +14,10 @@ function handleWPM(startTime: Date | null, userInput: string): number {
   return newWPM;
 }
 
-function endRace(mistakes: number, raceId: string | null) {
+function endRace(mistakes: number, raceId: string | null, router: AppRouterInstance) {
   void (async ()=>{
     try {
-      await (await fetch(`/api/race`, {
+      await (await fetch(`/api/race/finish`, {
         method: "POST",
         body: JSON.stringify({
           mistakes: mistakes,
@@ -31,9 +33,13 @@ function endRace(mistakes: number, raceId: string | null) {
     }
   })();
   //TODO: use SuperJSON for request stringification. sending dates is annoying rn
+
+  router.push(`/race/finish?id=${raceId}`);
 }
 
 export default function TextInputComponent({raceParagraphArray, raceId, startTime}: {raceParagraphArray: string[], raceId: string | null, startTime: Date | null}) {
+  const router = useRouter();
+
   const [userInput, setUserInput] = useState("");
   const userInputRef = useRef("");
 
@@ -94,7 +100,7 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
 
     //check if the userInput is equal to the raceParagraph
     if (newUserInput === raceParagraphArray.join("")) {
-      endRace(mistakes, raceId);
+      endRace(mistakes, raceId, router);
     }
   }
 
