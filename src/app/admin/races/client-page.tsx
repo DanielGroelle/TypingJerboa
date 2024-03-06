@@ -9,7 +9,7 @@ const Z_RACE = z.object({
   endTime: z.string().nullable(),
   mistakes: z.number().nullable(),
   paragraph: z.object({
-      text: z.string()
+    text: z.string()
   })
 });
 type Race = z.infer<typeof Z_RACE>;
@@ -39,9 +39,9 @@ export default function ClientAdminRaces() {
 
   useEffect(()=>{
     void (async ()=>setRaces(await getRaces()))();
-  },[])
+  },[]);
 
-  function handleClick(raceId: string) {
+  function handleDelete(raceId: string) {
     void (async ()=>{
       try{
         await fetch(`/api/admin/race`, {
@@ -61,7 +61,7 @@ export default function ClientAdminRaces() {
     const i = races.findIndex((race)=>race.id === raceId);
     const newRaces = races.toSpliced(i, 1);
 
-    setRaces([...newRaces])
+    setRaces([...newRaces]);
   }
 
   return (
@@ -74,7 +74,7 @@ export default function ClientAdminRaces() {
           endTime: {race.endTime}<br/>
           mistakes: {race.mistakes}<br/>
           paragraph: {race.paragraph.text}
-          <button className="border-solid border-red-700 border rounded-lg p-2" onClick={()=>handleClick(race.id)}>X</button>
+          <button className="border-solid border-red-700 border rounded-lg p-2" onClick={()=>handleDelete(race.id)}>X</button>
         </div>
       )}
       {races.length === 0 ? "No races found" : ""}
