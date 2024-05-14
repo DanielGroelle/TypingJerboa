@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect, ChangeEvent, ClipboardEvent, MouseEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -46,6 +44,8 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
   const [mistakes, setMistakes] = useState(0);
   const [WPM, setWPM] = useState(0);
 
+  const [raceFinished, setRaceFinished] = useState(false);
+
   useEffect(()=>{
     //on race start
     if (raceParagraphArray.length !== 0) {
@@ -80,8 +80,8 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
     //newLength < oldLength means user is backspacing which is fine
     const MISTAKE_TOLERANCE = 5;
     if (newLength < oldLength || charStatus(newUserInput, newLength - MISTAKE_TOLERANCE - 1) !== "incorrect") {
-      //make sure the race has started
-      if (startTime && startTime.getTime() < new Date().getTime()) {
+      //make sure the race has started and also isnt finished
+      if (startTime && startTime.getTime() < new Date().getTime() && !raceFinished) {
         setUserInput(newUserInput);
         userInputRef.current = newUserInput;
 
@@ -98,8 +98,9 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
       setMistakes(newMistakes);
     }
 
-    //check if the userInput is equal to the raceParagraph
+    //check if the userInput is equal to the raceParagraph in order to end the race
     if (newUserInput === raceParagraphArray.join("")) {
+      setRaceFinished(true);
       endRace(mistakes, raceId, router);
     }
   }

@@ -1,5 +1,3 @@
-"use client";
-
 import { z } from "zod";
 import { LanguageScripts } from "@/js/language-scripts";
 
@@ -51,7 +49,7 @@ export default function ScriptSelectionComponent({setRaceInfo}: { setRaceInfo: (
     <div className="">
       Select the script you&apos;d like to use
       <div className="flex">
-        <select name="script" id="script" className="bg-black">
+        <select name="script" id="script">
           <option value={LanguageScripts.CYRILLIC_RUSSIAN}>Cyrillic (Russian)</option>
           <option value={LanguageScripts.LATIN_ENGLISH}>Latin (English)</option>
         </select>
