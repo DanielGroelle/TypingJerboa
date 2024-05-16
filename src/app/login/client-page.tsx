@@ -33,16 +33,16 @@ function handleLogin(event: FormEvent<HTMLFormElement>) {
 
 export default function ClientLogin() {
   return (
-    <div className="">
+    <div>
       Login
-      <form className="" onSubmit={handleLogin}>
+      <form onSubmit={handleLogin}>
         <div>
           Username
-          <input className="text-black" type="text" id="username" required></input>
+          <input className="text-black" type="text" id="username" required/>
         </div>
         <div>
           Password
-          <input className="text-black" type="password" id="password" required></input>
+          <input className="text-black" type="password" id="password" required/>
         </div>
         <input type="submit" className="border-solid border-white border rounded-lg p-2" value="Login"/>
       </form>

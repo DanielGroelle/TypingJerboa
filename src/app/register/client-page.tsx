@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import { FormEvent } from "react";
@@ -43,11 +43,11 @@ export default function ClientRegister() {
       <form className="" onSubmit={handleRegister}>
         <div>
           Username
-          <input className="text-black" type="text" id="username" required></input>
+          <input className="text-black" type="text" id="username" required/>
         </div>
         <div>
           Password
-          <input className="text-black" type="password" id="password" required></input>
+          <input className="text-black" type="password" id="password" required/>
         </div>
         <input type="submit" className="border-solid border-white border rounded-lg p-2" value="Register"/>
       </form>

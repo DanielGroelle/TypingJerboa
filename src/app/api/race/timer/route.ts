@@ -2,6 +2,14 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+const Z_PARAGRAPH = z.object({
+  id: z.number(),
+  text: z.string(),
+  language_script_id: z.number(),
+  author: z.string(),
+  source: z.string()
+});
+
 const Z_REQUEST = z.object({
   languageScript: z.string()
 });
@@ -18,50 +26,23 @@ export async function POST(req: NextRequest) {
   //5 second countdown before start
   const startTime = new Date(Date.now() + 5000);
 
-  //fetch the number of paragraphs for a given languageScript
-  const languageScriptResult = await prisma.paragraph.findFirst({
-    select: {
-      languageScriptIndex: true,
-      languageScriptId: true
-    },
-    where: {
-      languageScript: {
-        languageScript: request.languageScript
-      }
-    },
-    orderBy: {
-      languageScriptIndex: "desc"
-    }
+  //get languageScriptId from languageScript
+  const languageScriptId = await prisma.languageScript.findFirst({
+    select: {id: true},
+    where: {languageScript: request.languageScript}
   });
-
-  if (languageScriptResult === null) {
+  if (languageScriptId === null) {
     return NextResponse.json({error: "LanguageScript not found"}, {status: 400});
   }
 
-  //pick random paragraph index
-  const lastParagraphIndex = languageScriptResult.languageScriptIndex;
-  const chosenParagraphIndex = Math.floor(Math.random() * (lastParagraphIndex + 1));
+  //pick random paragraph based on languageScriptId
+  //TODO: probably move this to a generalized function since right now this complex query is hidden away in /race/timer
+  const randomParagraph: object[] = await prisma.$queryRaw`SELECT * FROM Paragraphs WHERE Language_script_id = ${languageScriptId.id} AND selectable = true OFFSET floor(random() * (SELECT COUNT(*) FROM Paragraphs WHERE Language_script_id = ${languageScriptId.id} and selectable = true)) LIMIT 1`;
 
-  const languageScriptId = languageScriptResult.languageScriptId;
+  //will be undefined if nothing found
+  //TODO: handle undefined paragraph
 
-  //fetch the paragraph id and text
-  const chosenParagraphIdTextResult = await prisma.paragraph.findFirst({
-    select: {
-      id: true,
-      text: true
-    },
-    where: {
-      languageScriptIndex: chosenParagraphIndex,
-      languageScriptId: languageScriptId
-    }
-  });
-
-  if (chosenParagraphIdTextResult === null) {
-    return NextResponse.json({error: "Paragraph id not found"}, {status: 400});
-  }
-
-  const chosenParagraphId = chosenParagraphIdTextResult.id
-  const chosenParagraphText = chosenParagraphIdTextResult.text;
+  const chosenParagraph = Z_PARAGRAPH.parse(randomParagraph[0]);
 
   const createResult = await prisma.race.create({
     select: {
@@ -69,7 +50,7 @@ export async function POST(req: NextRequest) {
     },
     data: {
       startTime: startTime,
-      paragraphId: chosenParagraphId
+      paragraphId: chosenParagraph.id
       //TODO: implement session tokens
     }
   });
@@ -78,5 +59,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Race creation failed"}, {status: 400});
   }
 
-  return new NextResponse(JSON.stringify({startTime, paragraphText: chosenParagraphText, raceId: createResult.id}));
+  return new NextResponse(JSON.stringify({startTime, paragraphText: chosenParagraph.text, raceId: createResult.id}));
 }

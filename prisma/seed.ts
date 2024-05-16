@@ -14,8 +14,7 @@ async function main() {
         create: {
           text: "Лежи в цветах - сама, как сад в цвету. Твоя постель из пепла и гранита. Я руки над тобой переплету и окроплю слезами эти плиты. А завтра снова принесу цветов и забросаю ими твой покров.",
           source: "Ромео и Джульетта",
-          author: "У.Шейкспир",
-          languageScriptIndex: 0
+          author: "У.Шейкспир"
         },
       },
     }
@@ -27,8 +26,7 @@ async function main() {
         create: {
           text: "Music finds a comfortable parallel with that of human language. Much as language has words, sentences, and stories, music has tones, melodies, and songs.",
           source: "Civilization IV",
-          author: "Sid Meier",
-          languageScriptIndex: 0
+          author: "Sid Meier"
         },
       },
     }

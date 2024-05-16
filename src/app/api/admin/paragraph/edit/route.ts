@@ -7,10 +7,11 @@ const Z_REQUEST = z.object({
   text: z.string(),
   author: z.string(),
   source: z.string(),
-  languageScriptId: z.number()
+  languageScript: z.string(),
+  selectable: z.boolean()
 });
 //edit paragraph
-export default async function POST(req: NextRequest) {
+export async function POST(req: NextRequest) {
   let request;
   try {
     request = Z_REQUEST.parse(await req.json());
@@ -19,16 +20,43 @@ export default async function POST(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
+  //TODO: move this to a general function
+  const languageScriptId = await prisma.languageScript.findFirst({
+    select: {id: true},
+    where: {languageScript: request.languageScript}
+  });
+  if (languageScriptId === null) {
+    return NextResponse.json({error: "LanguageScript does not exist"}, {status: 400});
+  }
+
+  const currentLanguageScript = await prisma.paragraph.findFirst({
+    select: {
+      languageScript: true
+    },
+    where: {id: request.id}
+  });
+  if (currentLanguageScript === null) {
+    return NextResponse.json({error: "Paragraph id does not exist"}, {status: 400});
+  }
+
   const updatedParagraph = await prisma.paragraph.update({
+    select: {
+      id: true,
+      text: true,
+      author: true,
+      source: true,
+      languageScript: true,
+      selectable: true
+    },
     where: { id: request.id },
     data: {
       text: request.text,
       author: request.author,
       source: request.source,
-      languageScriptId: request.languageScriptId
+      languageScriptId: languageScriptId.id,
+      selectable: request.selectable
     }
   });
-
   if (updatedParagraph === null) {
     return NextResponse.json({error: "Paragraph ID does not exist"}, {status: 400});
   }

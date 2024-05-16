@@ -3,23 +3,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 export async function getParagraphs() {
-  const returnedParagraphs = await prisma.paragraph.findMany({
+  return await prisma.paragraph.findMany({
     select: {
       id: true,
       text: true,
       author: true,
       source: true,
       languageScript: true,
-      languageScriptIndex: true
+      selectable: true
     }
-  })
-  
-  return returnedParagraphs;
+  });
 }
+
 //return all paragraphs
 export async function GET() {
   const returnedParagraphs = await getParagraphs();
-
   if (returnedParagraphs === null) {
     return NextResponse.json({error: "Fetch paragraphs failed"}, {status: 400});
   }
@@ -31,7 +29,8 @@ const Z_REQUEST = z.object({
   text: z.string(),
   source: z.string(),
   author: z.string(),
-  languageScript: z.string()
+  languageScript: z.string(),
+  selectable: z.boolean()
 });
 //create paragraph
 export async function POST(req: NextRequest) {
@@ -43,35 +42,32 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  const languageScriptData = await prisma.paragraph.findFirst({
-    select: {
-      languageScriptIndex: true,
-      languageScriptId: true
-    },
-    where: {
-      languageScript: {
-        languageScript: request.languageScript
-      }
-    },
-    orderBy: {
-      languageScriptIndex: "desc"
-    }
+  //TODO: move this to a general function that can be imported and called from anywhere
+  const languageScriptId = await prisma.languageScript.findFirst({
+    select: {id: true},
+    where: {languageScript: request.languageScript}
   });
-
-  if (languageScriptData === null) {
-    return NextResponse.json({error: "Language script does not exist"}, {status: 400});
+  if (languageScriptId === null) {
+    return NextResponse.json({error: "LanguageScript does not exist"}, {status: 400});
   }
 
   const newParagraph = await prisma.paragraph.create({
+    select: {
+      id: true,
+      text: true,
+      source: true,
+      author: true,
+      languageScript: true,
+      selectable: true
+    },
     data: {
       text: request.text,
       source: request.source,
       author: request.author,
-      languageScriptIndex: languageScriptData.languageScriptIndex,
-      languageScriptId: languageScriptData.languageScriptId
+      languageScriptId: languageScriptId.id,
+      selectable: request.selectable
     }
   });
-
   if (newParagraph === null) {
     return NextResponse.json({error: "Paragraph creation failed"}, {status: 400});
   }
@@ -95,30 +91,8 @@ export async function DELETE(req: NextRequest) {
   const deletedParagraph = await prisma.paragraph.delete({
     where: { id: request.id }
   });
-
   if (deletedParagraph === null) {
     return NextResponse.json({error: "Paragraph ID does not exist"}, {status: 400});
-  }
-
-  //find the id of the lastIndexParagraph
-  const lastIndexParagraph = await prisma.paragraph.findFirst({
-    select: { id: true },
-    where: { languageScriptId: deletedParagraph.languageScriptId },
-    orderBy: { languageScriptIndex: "desc" }
-  });
-
-  if (lastIndexParagraph === null) {
-    return NextResponse.json({error: "Error finding last index paragraph"}, {status: 400});
-  }
-
-  //replace the lastIndexParagraph's index with the deleted paragraph's index so there are no gaps in indexes for a given languageScript
-  const movedParagraph = await prisma.paragraph.update({
-    where: { id: lastIndexParagraph.id },
-    data: { languageScriptIndex: deletedParagraph.languageScriptIndex }
-  });
-
-  if (movedParagraph === null) {
-    return NextResponse.json({error: "Error reassigning last index paragraph"}, {status: 400});
   }
   
   return NextResponse.json({status: 200});

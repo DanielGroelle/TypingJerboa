@@ -48,9 +48,8 @@ model Paragraph {
   author              String?
   languageScript      LanguageScript @relation(fields: [languageScriptId], references: [id]) 
   languageScriptId    Int            @map(name: "language_script_id")
-  languageScriptIndex Int            @map(name: "language_script_index")
+  selectable          Boolean        @default(true)
   races               Race[]
-  @@unique([languageScriptId, languageScriptIndex])
   @@map(name: "paragraphs")
 }
 
@@ -59,7 +58,7 @@ model Race {
   startTime      DateTime  @map(name: "start_time")
   endTime        DateTime? @map(name: "end_time")
   mistakes       Int?
-  paragraph      Paragraph @relation(fields: [paragraphId], references: [id])
+  paragraph      Paragraph @relation(fields: [paragraphId], references: [id], onDelete: Cascade)
   paragraphId    Int       @map(name: "paragraph_id")
   session        Session?  @relation(fields: [sessionToken], references: [token])
   sessionToken   String?   @unique @map(name: "session_token")

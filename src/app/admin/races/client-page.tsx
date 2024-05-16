@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import { z } from "zod";
@@ -68,13 +68,17 @@ export default function ClientAdminRaces() {
     <div>
       Races <br/>
       {races.map((race)=> 
-        <div className="border-solid border-white border" key={race.id}>
-          id: {race.id}<br/>
-          startTime: {race.startTime}<br/>
-          endTime: {race.endTime}<br/>
-          mistakes: {race.mistakes}<br/>
-          paragraph: {race.paragraph.text}
-          <button className="border-solid border-red-700 border rounded-lg p-2" onClick={()=>handleDelete(race.id)}>X</button>
+        <div className="border-solid border-white border flex justify-between" key={race.id}>
+          <div>
+            id: {race.id}<br/>
+            startTime: {race.startTime}<br/>
+            endTime: {race.endTime}<br/>
+            mistakes: {race.mistakes}<br/>
+            paragraph: {race.paragraph.text}
+          </div>
+          <div>
+            <button className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(race.id)}>X</button>
+          </div>
         </div>
       )}
       {races.length === 0 ? "No races found" : ""}

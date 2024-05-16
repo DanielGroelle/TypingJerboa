@@ -8,6 +8,22 @@ export default function TimerComponent({startTime}: {startTime: Date | null}) {
       const countdown = setInterval(()=>{
         const newTimer = (startTime.getTime() - Date.now()) / 1000;
         setTimer(newTimer);
+        /*
+          TODO: fix going back a page while race is running causing this error
+          Unhandled Runtime Error
+          Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+
+          Source
+          src/app/race/TimerComponent.tsx (10:8) @ setTimer
+
+            8 | const countdown = setInterval(()=>{
+            9 |   const newTimer = (startTime.getTime() - Date.now()) / 1000;
+          > 10 |   setTimer(newTimer);
+              |  ^
+            11 |   
+            12 |   //if the timer hits zero stop the interval
+            13 |   if (newTimer <= 0) {
+        */
         
         //if the timer hits zero stop the interval
         if (newTimer <= 0) {
