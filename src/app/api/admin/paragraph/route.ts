@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { getLanguageScriptId } from "../../utility/utility";
 
 export async function getParagraphs() {
   return await prisma.paragraph.findMany({
@@ -42,11 +43,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  //TODO: move this to a general function that can be imported and called from anywhere
-  const languageScriptId = await prisma.languageScript.findFirst({
-    select: {id: true},
-    where: {languageScript: request.languageScript}
-  });
+  const languageScriptId = await getLanguageScriptId(request.languageScript);
   if (languageScriptId === null) {
     return NextResponse.json({error: "LanguageScript does not exist"}, {status: 400});
   }
