@@ -39,9 +39,11 @@ export async function POST(req: NextRequest) {
   //TODO: probably move this to a generalized function since right now this complex query is hidden away in /race/timer
   const randomParagraph: object[] = await prisma.$queryRaw`SELECT * FROM Paragraphs WHERE Language_script_id = ${languageScriptId.id} AND selectable = true OFFSET floor(random() * (SELECT COUNT(*) FROM Paragraphs WHERE Language_script_id = ${languageScriptId.id} and selectable = true)) LIMIT 1`;
 
-  //will be undefined if nothing found
-  //TODO: handle undefined paragraph
-
+  //if no paragraph found send back null data to be handled in startRace()
+  if (randomParagraph[0] === undefined) {
+    return new NextResponse(JSON.stringify({startTime: null, paragraphText: null, raceId: null}));
+  }
+  
   const chosenParagraph = Z_PARAGRAPH.parse(randomParagraph[0]);
 
   const createResult = await prisma.race.create({
