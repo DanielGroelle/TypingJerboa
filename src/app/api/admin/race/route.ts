@@ -11,6 +11,12 @@ export async function getRaces() {
       mistakes: true,
       paragraph: {
         select: {text: true}
+      },
+      user: {
+        select: {id: true, username: true}
+      },
+      session: {
+        select: {token: true}
       }
     }
   })

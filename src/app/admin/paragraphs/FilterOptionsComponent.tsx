@@ -89,7 +89,6 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
         setAdding(false);
       }
       catch(e: unknown) {
-        console.log(e);
         throw "Delete failed";
       }
     })();

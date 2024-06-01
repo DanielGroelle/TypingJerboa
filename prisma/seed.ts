@@ -2,8 +2,9 @@ import prisma from "../src/lib/prisma";
 
 //npx prisma db seed
 async function main() {
-  //DROPS ALL RACES, PARAGRAPHS, AND LANGUAGESCRIPTS
+  //DROPS ALL RACES, USERS, PARAGRAPHS, AND LANGUAGESCRIPTS
   // await prisma.race.deleteMany();
+  // await prisma.user.deleteMany();
   // await prisma.paragraph.deleteMany();
   // await prisma.languageScript.deleteMany();
 

@@ -10,7 +10,14 @@ const Z_RACE = z.object({
   mistakes: z.number().nullable(),
   paragraph: z.object({
     text: z.string()
-  })
+  }),
+  user: z.object({
+    id: z.number(),
+    username: z.string()
+  }).nullable(),
+  session: z.object({
+    token: z.string()
+  }).nullable()
 });
 type Race = z.infer<typeof Z_RACE>;
 
@@ -71,6 +78,8 @@ export default function ClientAdminRaces() {
         <div className="border-solid border-white border flex justify-between" key={race.id}>
           <div>
             id: {race.id}<br/>
+            user: {String(race.user?.username)} - {String(race.user?.id)}<br/>
+            session: {String(race.session?.token)}<br/>
             startTime: {race.startTime}<br/>
             endTime: {race.endTime}<br/>
             mistakes: {race.mistakes}<br/>

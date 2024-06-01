@@ -30,7 +30,6 @@ function endRace(mistakes: number, raceId: string | null, router: AppRouterInsta
       throw "Failed finishing race";
     }
   })();
-  //TODO: use SuperJSON for request stringification. sending dates is annoying rn
 
   router.push(`/race/finish?id=${raceId}`);
 }

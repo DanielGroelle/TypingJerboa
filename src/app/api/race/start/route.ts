@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { selectRandomParagraph } from "../../utility/utility";
+import { findUserFromLoginToken } from "../../admin/user/route";
 
 const Z_PARAGRAPH = z.object({
   id: z.number(),
@@ -16,6 +17,10 @@ const Z_REQUEST = z.object({
 });
 //start race and get paragraphText and startTime
 export async function POST(req: NextRequest) {
+  //get the login/sessionToken from the users cookies if it exists
+  const loginToken = req.cookies.get("loginToken")?.value;
+  const sessionToken = req.cookies.get("sessionToken")?.value;
+
   let request;
   try {
     request = Z_REQUEST.parse(await req.json());
@@ -36,14 +41,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "LanguageScript not found"}, {status: 400});
   }
 
-  const randomParagraph = selectRandomParagraph(languageScriptId.id);
+  const randomParagraph = await selectRandomParagraph(languageScriptId.id);
 
   //if no paragraph found send back null data to be handled in startRace()
   if (randomParagraph === undefined) {
     return new NextResponse(JSON.stringify({startTime: null, paragraphText: null, raceId: null}));
   }
   
-  const chosenParagraph = Z_PARAGRAPH.parse(randomParagraph);
+  let chosenParagraph;
+  try {
+    chosenParagraph = Z_PARAGRAPH.parse(randomParagraph);
+  }
+  catch(e: unknown) {
+    return NextResponse.json({error: "Paragraph selection failed"}, {status: 400});
+  }
+
+  const user = await findUserFromLoginToken(loginToken);
 
   const createResult = await prisma.race.create({
     select: {
@@ -51,8 +64,9 @@ export async function POST(req: NextRequest) {
     },
     data: {
       startTime: startTime,
-      paragraphId: chosenParagraph.id
-      //TODO: implement session tokens
+      paragraphId: chosenParagraph.id,
+      userId: user?.id,
+      sessionToken: sessionToken ?? null
     }
   });
 

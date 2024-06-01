@@ -1,3 +1,5 @@
+//npx prisma migrate dev --name ""
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,9 +12,8 @@ datasource db {
 
 model Session {
   token  String   @id
-  expiry DateTime @default(now())
-  user   User?
-  race   Race?
+  expiry DateTime
+  races   Race[]
   @@map(name:"sessions")
 }
 
@@ -23,12 +24,12 @@ model Admin {
 }
 
 model User {
-  id           Int      @default(autoincrement()) @id
-  username     String   @unique
+  id           Int       @default(autoincrement()) @id
+  username     String    @unique
   password     String
-  createdAt    DateTime @default(now()) @map(name: "created_at")
-  session      Session? @relation(fields: [sessionToken], references: [token])
-  sessionToken String?  @unique @map(name: "session_token")
+  createdAt    DateTime  @default(now()) @map(name: "created_at")
+  loginToken   String?   @unique @map(name: "login_token")
+  loginExpiry  DateTime? @map(name: "login_expiry")
   races        Race[]
   admin        Admin?
   @@map(name: "users")
@@ -61,8 +62,8 @@ model Race {
   paragraph      Paragraph @relation(fields: [paragraphId], references: [id], onDelete: Cascade)
   paragraphId    Int       @map(name: "paragraph_id")
   session        Session?  @relation(fields: [sessionToken], references: [token])
-  sessionToken   String?   @unique @map(name: "session_token")
-  user           User?     @relation(fields: [userId], references: [id])
+  sessionToken   String?   @map(name: "session_token")
+  user           User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         Int?      @map(name: "user_id")
   @@map(name: "races")
 }

@@ -4,13 +4,13 @@ import { userIsAdmin } from "./api/admin/user/route";
 
 export default async function AdminPanelComponent() {
   const cookieStore = cookies();
-  const token = cookieStore.get("token");
+  const loginToken = cookieStore.get("loginToken");
 
-  if (token === undefined) {
+  if (loginToken === undefined) {
     return <></>;
   }
 
-  const isAdmin = await userIsAdmin(token.value);
+  const isAdmin = await userIsAdmin(loginToken.value);
 
   if (isAdmin) {
     return (

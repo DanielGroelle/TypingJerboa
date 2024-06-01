@@ -4,9 +4,9 @@ import prisma from "@/lib/prisma";
 import LogoutButtonComponent from "./LogoutButtonComponent";
 
 export default async function NavbarComponent() {
-  //get token from cookie to check if the user is logged in
+  //get loginToken from cookie to check if the user is logged in
   const cookieStore = cookies();
-  const token = cookieStore.get("token");
+  const loginToken = cookieStore.get("loginToken");
 
   return (
     <nav className="flex border-solid border-b-2 border-white">
@@ -18,10 +18,10 @@ export default async function NavbarComponent() {
       </div>
       {await (async ()=>{
         //if user logged in
-        if (token !== undefined) {
+        if (loginToken !== undefined) {
           const user = await prisma.user.findUnique({
             select: {username: true},
-            where: {sessionToken: token.value}
+            where: {loginToken: loginToken.value}
           });
           if (user === null) {
             throw "User not found";

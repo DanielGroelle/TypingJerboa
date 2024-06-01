@@ -49,16 +49,14 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({error: "Delete was unsuccessful"}, {status: 400});
   }
 
-  //TODO: delete associated session token and races
-
   return NextResponse.json({deleteResult});
 }
 
-//return if a single user is an admin based on sessionToken
+//return if a single user is an admin based on loginToken
 export async function userIsAdmin(token: string) {
   const user = await prisma.user.findUnique({
-    select: {id: true},
-    where: {sessionToken: token}
+    select: {id: true, admin: true},
+    where: {loginToken: token}
   });
 
   //no user found
@@ -66,11 +64,11 @@ export async function userIsAdmin(token: string) {
     return false;
   }
 
-  return await prisma.admin.findUnique({where: {id: user.id}}) !== null;
+  return user.admin !== null;
 }
 
 const Z_POST_REQUEST = z.object({
-  token: z.string() 
+  loginToken: z.string() 
 });
 //TODO: probably move this somewhere else
 //return if single user is admin or not
@@ -83,7 +81,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  const isAdmin = await userIsAdmin(request.token);
+  const isAdmin = await userIsAdmin(request.loginToken);
 
   return NextResponse.json({isAdmin});
+}
+
+export async function findUserFromLoginToken(loginToken: string | undefined) {
+  if (loginToken === undefined) return null;
+
+  const user = await prisma.user.findFirst({
+    where: {loginToken: loginToken}
+  });
+  
+  return user;
 }

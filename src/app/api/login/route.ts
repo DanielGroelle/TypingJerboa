@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       id: true,
       username: true,
       password: true
-    }, 
+    },
     where: {username: request.username}
   })
 
@@ -35,28 +35,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Username or password is not correct"}, {status: 401});
   }
 
-  //create and send token
-  const token = createId();
+  //create and send loginToken
+  const loginToken = createId();
   const dayMs = 1000 * 60 * 60 * 24;
 
-  const createdSession = await prisma.session.create({
+  const createdLogin = await prisma.user.update({
     data: {
-      token: token,
-      expiry: new Date(Date.now() + dayMs),
-      user: {
-        connect: {
-          id: returnedUser.id
-        }
-      }
-    }
+      loginToken: loginToken,
+      loginExpiry: new Date(Date.now() + dayMs)
+    },
+    where: {id: returnedUser.id}
   });
 
-  if (createdSession === null) {
-    return NextResponse.json({error: "Failed to create session"}, {status: 400});
+  if (createdLogin === null) {
+    return NextResponse.json({error: "Failed to create login"}, {status: 400});
   }
 
   const response = new NextResponse();
-  response.cookies.set("token", token, {
+  response.cookies.set("loginToken", loginToken, {
     httpOnly: true
   });
   return response;
