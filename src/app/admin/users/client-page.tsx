@@ -81,8 +81,13 @@ export default function ClientAdminUsers() {
       }
     })();
 
-    const newUsers = users.map((user)=>{return {...user, admin: !user.admin}})
-    setUsers(newUsers)
+    const newUsers = users.map((user)=>{
+      if (user.id === userId) {
+        return {...user, admin: !user.admin};
+      }
+      return {...user};
+    });
+    setUsers(newUsers);
   }
 
   return (

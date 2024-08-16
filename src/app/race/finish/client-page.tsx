@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const Z_RESPONSE = z.object({
+  user: z.string(),
   startTime: z.string(),
   endTime: z.string(),
   mistakes: z.number(),
@@ -15,7 +16,7 @@ export default function ClientRaceFinish() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  const [raceData, setRaceData] = useState({startTime: "", endTime: "", mistakes: 0, paragraph: ""});
+  const [raceData, setRaceData] = useState({user: "", startTime: "", endTime: "", mistakes: 0, paragraph: ""});
 
   useEffect(()=>{
     void fetch(`/api/race`, {
@@ -34,11 +35,14 @@ export default function ClientRaceFinish() {
 
   return (
     <div>
+      User: {raceData.user.length > 0 ? `${raceData.user}` : "Unregistered User"}<br/>
       WPM: {((raceData.paragraph.length / 5) / (time / 1000 / 60)).toFixed(1)}<br/>
       Time: {time / 1000}s<br/>
       Mistakes: {raceData.mistakes}<br/>
       Paragraph: {raceData.paragraph}<br/>
-      <Link href="/race">Race again</Link>
+      <br/>
+      <Link href="/race" className="border-solid border-white border rounded-lg p-2">Race again</Link>
     </div>
+    //todo add share link here
   );
 }

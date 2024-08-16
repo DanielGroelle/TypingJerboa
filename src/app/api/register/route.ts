@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import {hashPassword} from "@/lib/bcrypt";
+import { hashPassword } from "@/lib/bcrypt";
 
 const Z_REQUEST = z.object({
   username: z.string(),

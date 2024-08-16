@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
 
   const raceData = await prisma.race.findFirst({
     select: {
+      user: {select: {username: true}},
       startTime: true,
       endTime: true,
       mistakes: true,
@@ -29,6 +30,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Race not found"}, {status: 404});
   }
 
-  const response = {...raceData, paragraph: raceData.paragraph.text};
+  let username = raceData?.user?.username;
+  if (!username) {
+    username = "";
+  }
+
+  const response = {...raceData, user: username, paragraph: raceData.paragraph.text};
   return new NextResponse(JSON.stringify(response));
 }

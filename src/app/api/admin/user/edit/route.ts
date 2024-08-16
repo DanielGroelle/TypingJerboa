@@ -24,6 +24,10 @@ export async function POST(req: NextRequest) {
       where: {id: request.id},
       data: {
         username: request.username || undefined
+      },
+      select: {
+        username: true,
+        createdAt: true
       }
     });
     //have to do this in two separate calls because prisma says so
@@ -37,12 +41,16 @@ export async function POST(req: NextRequest) {
       where: {id: request.id},
       data: {
         username: request.username || undefined
+      },
+      select: {
+        username: true,
+        createdAt: true
       }
     });
     //have to do this in two separate calls because prisma says so
     updatedAdmin = await prisma.admin.delete({
       where: {id: request.id}
-    })
+    });
   }
 
   if (updatedUser === null || updatedAdmin === null) {
@@ -51,3 +59,5 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({updatedUser, updatedAdmin});
 }
+
+//todo return if the user is an admin or not
