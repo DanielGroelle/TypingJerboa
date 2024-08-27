@@ -35,7 +35,7 @@ export default function ClientAdminUsers() {
 
   useEffect(()=>{
     void (async ()=>setUsers(await getUsers()))();
-  },[])
+  },[]);
 
   function handleDelete(userId: number) {
     void (async ()=>{
@@ -57,7 +57,7 @@ export default function ClientAdminUsers() {
     const i = users.findIndex((user)=>user.id === userId);
     const newUsers = users.toSpliced(i, 1);
 
-    setUsers([...newUsers])
+    setUsers([...newUsers]);
   }
 
   function handleAdminCheckbox(event: ChangeEvent<HTMLInputElement>, userId: number) {

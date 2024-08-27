@@ -43,6 +43,6 @@ export default function ClientRaceFinish() {
       <br/>
       <Link href="/race" className="border-solid border-white border rounded-lg p-2">Race again</Link>
     </div>
-    //todo add share link here
+    //TODO: add share link here
   );
 }

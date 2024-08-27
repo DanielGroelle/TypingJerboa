@@ -31,3 +31,8 @@ describe("Home page", ()=> {
     // expect(learn).toBeInTheDocument();
   });
 });
+
+//https://www.npmjs.com/package/selenium-webdriver?activeTab=readme
+//https://marmelab.com/blog/2016/04/19/e2e-testing-with-node-and-es6.html
+//https://nextjs.org/docs/app/building-your-application/testing
+//https://nextjs.org/docs/app/building-your-application/testing/jest#add-a-test-script-to-packagejson

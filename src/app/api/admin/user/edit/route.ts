@@ -60,4 +60,4 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({updatedUser, updatedAdmin});
 }
 
-//todo return if the user is an admin or not
+//TODO: return if the user is an admin or not in the response

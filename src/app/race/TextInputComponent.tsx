@@ -121,10 +121,10 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
   };
   const handleTextAreaContextMenu = (event: MouseEvent<HTMLTextAreaElement>) => {
     event.preventDefault();
-  }
+  };
   const handleParagraphContextMenu = (event: MouseEvent<HTMLParagraphElement>) => {
     event.preventDefault();
-  }
+  };
 
   return (
     <div className="w-1/2">
@@ -137,7 +137,7 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
           return <span className={charStatus(userInput, i)} key={i}>{character}</span>
         })}
 
-        {//for inputted characters that exceed paragraph length
+        {//for inputed characters that exceed paragraph length
         [...userInput.slice(raceParagraphArray.length)].map((_, i)=>{
             return <span className="incorrect" key={i}>&nbsp;</span>
         })}

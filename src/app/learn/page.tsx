@@ -1,5 +1,7 @@
+import ClientLearn from "./client-page";
+
 export default function Learn() {
   return (
-    <div>learn</div>
+    <ClientLearn />
   );
 }
