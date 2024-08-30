@@ -55,7 +55,7 @@ export default function ScriptSelectionComponent({setRaceInfo}: { setRaceInfo: (
   scriptSelectionHidden: boolean,
   timerHidden: boolean
 ) => void }) {
-  const [error, setError] = useState(null as null | string);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div>
@@ -68,7 +68,7 @@ export default function ScriptSelectionComponent({setRaceInfo}: { setRaceInfo: (
           <option value={LanguageScripts.CYRILLIC_RUSSIAN}>Cyrillic (Russian)</option>
           <option value={LanguageScripts.LATIN_ENGLISH}>Latin (English)</option>
         </select>
-        <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={() => {
+        <input type="button" className="border-solid border-white border rounded-lg p-2 cursor-pointer" onClick={() => {
           void (async ()=>await startRace(setRaceInfo, setError))();
         }} value="Start Race"/>
       </div>

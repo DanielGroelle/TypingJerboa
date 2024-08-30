@@ -42,7 +42,7 @@ export default function ClientAdminParagraphs() {
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
   const [displayParagraphs, setDisplayParagraphs] = useState<Paragraph[]>([]); //displayParagraphs used to allow for filtering and searching
   
-  const [paragraphEditing, setParagraphEditing] = useState(null as number | null);
+  const [paragraphEditing, setParagraphEditing] = useState<number | null>(null);
 
   useEffect(()=>{
     void (async ()=>{

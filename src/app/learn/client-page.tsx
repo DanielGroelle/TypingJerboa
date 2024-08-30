@@ -4,12 +4,14 @@ import { ManualKeyboardMapping, ManualKeyboardMap, LanguageScripts } from "@/js/
 import { useState, useRef, ChangeEvent, ClipboardEvent, MouseEvent } from "react";
 
 export default function ClientLearn() {
-  const [languageScript, setLanguageScript] = useState(LanguageScripts.LATIN_ENGLISH as string);
+  const [languageScript, setLanguageScript] = useState<string>(LanguageScripts.LATIN_ENGLISH);
   const [learnPromptArray, setLearnPromptArray] = useState([]);
   const [userInput, setUserInput] = useState("");
   const userInputRef = useRef("");
+  const [activeMode, setActiveMode] = useState<string>("new-characters");
+  const [activeLesson, setActiveLesson] = useState<string | null>(null)
   const [lessonFinished, setLessonFinished] = useState(false);
-  const [startTime, setStartTime] = useState(null as Date | null);
+  const [startTime, setStartTime] = useState<Date | null>(null);
   const lessons = ManualKeyboardMap[languageScript];
   
   function handleScriptChange() {
@@ -64,17 +66,16 @@ export default function ClientLearn() {
     }
 
     return lessonsList.map((lesson, i)=>{
-      let tailwindClassNames = "text-left border-dotted border-b-2 border-white p-2";
-  
-      //if last lesson, dont have a dotted line underneath
-      if (i === lessonsList.length - 1) {
-        tailwindClassNames = "text-left p-2";
+      let tailwindClassNames = "text-left p-2 hover:bg-cyan-800";
+      //if not last lesson, add a dotted line underneath
+      if (i !== lessonsList.length - 1) {
+        tailwindClassNames += " border-dotted border-b-2 border-white";
       }
-  
+      if (lesson === activeLesson) {
+        tailwindClassNames += " bg-cyan-950";
+      }
       return (
-        <button key={lesson} onClick={()=>{console.log(lesson)}} className={tailwindClassNames}>
-          {(i + 1) + ": " + lesson}
-        </button>
+        <input type="button" key={lesson} onClick={()=>{setActiveLesson(lesson)}} className={tailwindClassNames} value={(i + 1) + ": " + lesson} />
       );
     });
   }
@@ -90,7 +91,7 @@ export default function ClientLearn() {
   };
 
   return (
-    <div>
+    <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       {/* script selection */}
       <div className="flex justify-end">
         Language Script:
@@ -100,34 +101,50 @@ export default function ClientLearn() {
         </select>
       </div>
 
-      {/* lessons sidebar */}
-      <div className="flex">
-        <div className="flex flex-col border-solid border-r-2 rounded border-white p-2">
-          <h3 className="">Lessons</h3>
-          <h4>Letters</h4>
-          {displaySidebarCharsByType("letters")}
-          <h4>Capitals</h4>
-          {displaySidebarCharsByType("capitals")}
-          <h4>Numbers</h4>
-          {displaySidebarCharsByType("numbers")}
-          <h4>Symbols</h4>
-          {displaySidebarCharsByType("symbols")}
+      <div className="flex overflow-y-hidden">
+        {/* lessons sidebar */}
+        <div className="flex flex-col overflow-y-hidden">
+          <h1>Lessons</h1>
+          <div className="flex flex-col border-solid border-r-2 rounded border-white p-2 overflow-y-scroll">
+            <h4>Letters</h4>
+            {displaySidebarCharsByType("letters")}
+            <h4>Capitals</h4>
+            {displaySidebarCharsByType("capitals")}
+            <h4>Numbers</h4>
+            {displaySidebarCharsByType("numbers")}
+            <h4>Symbols</h4>
+            {displaySidebarCharsByType("symbols")}
+          </div>
         </div>
         
         {/* center area */}
         <div className="m-4">
           <div>
-            <button>New Characters</button>
-            <button>Word Exercise</button>
-            <button></button>
+            <input type="button" className="border-solid border-white border rounded-lg p-2 cursor-pointer mr-2" onClick={()=>{
+              setActiveMode("new-characters");
+            }} style={{backgroundColor: (activeMode === "new-characters") ? "rgb(39 39 42)" : ""}} value="New Characters" />
+            <input type="button" className="border-solid border-white border rounded-lg p-2 cursor-pointer" onClick={()=>{
+              setActiveMode("word-exercise");
+            }} style={{backgroundColor: (activeMode === "word-exercise") ? "rgb(39 39 42)" : ""}} value="Word Exercise" />
           </div>
-          {languageScript}
-          <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={() => {
-            console.log("start");
-            setStartTime(new Date());
-            //TODO seeing an issue where if you ctrl-a then delete you can no longer input
-            // void (async ()=>await startRace(setRaceInfo, setError))()
-          }} value="Begin Lesson"/>
+          <br/>
+          Selected: {activeLesson ?? "None"}
+          <br/>
+          
+          {!startTime ?
+            //if lesson not started show "begin lesson" button
+            <input type="button" className="border-solid border-white border rounded-lg p-2 cursor-pointer" onClick={()=>{
+              if (activeLesson) setStartTime(new Date());
+              // void (async ()=>await startRace(setRaceInfo, setError))()
+            }} value="Begin Lesson" />
+            :
+            //else show "end lesson" button
+            <input type="button" className="border-solid border-white border rounded-lg p-2 cursor-pointer" onClick={()=>{
+              setStartTime(null);
+              setLearnPromptArray([]);
+              setUserInput("");
+            }} value="End Lesson" />
+          }
 
           <div className="border-solid border-white border select-none" onContextMenu={handleParagraphContextMenu}>
             {learnPromptArray.map((character, i)=>{

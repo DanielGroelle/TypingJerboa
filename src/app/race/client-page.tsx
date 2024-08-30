@@ -6,9 +6,9 @@ import TimerComponent from "./TimerComponent";
 import React, { useState } from "react";
 
 export default function ClientRace() {
-  const [raceParagraph, setRaceParagraph] = useState(null as string | null);
-  const [startTime, setStartTime] = useState(null as Date | null);
-  const [raceId, setRaceId] = useState(null as string | null);
+  const [raceParagraph, setRaceParagraph] = useState<string | null>(null);
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [raceId, setRaceId] = useState<string | null>(null);
 
   const [scriptSelectionHidden, setScriptSelectionHidden] = useState(false);
   const [timerHidden, setTimerHidden] = useState(true);
