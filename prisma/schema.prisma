@@ -11,9 +11,11 @@ datasource db {
 }
 
 model Session {
-  token  String   @id
-  expiry DateTime
-  races   Race[]
+  token              String   @id
+  expiry             DateTime
+  races              Race[]
+  lessons            Lesson[]
+  userWordEncounters UserWordEncounter[]
   @@map(name:"sessions")
 }
 
@@ -24,14 +26,16 @@ model Admin {
 }
 
 model User {
-  id           Int       @default(autoincrement()) @id
-  username     String    @unique
-  password     String
-  createdAt    DateTime  @default(now()) @map(name: "created_at")
-  loginToken   String?   @unique @map(name: "login_token")
-  loginExpiry  DateTime? @map(name: "login_expiry")
-  races        Race[]
-  admin        Admin?
+  id                 Int       @default(autoincrement()) @id
+  username           String    @unique
+  password           String
+  createdAt          DateTime  @default(now()) @map(name: "created_at")
+  loginToken         String?   @unique @map(name: "login_token")
+  loginExpiry        DateTime? @map(name: "login_expiry")
+  admin              Admin?
+  races              Race[]
+  lessons            Lesson[]
+  userWordEncounters UserWordEncounter[]
   @@map(name: "users")
 }
 
@@ -39,32 +43,74 @@ model LanguageScript {
   id             Int         @default(autoincrement()) @id
   languageScript String      @unique @map(name: "language_script")
   paragraphs     Paragraph[]
+  words          Word[]
   @@map(name: "language_scripts")
 }
 
+model Lesson {
+  id                 Int       @default(autoincrement()) @id
+  startTime          DateTime  @map(name: "start_time")
+  endTime            DateTime? @map(name: "end_time")
+  lessonText         String    @map(name: "lesson_text")
+  mistakes           Int?
+  session            Session?  @relation(fields: [sessionToken], references: [token])
+  sessionToken       String?   @map(name: "session_token")
+  user               User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             Int?      @map(name: "user_id")
+  userWordEncounters UserWordEncounter[]
+  @@map(name: "lessons")
+}
+
+model Word {
+  id                 Int            @default(autoincrement()) @id
+  languageScript     LanguageScript @relation(fields: [languageScriptId], references: [id]) 
+  languageScriptId   Int            @map(name: "language_script_id")
+  word               String
+  userWordEncounters UserWordEncounter[]
+  @@map(name: "words")
+}
+
+model UserWordEncounter {
+  id              Int      @default(autoincrement()) @id
+  word            Word     @relation(fields: [wordId], references: [id])
+  wordId          Int      @map(name: "word_id")
+  mistakes        Int
+  timeEncountered DateTime @map(name: "time_encountered")
+  lesson          Lesson?  @relation(fields: [lessonId], references: [id])
+  lessonId        Int?     @map(name: "lesson_id")
+  race            Race?    @relation(fields: [raceId], references: [id])
+  raceId          String?  @map(name: "race_id")
+  session         Session? @relation(fields: [sessionToken], references: [token])
+  sessionToken    String?  @map(name: "session_token")
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          Int?     @map(name: "user_id")
+  @@map(name: "user_word_encounters")
+}
+
 model Paragraph {
-  id                  Int            @default(autoincrement()) @id
-  text                String
-  source              String?
-  author              String?
-  languageScript      LanguageScript @relation(fields: [languageScriptId], references: [id]) 
-  languageScriptId    Int            @map(name: "language_script_id")
-  selectable          Boolean        @default(true)
-  races               Race[]
+  id               Int            @default(autoincrement()) @id
+  text             String
+  source           String?
+  author           String?
+  languageScript   LanguageScript @relation(fields: [languageScriptId], references: [id]) 
+  languageScriptId Int            @map(name: "language_script_id")
+  selectable       Boolean        @default(true)
+  races            Race[]
   @@map(name: "paragraphs")
 }
 
 model Race {
-  id             String    @default(cuid()) @id
-  startTime      DateTime  @map(name: "start_time")
-  endTime        DateTime? @map(name: "end_time")
-  mistakes       Int?
-  paragraph      Paragraph @relation(fields: [paragraphId], references: [id], onDelete: Cascade)
-  paragraphId    Int       @map(name: "paragraph_id")
-  session        Session?  @relation(fields: [sessionToken], references: [token])
-  sessionToken   String?   @map(name: "session_token")
-  user           User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         Int?      @map(name: "user_id")
+  id                 String    @default(cuid()) @id
+  startTime          DateTime  @map(name: "start_time")
+  endTime            DateTime? @map(name: "end_time")
+  paragraph          Paragraph @relation(fields: [paragraphId], references: [id], onDelete: Cascade)
+  paragraphId        Int       @map(name: "paragraph_id")
+  mistakes           Int?
+  session            Session?  @relation(fields: [sessionToken], references: [token])
+  sessionToken       String?   @map(name: "session_token")
+  user               User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             Int?      @map(name: "user_id")
+  userWordEncounters UserWordEncounter[]
   @@map(name: "races")
 }
 
