@@ -49,6 +49,7 @@ model LanguageScript {
 
 model Lesson {
   id                 Int       @default(autoincrement()) @id
+  lessonCharacters   String    @map(name: "lesson_characters")
   startTime          DateTime  @map(name: "start_time")
   endTime            DateTime? @map(name: "end_time")
   lessonText         String    @map(name: "lesson_text")
