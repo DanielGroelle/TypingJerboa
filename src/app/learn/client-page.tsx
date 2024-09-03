@@ -106,13 +106,13 @@ export default function ClientLearn() {
         <div className="flex flex-col overflow-y-hidden">
           <h1>Lessons</h1>
           <div className="flex flex-col border-solid border-r-2 rounded border-white p-2 overflow-y-scroll">
-            <h4>Letters</h4>
+            <h4><strong>Letters</strong></h4>
             {displaySidebarCharsByType("letters")}
-            <h4>Capitals</h4>
+            <h4><strong>Capitals</strong></h4>
             {displaySidebarCharsByType("capitals")}
-            <h4>Numbers</h4>
+            <h4><strong>Numbers</strong></h4>
             {displaySidebarCharsByType("numbers")}
-            <h4>Symbols</h4>
+            <h4><strong>Symbols</strong></h4>
             {displaySidebarCharsByType("symbols")}
           </div>
         </div>
@@ -120,10 +120,10 @@ export default function ClientLearn() {
         {/* center area */}
         <div className="m-4">
           <div>
-            <input type="button" className="border-solid border-white border rounded-lg p-2 cursor-pointer mr-2" onClick={()=>{
+            <input type="button" className="border-solid border-white border rounded-lg p-2 mr-2" onClick={()=>{
               setActiveMode("new-characters");
             }} style={{backgroundColor: (activeMode === "new-characters") ? "rgb(39 39 42)" : ""}} value="New Characters" />
-            <input type="button" className="border-solid border-white border rounded-lg p-2 cursor-pointer" onClick={()=>{
+            <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
               setActiveMode("word-exercise");
             }} style={{backgroundColor: (activeMode === "word-exercise") ? "rgb(39 39 42)" : ""}} value="Word Exercise" />
           </div>
@@ -133,13 +133,13 @@ export default function ClientLearn() {
           
           {!startTime ?
             //if lesson not started show "begin lesson" button
-            <input type="button" className="border-solid border-white border rounded-lg p-2 cursor-pointer" onClick={()=>{
+            <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
               if (activeLesson) setStartTime(new Date());
               // void (async ()=>await startRace(setRaceInfo, setError))()
             }} value="Begin Lesson" />
             :
             //else show "end lesson" button
-            <input type="button" className="border-solid border-white border rounded-lg p-2 cursor-pointer" onClick={()=>{
+            <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
               setStartTime(null);
               setLearnPromptArray([]);
               setUserInput("");

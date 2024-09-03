@@ -127,7 +127,7 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
           <option>author</option>
           <option>source</option>
         </select>
-        <button className="border-solid border-blue-600 border rounded-lg p-2" onClick={()=>setAdding(!adding)}>Add Paragraph</button>
+        <input type="button" className="border-solid border-blue-600 border rounded-lg p-2" onClick={()=>setAdding(!adding)} value="Add Paragraph" />
 
         {
           //add paragraph form
@@ -160,8 +160,8 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
                   </select><br/>
                 </div>
                 <div>
-                  <button type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setAdding(false)}>Cancel</button>
-                  <button type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2">Add</button>
+                  <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setAdding(false)} value="Cancel" />
+                  <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2" value="Add" />
                 </div>
               </form>
             </div>

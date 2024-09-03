@@ -102,7 +102,7 @@ export default function ClientAdminUsers() {
             <input type="checkbox" checked={user.admin} onChange={(event)=>handleAdminCheckbox(event, user.id)}></input>
           </div>
           <div>
-            <button className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(user.id)}>X</button>
+            <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(user.id)} value="X" />
           </div>
         </div>
       )}

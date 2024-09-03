@@ -243,10 +243,10 @@ export default function ClientAdminParagraphs() {
               </div>
               <div className="flex justify-between">
                 <div>
-                  <button type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setParagraphEditing(null)}>Cancel</button>
-                  <button type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2">Save</button>
+                  <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setParagraphEditing(null)} value="Cancel" />
+                  <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2" value="Save" />
                 </div>
-                <button className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(paragraph.id)}>X</button>
+                <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(paragraph.id)} value="X" />
               </div>
             </form>
             :
@@ -268,8 +268,8 @@ export default function ClientAdminParagraphs() {
               languageScript: {paragraph.languageScript.languageScript}<br/>
               selectable: {paragraph.selectable.toString()}<br/>
               <div className="flex justify-between">
-                <button className="border-solid border-green-700 border-2 rounded-lg p-2" onClick={()=>setParagraphEditing(paragraph.id)}>Edit</button>
-                <button className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(paragraph.id)}>X</button>
+                <input type="button" className="border-solid border-green-700 border-2 rounded-lg p-2" onClick={()=>setParagraphEditing(paragraph.id)} value="Edit" />
+                <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(paragraph.id)} value="X" />
               </div>
             </div>
           }

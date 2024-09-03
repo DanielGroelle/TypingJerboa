@@ -16,6 +16,6 @@ function handleLogout(router: AppRouterInstance) {
 export default function LogoutButtonComponent() {
   const router = useRouter();
   return (
-    <button onClick={()=>handleLogout(router)}>Logout</button>
+    <input type="button" onClick={()=>handleLogout(router)} value="Logout" />
   );
 }

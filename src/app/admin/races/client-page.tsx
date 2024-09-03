@@ -86,7 +86,7 @@ export default function ClientAdminRaces() {
             paragraph: {race.paragraph.text}
           </div>
           <div>
-            <button className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(race.id)}>X</button>
+            <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(race.id)} value="X" />
           </div>
         </div>
       )}
