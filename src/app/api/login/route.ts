@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { z } from "zod";
-import { createId } from "@paralleldrive/cuid2";
 import { comparePassword } from "@/lib/bcrypt";
 import prisma from "@/lib/prisma";
 
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   }
 
   //create and send loginToken
-  const loginToken = createId();
+  const loginToken = randomBytes(32).toString("hex");
   const dayMs = 1000 * 60 * 60 * 24;
 
   const createdLogin = await prisma.user.update({
@@ -47,13 +47,14 @@ export async function POST(req: NextRequest) {
     where: {id: returnedUser.id}
   });
 
-  if (createdLogin === null) {
+  if (createdLogin === null || createdLogin.loginExpiry === null) {
     return NextResponse.json({error: "Failed to create login"}, {status: 400});
   }
 
   const response = new NextResponse();
   response.cookies.set("loginToken", loginToken, {
-    httpOnly: true
+    httpOnly: true,
+    expires: createdLogin.loginExpiry
   });
   return response;
 }
