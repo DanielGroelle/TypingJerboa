@@ -1,8 +1,12 @@
 import { LanguageScripts } from "@/js/language-scripts";
 import { Paragraph, Z_PARAGRAPH } from "./client-page";
-import { useState, FormEvent } from "react";
+import { z } from "zod";
+import { useState, FormEvent, ChangeEvent } from "react";
+import Papa from "papaparse";
 
-export default function FilterOptionsComponent({paragraphs, setParagraphs, handleFiltering}: {paragraphs: Paragraph[], setParagraphs: (paragraphs: Paragraph[]) => void, handleFiltering: () => void}) {
+export default function FilterOptionsComponent({paragraphs, setParagraphs, handleFiltering}: {
+  paragraphs: Paragraph[], setParagraphs: (paragraphs: Paragraph[]) => void, handleFiltering: (passedParagraphs?: Paragraph[]) => void
+}) {
   const [adding, setAdding] = useState(false);
 
   function handleSort() {
@@ -89,9 +93,75 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
         setAdding(false);
       }
       catch(e: unknown) {
-        throw "Delete failed";
+        console.error("Paragraph add failed", e);
       }
     })();
+  }
+
+  function handleCsvSelect(e: ChangeEvent<HTMLInputElement>) {
+    //dont allow upload of files other than csv
+    if (e) {
+      if (e.target.files?.[0].type !== "text/csv") {
+        e.target.value = "";
+      }
+    }
+  }
+
+  const Z_CSV_RESULTS_DATA = z.array(z.array(z.string()));
+  const Z_PARAGRAPHS_ARRAY = z.object({
+    data: z.array(Z_PARAGRAPH)
+  });
+
+  function importFromCsv() {
+    const csvFileInput = document.getElementById("csv-import");
+    const languageScriptSelector = document.querySelector("#language-script-csv-select");
+
+    if (csvFileInput instanceof HTMLInputElement && languageScriptSelector instanceof HTMLSelectElement) {
+      const csvFile = csvFileInput.files?.[0];
+      if (csvFile) {
+        Papa.parse(csvFile, {
+          // delimiter: ",", feel like delimiter shouldnt be specified in-case at some point a weird csv variant is used
+          //papaparse is good at guessing anyways, it just returns an error when it has to guess
+          complete: (results)=>{
+            if (results.errors.length) {
+              console.error("Errors parsing csv", results.errors);
+            }
+            console.log(results)
+            const data = Z_CSV_RESULTS_DATA.parse(results.data);
+            const author = data?.[0]?.[0];
+            const source = data?.[0]?.[1];
+            const texts = data.slice(1, data.length - 1).map((arr)=>arr[0]);
+            const languageScript = languageScriptSelector.value;
+            const selectable = true;
+
+            void (async ()=>{
+              try{
+                const response = Z_PARAGRAPHS_ARRAY.parse(await(await fetch(`/api/admin/paragraph/bulk`, {
+                  method: "POST",
+                  body: JSON.stringify({
+                    texts,
+                    author,
+                    source,
+                    languageScript,
+                    selectable
+                  }),
+                  mode: "cors",
+                  cache: "default"
+                })).json());
+
+                //rerender edits
+                const newParagraphs = [...response.data, ...paragraphs]
+                setParagraphs(newParagraphs);
+                handleFiltering(newParagraphs);
+              }
+              catch(e: unknown) {
+                console.error("Bulk paragraph add failed", e);
+              }
+            })();
+          }
+        });
+      }
+    }
   }
 
   return (
@@ -127,7 +197,20 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
           <option>author</option>
           <option>source</option>
         </select>
-        <input type="button" className="border-solid border-blue-600 border rounded-lg p-2" onClick={()=>setAdding(!adding)} value="Add Paragraph" />
+
+        <br/>
+        <input type="button" className="border-solid border-blue-600 border rounded-lg p-2 mr-2" onClick={()=>setAdding(!adding)} value="Add Paragraph" />
+        <label htmlFor="csv-import" className="mr-1">Import From CSV</label>
+        <input type="file" name="csv-import" id="csv-import" className="text-xs" accept=".csv" onChange={(e)=>handleCsvSelect(e)} />
+        <input type="button" className="border-solid border-green-600 border rounded-lg p-2" onClick={()=>importFromCsv()} value="Import"/>
+        languageScript:<select id="language-script-csv-select">
+        {
+          Object.values(LanguageScripts).map((languageScript)=>{
+            return <option key={languageScript} defaultValue={languageScript}>{languageScript}</option>
+          })
+        }
+        </select>
+        <br/><br/>
 
         {
           //add paragraph form

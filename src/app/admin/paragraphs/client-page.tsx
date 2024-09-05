@@ -40,7 +40,7 @@ async function getParagraphs() {
 
 export default function ClientAdminParagraphs() {
   const [paragraphs, setParagraphs] = useState<Paragraph[]>([]);
-  const [displayParagraphs, setDisplayParagraphs] = useState<Paragraph[]>([]); //displayParagraphs used to allow for filtering and searching
+  const [displayParagraphs, setDisplayParagraphs] = useState<Paragraph[]>([]); //used to allow for filtering and searching
   
   const [paragraphEditing, setParagraphEditing] = useState<number | null>(null);
 
@@ -48,9 +48,9 @@ export default function ClientAdminParagraphs() {
     void (async ()=>{
       const fetchedParagraphs = await getParagraphs();
       setParagraphs(fetchedParagraphs);
-      setDisplayParagraphs(fetchedParagraphs);
+      handleFiltering(fetchedParagraphs);
     })();
-  },[]);
+  }, []);
 
   function handleDelete(paragraphId: number) {
     void (async ()=>{
@@ -132,7 +132,7 @@ export default function ClientAdminParagraphs() {
     setParagraphEditing(null);
   }
 
-  function handleFiltering() {
+  function handleFiltering(passedParagraphs: Paragraph[] = []) {
     // sort: ascending/descending
     // sortBy: id/text/author/source
     // languageScript: all/languageScript1/languageScript2/...
@@ -160,9 +160,13 @@ export default function ClientAdminParagraphs() {
     const search = searchSelector.value.toLowerCase();
     const searchIn = searchInSelector.value;
 
-    //start filtering based on languageScript
-    let newDisplayParagraphs = paragraphs.filter((paragraph)=>paragraph.languageScript.languageScript === languageScript || languageScript === "all");
+    let filteringParagraphs = paragraphs;
+    if (passedParagraphs.length) {
+      filteringParagraphs = passedParagraphs;
+    }
 
+    //start filtering based on languageScript
+    let newDisplayParagraphs = filteringParagraphs.filter((paragraph)=>paragraph.languageScript.languageScript === languageScript || languageScript === "all");
     //filter based on search
     newDisplayParagraphs = newDisplayParagraphs.filter((paragraph)=>{
       if (search === "") {
@@ -205,6 +209,7 @@ export default function ClientAdminParagraphs() {
     setDisplayParagraphs([...newDisplayParagraphs]);
   }
 
+  //TODO: add pagination to prevent all paragraphs from being rendered at once
   return (
     <div>
       <FilterOptionsComponent paragraphs={paragraphs} setParagraphs={setParagraphs} handleFiltering={handleFiltering}/>
