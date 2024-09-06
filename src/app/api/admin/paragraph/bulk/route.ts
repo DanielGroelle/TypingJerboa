@@ -63,3 +63,29 @@ export async function POST(req: NextRequest) {
 
   return new NextResponse(JSON.stringify({data: [...newParagraphsReturned]}));
 }
+
+const Z_DELETE_REQUEST = z.object({
+  ids: z.array(z.number())
+});
+//bulk delete paragraphs
+export async function DELETE(req: NextRequest) {
+  let request;
+  try {
+    request = Z_DELETE_REQUEST.parse(await req.json());
+  }
+  catch(e: unknown) {
+    return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
+  }
+
+  const deletedParagraphCount = await prisma.paragraph.deleteMany({
+    where: {
+      id: {in: request.ids}
+    }
+  });
+
+  if (deletedParagraphCount === null) {
+    return NextResponse.json({error: "Paragraph ID does not exist"}, {status: 400});
+  }
+  
+  return NextResponse.json({status: 200});
+}

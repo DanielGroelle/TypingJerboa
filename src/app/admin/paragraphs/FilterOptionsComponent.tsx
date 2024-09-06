@@ -4,8 +4,8 @@ import { z } from "zod";
 import { useState, FormEvent, ChangeEvent } from "react";
 import Papa from "papaparse";
 
-export default function FilterOptionsComponent({paragraphs, setParagraphs, handleFiltering}: {
-  paragraphs: Paragraph[], setParagraphs: (paragraphs: Paragraph[]) => void, handleFiltering: (passedParagraphs?: Paragraph[]) => void
+export default function FilterOptionsComponent({paragraphs, setParagraphs, handleFiltering, handleDeleteAllFiltered}: {
+  paragraphs: Paragraph[], setParagraphs: (paragraphs: Paragraph[]) => void, handleFiltering: (passedParagraphs?: Paragraph[]) => void, handleDeleteAllFiltered: () => void
 }) {
   const [adding, setAdding] = useState(false);
 
@@ -101,7 +101,7 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
   function handleCsvSelect(e: ChangeEvent<HTMLInputElement>) {
     //dont allow upload of files other than csv
     if (e) {
-      if (e.target.files?.[0].type !== "text/csv") {
+      if (e.target.files?.[0]?.type !== "text/csv") {
         e.target.value = "";
       }
     }
@@ -126,7 +126,7 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
             if (results.errors.length) {
               console.error("Errors parsing csv", results.errors);
             }
-            console.log(results)
+
             const data = Z_CSV_RESULTS_DATA.parse(results.data);
             const author = data?.[0]?.[0];
             const source = data?.[0]?.[1];
@@ -198,17 +198,18 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
           <option>source</option>
         </select>
 
+        <input type="button" className="border-solid border-red-700 border rounded-lg p-2 ml-2" onClick={handleDeleteAllFiltered} value="Delete all filtered" />
+
         <br/>
         <input type="button" className="border-solid border-blue-600 border rounded-lg p-2 mr-2" onClick={()=>setAdding(!adding)} value="Add Paragraph" />
         <label htmlFor="csv-import" className="mr-1">Import From CSV</label>
         <input type="file" name="csv-import" id="csv-import" className="text-xs" accept=".csv" onChange={(e)=>handleCsvSelect(e)} />
-        <input type="button" className="border-solid border-green-600 border rounded-lg p-2" onClick={()=>importFromCsv()} value="Import"/>
-        languageScript:<select id="language-script-csv-select">
-        {
-          Object.values(LanguageScripts).map((languageScript)=>{
-            return <option key={languageScript} defaultValue={languageScript}>{languageScript}</option>
-          })
-        }
+        <input type="button" className="border-solid border-green-600 border rounded-lg p-2" onClick={importFromCsv} value="Import"/>
+        languageScript: 
+        <select id="language-script-csv-select">
+        {Object.values(LanguageScripts).map((languageScript)=>{
+          return <option key={languageScript} defaultValue={languageScript}>{languageScript}</option>
+        })}
         </select>
         <br/><br/>
 
