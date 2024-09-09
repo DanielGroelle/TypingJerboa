@@ -68,6 +68,7 @@ model Word {
   languageScriptId   Int            @map(name: "language_script_id")
   word               String
   userWordEncounters UserWordEncounter[]
+  @@unique([word, languageScriptId], name: "wordLanguageScriptId")
   @@map(name: "words")
 }
 

@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getLanguageScriptId } from "../../utility/utility";
+import { extractWordsFromTexts, getLanguageScriptId, insertToWordTable } from "../../utility/utility";
 
 export async function getParagraphs() {
   return await prisma.paragraph.findMany({
@@ -67,6 +67,12 @@ export async function POST(req: NextRequest) {
   });
   if (newParagraph === null) {
     return NextResponse.json({error: "Paragraph creation failed"}, {status: 400});
+  }
+
+  const words = extractWordsFromTexts([request.text]);
+  const response = await insertToWordTable(words, languageScriptId.id);
+  if (response === null) {
+    return NextResponse.json({error: "Word insertion failed"}, {status: 400});
   }
 
   return new NextResponse(JSON.stringify({...newParagraph}));

@@ -158,7 +158,7 @@ export default function ClientAdminParagraphs() {
         paragraphs[paragraphIndex] = response;
 
         setParagraphs([...paragraphs]);
-        handleFiltering();
+        handleFiltering([...paragraphs], true);
       }
       catch(e: unknown) {
         throw "Delete failed";

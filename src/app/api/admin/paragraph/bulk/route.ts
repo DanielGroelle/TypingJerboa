@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getLanguageScriptId } from "../../../utility/utility";
+import { extractWordsFromTexts, getLanguageScriptId, insertToWordTable } from "../../../utility/utility";
 
 const Z_REQUEST = z.object({
   source: z.string(),
@@ -24,25 +24,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "LanguageScript does not exist"}, {status: 400});
   }
 
-  const Z_PARAGRAPH = z.object({
-    text: z.string(),
-    author: z.string(),
-    source: z.string(),
-    languageScriptId: z.number(),
-    selectable: z.boolean()
-  });
-  type Paragraph = z.infer<typeof Z_PARAGRAPH>;
-
   //format into a neat array of objects for prisma to createMany with
-  const newParagraphs = [] as Paragraph[];
-  request.texts.forEach((text)=>{
-     newParagraphs.push({
+  const newParagraphs = request.texts.map((text)=>{
+     return {
       source: request.source,
       author: request.author,
       selectable: request.selectable,
       text: text,
       languageScriptId: languageScriptId.id,
-    });
+    };
   });
 
   const newParagraphsReturned = await prisma.paragraph.createManyAndReturn({
@@ -60,6 +50,13 @@ export async function POST(req: NextRequest) {
   if (newParagraphsReturned === null) {
     return NextResponse.json({error: "Paragraph creation failed"}, {status: 400});
   }
+
+  const words = extractWordsFromTexts(request.texts);
+  const response = await insertToWordTable(words, languageScriptId.id);
+  if (response === null) {
+    return NextResponse.json({error: "Word insertion failed"}, {status: 400});
+  }
+  console.log("words attempted to insert", response);
 
   return new NextResponse(JSON.stringify({data: [...newParagraphsReturned]}));
 }

@@ -15,3 +15,25 @@ export async function selectRandomParagraph(languageScriptId: number) {
   //can be undefined
   return randomParagraph[0];
 }
+
+export function extractWordsFromTexts(texts: string[]) {
+  const words: string[] = [];
+  for(const text of texts) {
+    //match all words in the text (any unicode characters with the property of "letter")
+    const possibleWords = text.match(/\p{L}+/gu);
+    if (possibleWords === null) continue;
+    words.push(...possibleWords);
+  }
+
+  return words;
+}
+
+export async function insertToWordTable(words: string[], languageScriptId: number) {
+  const newWords = words.map((word)=>{return {word, languageScriptId}});
+  const wordInsertCount = await prisma.word.createMany({
+    data: newWords,
+    skipDuplicates: true,
+  });
+
+  return wordInsertCount;
+}
