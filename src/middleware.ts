@@ -29,7 +29,7 @@ async function createNewSession(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
   const response = NextResponse.redirect(new URL("/", request.url));
-  response.cookies.set("sessionToken", zodResponse.token, { httpOnly: true, expires: new Date(zodResponse.expiry) });
+  response.cookies.set("sessionToken", zodResponse.token, { secure: true, httpOnly: true, expires: new Date(zodResponse.expiry) });
   
   return response;
 }
@@ -81,7 +81,7 @@ export async function middleware(request: NextRequest) {
           })).json());
         }
         catch(e: unknown) {
-          console.log("loginToken expiry", e)
+          console.log("loginToken expiry", e);
           return NextResponse.redirect(new URL("/", request.url));
         }
 
@@ -109,6 +109,8 @@ export async function middleware(request: NextRequest) {
           console.error("remove sessionToken", e);
         }
 
+        //TODO: also move lessons to be associated with user
+
         return response;
       }
     }
@@ -129,7 +131,7 @@ export async function middleware(request: NextRequest) {
     let response;
     try {
       //must be an api fetch because PrismaClient cant run in vercel edge functions
-      response = Z_ADMIN_RESPONSE.parse(await (await fetch(new URL("/api/admin/user", process.env.BASE_URL), {
+      response = Z_ADMIN_RESPONSE.parse(await (await fetch(new URL("/api/admin/user/is-admin", process.env.BASE_URL), {
         method: "POST",
         body: JSON.stringify({
           loginToken: loginToken

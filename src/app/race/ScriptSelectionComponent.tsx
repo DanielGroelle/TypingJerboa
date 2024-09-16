@@ -40,7 +40,7 @@ async function startRace(
     //if paragraph was found set the race info to start the race
     else {
       setError(null);
-      setRaceInfo(response.paragraphText, new Date(response.startTime), response.raceId, true, false)
+      setRaceInfo(response.paragraphText, new Date(response.startTime), response.raceId, true, false);
     }
   }
   catch(e: unknown) {

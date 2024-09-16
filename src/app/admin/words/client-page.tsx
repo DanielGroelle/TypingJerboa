@@ -80,8 +80,6 @@ export default function ClientAdminWords() {
         throw "Delete failed";
       }
     })();
-
-    //TODO: give some prompt that deleting is a destructive action for any races that used the word
   
     const newWords = words.filter((word)=>{
       return !wordIds.includes(word.id)

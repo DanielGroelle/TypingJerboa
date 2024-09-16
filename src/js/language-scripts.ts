@@ -3,6 +3,7 @@ export const LanguageScripts = {
   LATIN_ENGLISH: "latin-english"
 } as const;
 
+//these are ordered in this way so then characters on homerow are always learned first, then upperrow, etc.
 export type Rows = {
   homerow: string[][],
   upperrow: string[][],

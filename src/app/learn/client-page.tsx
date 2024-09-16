@@ -1,18 +1,50 @@
 "use client";
 
 import { ManualKeyboardMapping, ManualKeyboardMap, LanguageScripts } from "@/js/language-scripts";
-import { useState, useRef, ChangeEvent, ClipboardEvent, MouseEvent } from "react";
+import { useState, useRef, ChangeEvent, ClipboardEvent, MouseEvent, useEffect } from "react";
+import { z } from "zod";
 
 export default function ClientLearn() {
   const [languageScript, setLanguageScript] = useState<string>(LanguageScripts.LATIN_ENGLISH);
-  const [learnPromptArray, setLearnPromptArray] = useState([]);
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [lessonText, setLessonText] = useState("");
   const [userInput, setUserInput] = useState("");
   const userInputRef = useRef("");
+  const [error, setError] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<string>("new-characters");
   const [activeLesson, setActiveLesson] = useState<string | null>(null)
   const [lessonFinished, setLessonFinished] = useState(false);
-  const [startTime, setStartTime] = useState<Date | null>(null);
   const lessons = ManualKeyboardMap[languageScript];
+  const [finishedLessons, setFinishedLessons] = useState<Set<string>>(new Set([]));
+  const [lessonId, setLessonId] = useState<string | null>(null);
+
+  //TODO: have the languageScript encoded in the url as a parameter ?ls=cyrillic-russian
+  //TODO: make new characters and word exercise produce different lessons. also probably show different checkmark for each
+
+  const Z_FINISHED_LESSONS_RESPONSE = z.object({
+    finishedLessons: z.array(
+      z.object({
+        lessonCharacters: z.string()
+      }
+    ))
+  });
+  useEffect(()=>{
+    void (async()=>{
+      try {
+        //fetch finished lessons and assign them to finishedLessons state variable
+        const response = Z_FINISHED_LESSONS_RESPONSE.parse(await (await fetch(`/api/lesson`, {
+          method: "GET",
+          mode: "cors",
+          cache: "default"
+        })).json());
+        const newFinishedLessons = response.finishedLessons.map((lesson)=>lesson.lessonCharacters);
+        setFinishedLessons(new Set([...newFinishedLessons]));
+      }
+      catch(e: unknown) {
+        throw "Fetch finishedLessons failed";
+      }
+    })();
+  }, [languageScript]);
   
   function handleScriptChange() {
     const scriptSelect = document.querySelector("#script-select");
@@ -38,20 +70,20 @@ export default function ClientLearn() {
       }
     }
 
-    //check if the userInput is equal to the learnPrompt in order to end the lesson
-    if (newUserInput === learnPromptArray.join("")) {
+    //check if the userInput is equal to the learnText in order to end the lesson
+    if (newUserInput === lessonText) {
       setLessonFinished(true);
-      // endLesson(mistakes, lessonId, router);
+      endLesson();
     }
   }
 
-  //returns the appropriate class name based on if the current learnPrompt char matches the userInput char
+  //returns the appropriate class name based on if the current learnText char matches the userInput char
   //needs to take in the userInput string in case the state variable hasnt updated yet
   const charStatus = (userInput: string, i: number) => {
     if (userInput[i] === undefined) {
       return "empty";
     }
-    if (learnPromptArray[i] !== userInput[i]) {
+    if (lessonText[i] !== userInput[i]) {
       return "incorrect";
     }
     return "correct";
@@ -61,12 +93,13 @@ export default function ClientLearn() {
     const lessonsList = [] as string[];
     for (const lessonList of Object.values(lessons[lessonType])) {
       //join together lesson characters into one string
-      const joinedLessons = lessonList.map((lesson) => lesson.join(" "));
+      const joinedLessons = lessonList.map((lesson) => lesson.join(""));
       lessonsList.push(...joinedLessons);
     }
 
     return lessonsList.map((lesson, i)=>{
-      let tailwindClassNames = "text-left p-2 hover:bg-cyan-800";
+      const spacedLesson = lesson.split("").join(" ");
+      let tailwindClassNames = "text-left p-2 hover:bg-cyan-800 flex justify-between";
       //if not last lesson, add a dotted line underneath
       if (i !== lessonsList.length - 1) {
         tailwindClassNames += " border-dotted border-b-2 border-white";
@@ -75,9 +108,92 @@ export default function ClientLearn() {
         tailwindClassNames += " bg-cyan-950";
       }
       return (
-        <input type="button" key={lesson} onClick={()=>{setActiveLesson(lesson)}} className={tailwindClassNames} value={(i + 1) + ": " + lesson} />
+        <div className={tailwindClassNames} key={lesson} onClick={()=>{setActiveLesson(lesson)}}>
+          <input type="button" value={(i + 1) + ": " + spacedLesson} />
+          {/*add checkmark if the lesson is complete*/}
+          {finishedLessons.has(lesson) ? 
+            <span className="checkmark"></span>
+            :
+            ""
+          }
+        </div>
       );
     });
+  }
+
+  function assignLessonInfo(lessonText: string, startTime: Date | null, newLessonId: string | null) {
+    setLessonText(lessonText);
+    setStartTime(startTime);
+    setLessonId(newLessonId);
+  }
+
+  const Z_RESPONSE = z.object({
+    startTime: z.string().nullable(),
+    lessonText: z.string().nullable(),
+    lessonId: z.string().nullable()
+  });
+  async function startLesson(
+    assignLessonInfo: (lessonText: string, startTime: Date | null, newLessonId: string | null) => void,
+    setError: (error: string | null) => void
+  ) {
+    if (!activeLesson) {
+      setError("No lesson selected");
+      return;
+    }
+
+    let response;
+    try {
+      //fetch startTime and lessonText
+      response = Z_RESPONSE.parse(await (await fetch(`/api/lesson/start`, {
+        method: "POST",
+        body: JSON.stringify({
+          activeLesson: activeLesson?.split(""),
+          languageScript: languageScript,
+          mode: activeMode
+        }),
+        mode: "cors",
+        cache: "default"
+      })).json());
+      
+      //if no lesson was found set the error message
+      if (response.lessonId === null || response.lessonText === null || response.startTime === null) {
+        setError("No lesson for that language script found");
+      }
+      //if lesson was found set the lesson info to start the lesson
+      else {
+        setError(null);
+        assignLessonInfo(response.lessonText, new Date(response.startTime), response.lessonId);
+      }
+    }
+    catch(e: unknown) {
+      throw "startLesson failed";
+    }
+  }
+
+  //TODO: when user is in a lesson, if they switch activeLesson on the sidebar, end the current lesson as incomplete
+  function endLesson() {
+    void (async ()=>{
+      try {
+        await (await fetch(`/api/lesson/finish`, {
+          method: "POST",
+          body: JSON.stringify({
+            endTime: new Date(),
+            lessonId
+          }),
+          mode: "cors",
+          cache: "default"
+        })).json();
+      }
+      catch(e: unknown) {
+        throw "Failed finishing lesson";
+      }
+    })();
+
+    if (activeLesson) setFinishedLessons(new Set([...finishedLessons, activeLesson]));
+    setStartTime(null);
+    setLessonText("");
+    setUserInput("");
+    setLessonFinished(false);
   }
 
   const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
@@ -119,6 +235,9 @@ export default function ClientLearn() {
         
         {/* center area */}
         <div className="m-4">
+          <div className="border-solid border-red-500 border rounded-lg p-2" hidden={typeof error !== "string"}>
+            {error}
+          </div>
           <div>
             <input type="button" className="border-solid border-white border rounded-lg p-2 mr-2" onClick={()=>{
               setActiveMode("new-characters");
@@ -130,29 +249,22 @@ export default function ClientLearn() {
           <br/>
           Selected: {activeLesson ?? "None"}
           <br/>
-          
-          {!startTime ?
-            //if lesson not started show "begin lesson" button
+
+          {!startTime ? 
             <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
-              if (activeLesson) setStartTime(new Date());
-              // void (async ()=>await startRace(setRaceInfo, setError))()
+              void (async ()=>await startLesson(assignLessonInfo, setError))();
             }} value="Begin Lesson" />
             :
-            //else show "end lesson" button
-            <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
-              setStartTime(null);
-              setLearnPromptArray([]);
-              setUserInput("");
-            }} value="End Lesson" />
+            ""
           }
 
           <div className="border-solid border-white border select-none" onContextMenu={handleParagraphContextMenu}>
-            {learnPromptArray.map((character, i)=>{
+            {[...lessonText].map((character, i)=>{
               return <span className={charStatus(userInput, i)} key={i}>{character}</span>
             })}
 
             {//for inputed characters that exceed paragraph length
-            [...userInput.slice(learnPromptArray.length)].map((_, i)=>{
+            [...userInput.slice(lessonText.length)].map((_, i)=>{
                 return <span className="incorrect" key={i}>&nbsp;</span>
             })}
           </div>

@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     request = Z_REQUEST.parse(await req.json());
   }
   catch(e: unknown) {
-    return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400})
+    return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
   //5 second countdown before start

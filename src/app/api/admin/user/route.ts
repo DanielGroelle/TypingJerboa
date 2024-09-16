@@ -52,40 +52,6 @@ export async function DELETE(req: NextRequest) {
   return NextResponse.json({deleteResult});
 }
 
-//return if a single user is an admin based on loginToken
-export async function userIsAdmin(token: string) {
-  const user = await prisma.user.findUnique({
-    select: {id: true, admin: true},
-    where: {loginToken: token}
-  });
-
-  //no user found
-  if (user === null) {
-    return false;
-  }
-
-  return user.admin !== null;
-}
-
-const Z_POST_REQUEST = z.object({
-  loginToken: z.string() 
-});
-//TODO: probably move this somewhere else
-//return if single user is admin or not
-export async function POST(req: NextRequest) {
-  let request;
-  try {
-    request = Z_POST_REQUEST.parse(await req.json());
-  }
-  catch(e: unknown) {
-    return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
-  }
-
-  const isAdmin = await userIsAdmin(request.loginToken);
-
-  return NextResponse.json({isAdmin});
-}
-
 export async function findUserFromLoginToken(loginToken: string | undefined) {
   if (loginToken === undefined) return null;
 

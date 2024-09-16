@@ -23,6 +23,14 @@ export default function Admin() {
       </div>
       <div className="pb-4">
         <div className="text-2xl">
+          <Link href="/admin/lessons">Lessons</Link>
+        </div>
+        <div>
+          Lessons view
+        </div>
+      </div>
+      <div className="pb-4">
+        <div className="text-2xl">
           <Link href="/admin/paragraphs">Paragraphs</Link>
         </div>
         <div>

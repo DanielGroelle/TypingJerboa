@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
 
   const response = new NextResponse();
   response.cookies.set("loginToken", loginToken, {
+    secure: true,
     httpOnly: true,
     expires: createdLogin.loginExpiry
   });

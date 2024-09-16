@@ -37,3 +37,61 @@ export async function insertToWordTable(words: string[], languageScriptId: numbe
 
   return wordInsertCount;
 }
+
+export function generateRandomWord(charset: string[], length: number) {
+  let word = "";
+  for (let i = 0; i < length; i++) {
+    const char = charset[Math.floor(Math.random() * charset.length)];
+    //make sure the same character isnt chosen more than maxRepeats
+    if (char === word[word.length - 1] && char === word[word.length - 2]) {
+      i--;
+      continue;
+    }
+
+    word += char;
+  }
+  return word;
+}
+
+//fisher-yates shuffle
+export function shuffle<T>(array: T[]) {
+  let currentIndex = array.length;
+
+  //while there are remaining elements to shuffle
+  while (currentIndex != 0) {
+    const randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    //swap with the current element
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+}
+
+export async function findUniqueFinishedLessons(options: {userId?: number | undefined, sessionToken?: string | undefined}) {
+  if (options.userId) {
+    return await prisma.lesson.findMany({
+      select: {
+        lessonCharacters: true
+      },
+      where: {
+        userId: options.userId,
+        endTime: {not: null}
+      },
+      distinct: ["lessonCharacters"]
+    });
+  }
+
+  if (options.sessionToken) {
+    return await prisma.lesson.findMany({
+      select: {
+        lessonCharacters: true
+      },
+      where: {
+        sessionToken: options.sessionToken,
+        endTime: {not: null}
+      },
+      distinct: ["lessonCharacters"]
+    });
+  }
+}

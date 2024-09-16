@@ -38,6 +38,10 @@ input[type=button] {
   cursor: pointer;
 }
 
+input[type=submit] {
+  cursor: pointer;
+}
+
 select {
   cursor: pointer;
 }
@@ -70,4 +74,33 @@ option {
   background-color: darkred;
   text-decoration-line: underline;
   text-decoration-color: red;
+}
+
+.checkmark {
+  display:inline-block;
+  width: 22px;
+  height:22px;
+  -ms-transform: rotate(45deg); /* IE 9 */
+  -webkit-transform: rotate(45deg); /* Chrome, Safari, Opera */
+  transform: rotate(45deg);
+}
+
+.checkmark:before {
+  content: "";
+  position: absolute;
+  width:3px;
+  height:9px;
+  background-color:rgb(22 163 74);
+  left:11px;
+  top:6px;
+}
+
+.checkmark:after {
+  content:"";
+  position: absolute;
+  width:4px;
+  height:3px;
+  background-color:rgb(22 163 74);
+  left:8px;
+  top:12px;
 }
