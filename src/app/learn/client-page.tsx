@@ -1,8 +1,9 @@
 "use client";
 
-import { ManualKeyboardMapping, ManualKeyboardMap, LanguageScripts } from "@/js/language-scripts";
+import { ManualKeyboardMap, LanguageScripts } from "@/js/language-scripts";
 import { useState, useRef, ChangeEvent, ClipboardEvent, MouseEvent, useEffect } from "react";
 import { z } from "zod";
+import SidebarComponent from "./SidebarComponent";
 
 export default function ClientLearn() {
   const [languageScript, setLanguageScript] = useState<string>(LanguageScripts.LATIN_ENGLISH);
@@ -12,7 +13,7 @@ export default function ClientLearn() {
   const userInputRef = useRef("");
   const [error, setError] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<string>("new-characters");
-  const [activeLesson, setActiveLesson] = useState<string | null>(null)
+  const [activeLesson, setActiveLesson] = useState<string | null>(null);
   const [lessonFinished, setLessonFinished] = useState(false);
   const lessons = ManualKeyboardMap[languageScript];
   const [finishedLessons, setFinishedLessons] = useState<Set<string>>(new Set([]));
@@ -89,38 +90,6 @@ export default function ClientLearn() {
     return "correct";
   }
 
-  const displaySidebarCharsByType = (lessonType: keyof ManualKeyboardMapping) => {
-    const lessonsList = [] as string[];
-    for (const lessonList of Object.values(lessons[lessonType])) {
-      //join together lesson characters into one string
-      const joinedLessons = lessonList.map((lesson) => lesson.join(""));
-      lessonsList.push(...joinedLessons);
-    }
-
-    return lessonsList.map((lesson, i)=>{
-      const spacedLesson = lesson.split("").join(" ");
-      let tailwindClassNames = "text-left p-2 hover:bg-cyan-800 flex justify-between";
-      //if not last lesson, add a dotted line underneath
-      if (i !== lessonsList.length - 1) {
-        tailwindClassNames += " border-dotted border-b-2 border-white";
-      }
-      if (lesson === activeLesson) {
-        tailwindClassNames += " bg-cyan-950";
-      }
-      return (
-        <div className={tailwindClassNames} key={lesson} onClick={()=>{setActiveLesson(lesson)}}>
-          <input type="button" value={(i + 1) + ": " + spacedLesson} />
-          {/*add checkmark if the lesson is complete*/}
-          {finishedLessons.has(lesson) ? 
-            <span className="checkmark"></span>
-            :
-            ""
-          }
-        </div>
-      );
-    });
-  }
-
   function assignLessonInfo(lessonText: string, startTime: Date | null, newLessonId: string | null) {
     setLessonText(lessonText);
     setStartTime(startTime);
@@ -170,7 +139,6 @@ export default function ClientLearn() {
     }
   }
 
-  //TODO: when user is in a lesson, if they switch activeLesson on the sidebar, end the current lesson as incomplete
   function endLesson() {
     void (async ()=>{
       try {
@@ -190,6 +158,10 @@ export default function ClientLearn() {
     })();
 
     if (activeLesson) setFinishedLessons(new Set([...finishedLessons, activeLesson]));
+    resetLesson();
+  }
+
+  function resetLesson() {
     setStartTime(null);
     setLessonText("");
     setUserInput("");
@@ -218,20 +190,7 @@ export default function ClientLearn() {
       </div>
 
       <div className="flex overflow-y-hidden">
-        {/* lessons sidebar */}
-        <div className="flex flex-col overflow-y-hidden">
-          <h1>Lessons</h1>
-          <div className="flex flex-col border-solid border-r-2 rounded border-white p-2 overflow-y-scroll">
-            <h4><strong>Letters</strong></h4>
-            {displaySidebarCharsByType("letters")}
-            <h4><strong>Capitals</strong></h4>
-            {displaySidebarCharsByType("capitals")}
-            <h4><strong>Numbers</strong></h4>
-            {displaySidebarCharsByType("numbers")}
-            <h4><strong>Symbols</strong></h4>
-            {displaySidebarCharsByType("symbols")}
-          </div>
-        </div>
+        <SidebarComponent lessons={lessons} activeLesson={activeLesson} setActiveLesson={setActiveLesson} finishedLessons={finishedLessons} resetLesson={resetLesson} />
         
         {/* center area */}
         <div className="m-4">
