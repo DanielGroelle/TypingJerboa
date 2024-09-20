@@ -106,10 +106,24 @@ export async function middleware(request: NextRequest) {
           })).json();
         }
         catch(e: unknown) {
-          console.error("remove sessionToken", e);
+          console.error("remove sessionToken from races error", e);
         }
 
-        //TODO: also move lessons to be associated with user
+        //change lessons set under a session to be associated with a user
+        try {
+          await (await fetch(new URL("/api/user/lessons", process.env.BASE_URL), {
+            method: "POST",
+            body: JSON.stringify({
+              loginToken: loginToken,
+              sessionToken: sessionToken
+            }),
+            mode: "cors",
+            cache: "default"
+          })).json();
+        }
+        catch(e: unknown) {
+          console.error("remove sessionToken from lessons error", e);
+        }
 
         return response;
       }

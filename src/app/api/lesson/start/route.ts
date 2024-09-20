@@ -40,41 +40,48 @@ export async function POST(req: NextRequest) {
 
   const user = await findUserFromLoginToken(loginToken);
 
-  // find all the lessons user has done and add the characters from those lessons to the learnedChars array
-  let learnedChars = [] as string[];
-  const finishedLessons = await findUniqueFinishedLessons({userId: user?.id, sessionToken: sessionToken});
-  if (finishedLessons) learnedChars = finishedLessons.reduce((accumulator, lesson)=>{
-    return accumulator.concat([...lesson.lessonCharacters.split("")])
-  }, [] as string[]);
+  let words = [] as string[]; //words to be used for the lesson text
 
-  const fetchedWords = await prisma.word.findMany({
-    select: {
-      word: true
-    },
-    where: {
-      languageScriptId: languageScriptId.id
-    }
-  });
+  //only fetch words to use in lesson text if the mode selected is word exercise
+  if (request.mode === "word-exercise") {
+    let learnedChars = [] as string[];
 
-  //filter the fetched words to only include words that contain a character from the activeLesson, and the rest from previous completed lessons
-  const activeCharset = new Set([...request.activeLesson]);
-  const completeCharset = new Set([...learnedChars, ...request.activeLesson]);
-  const filteredWords = fetchedWords.map((wordObj)=>wordObj.word).filter((word)=>{
-    const wordChars = [...word];
-    return wordChars.some(char => activeCharset.has(char)) && wordChars.every(char => completeCharset.has(char));
-  });
+    // find all the lessons user has done and add the characters from those lessons to the learnedChars array
+    const finishedLessons = await findUniqueFinishedLessons({userId: user?.id, sessionToken: sessionToken});
+    if (finishedLessons) learnedChars = finishedLessons.reduce((accumulator, lesson)=>{
+      return accumulator.concat([...lesson.lessonCharacters.split("")])
+    }, [] as string[]);
 
-  //if the filtered words is less than minWords, generate new "words" with random characters
-  const minWords = 10;
-  const minimumLength = 3;
-  const lengthRange = 3;
-  while (filteredWords.length < minWords) {
-    const length = Math.floor((Math.random() * lengthRange) + minimumLength);
-    filteredWords.push(generateRandomWord(request.activeLesson, length));
+    const fetchedWords = await prisma.word.findMany({
+      select: {
+        word: true
+      },
+      where: {
+        languageScriptId: languageScriptId.id
+      }
+    });
+  
+    //filter the fetched words to only include words that contain a character from the activeLesson, and the rest from previous completed lessons
+    const activeCharset = new Set([...request.activeLesson]);
+    const completeCharset = new Set([...learnedChars, ...request.activeLesson]);
+    words = fetchedWords.map((wordObj)=>wordObj.word).filter((word)=>{
+      const wordChars = [...word];
+      return wordChars.some(char => activeCharset.has(char)) && wordChars.every(char => completeCharset.has(char));
+    });
   }
 
-  shuffle(filteredWords);
-  const lessonText = filteredWords.slice(0, minWords).join(" ");
+  //if the words array is less than minWords, generate new "words" with random characters
+  const minWords = 15;
+  const minimumLength = 3;
+  const lengthRange = 3;
+  while (words.length < minWords) {
+    const length = Math.floor((Math.random() * lengthRange) + minimumLength);
+    words.push(generateRandomWord(request.activeLesson, length));
+  }
+
+  shuffle(words);
+  //limit the words to minWords and join them into a one string
+  const lessonText = words.slice(0, minWords).join(" ");
 
   const createResult = await prisma.lesson.create({
     select: {

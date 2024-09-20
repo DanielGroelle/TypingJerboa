@@ -49,14 +49,14 @@ export const ManualKeyboardMap: {[key: string]: ManualKeyboardMapping} = {
     letters: {
       homerow: [["в", "а", "о", "л"], ["ф", "ы"], ["д", "ж", "э"], ["п", "р"]],
       upperrow: [["у", "к"], ["г", "ш"], ["й", "ц"], ["щ", "з"], ["е", "н"], ["х", "ъ"]],
-      lowerrow: [["с", "м"], ["ь", "б", "ю"], ["я", "ч"], ["и", "т"]],
-      symbolrow: [["ё"]]
+      lowerrow: [["с", "м"], ["ь", "б", "ю"], ["я", "ч"], ["и", "т", "ё"]], //despite ё technically being on symbolrow, having it be by itself isnt good for a lesson
+      symbolrow: []
     },
     capitals: {
       homerow: [["В", "А", "О", "Л"], ["Ф", "Ы"], ["Д", "Ж", "Э"], ["П", "Р"]],
       upperrow: [["У", "К"], ["Г", "Ш"], ["Й", "Ц"], ["Щ", "З"], ["Е", "Н"], ["Х", "Ъ"]],
-      lowerrow: [["С", "М"], ["Ь", "Б", "Ю"], ["Я", "Ч"], ["И", "Т"]],
-      symbolrow: [["Ё"]]
+      lowerrow: [["С", "М"], ["Ь", "Б", "Ю"], ["Я", "Ч"], ["И", "Т", "Ё"]],
+      symbolrow: []
     },
     numbers: {
       homerow: [],

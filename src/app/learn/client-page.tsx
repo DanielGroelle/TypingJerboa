@@ -20,7 +20,7 @@ export default function ClientLearn() {
   const [lessonId, setLessonId] = useState<string | null>(null);
 
   //TODO: have the languageScript encoded in the url as a parameter ?ls=cyrillic-russian
-  //TODO: make new characters and word exercise produce different lessons. also probably show different checkmark for each
+  //TODO: make new characters and word exercise show different checkmarks
 
   const Z_FINISHED_LESSONS_RESPONSE = z.object({
     finishedLessons: z.array(
@@ -112,7 +112,7 @@ export default function ClientLearn() {
 
     let response;
     try {
-      //fetch startTime and lessonText
+      //fetch startTime, lessonText, and lessonId
       response = Z_RESPONSE.parse(await (await fetch(`/api/lesson/start`, {
         method: "POST",
         body: JSON.stringify({
@@ -124,7 +124,7 @@ export default function ClientLearn() {
         cache: "default"
       })).json());
       
-      //if no lesson was found set the error message
+      //if no lesson was returned set the error message
       if (response.lessonId === null || response.lessonText === null || response.startTime === null) {
         setError("No lesson for that language script found");
       }
@@ -217,7 +217,7 @@ export default function ClientLearn() {
             ""
           }
 
-          <div className="border-solid border-white border select-none" onContextMenu={handleParagraphContextMenu}>
+          <div className="border-solid border-white border select-none font-mono text-lg" onContextMenu={handleParagraphContextMenu}>
             {[...lessonText].map((character, i)=>{
               return <span className={charStatus(userInput, i)} key={i}>{character}</span>
             })}
@@ -227,7 +227,8 @@ export default function ClientLearn() {
                 return <span className="incorrect" key={i}>&nbsp;</span>
             })}
           </div>
-          <textarea id="main-text-input" className="text-black resize-none min-w-full" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+
+          <textarea id="main-text-input" className="text-black resize-none min-w-full font-mono text-lg" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
         </div>
       </div>
     </div>
