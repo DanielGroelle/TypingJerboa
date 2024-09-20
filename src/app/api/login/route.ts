@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   const createdLogin = await prisma.user.update({
     data: {
       loginToken: loginToken,
-      loginExpiry: new Date(Date.now() + dayMs)
+      loginExpiry: new Date(Date.now() + (7 * dayMs))
     },
     where: {id: returnedUser.id}
   });

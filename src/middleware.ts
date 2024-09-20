@@ -40,8 +40,38 @@ export async function middleware(request: NextRequest) {
   const sessionToken = request.cookies.get("sessionToken")?.value;
 
   if (path.startsWith("/api/")) {
+    if (path.startsWith("/api/admin") && path !== "/api/admin/user/is-admin") {
+      //no loginToken so cant be authorized
+      if (!loginToken) {
+        return NextResponse.json({error: "Not authorized for this action"}, {status: 403});
+      }
+
+      let response;
+        try {
+          //must be an api fetch because PrismaClient cant run in vercel edge functions
+          response = Z_ADMIN_RESPONSE.parse(await (await fetch(new URL("/api/admin/user/is-admin", process.env.BASE_URL), {
+            method: "POST",
+            body: JSON.stringify({
+              loginToken: loginToken
+            }),
+            mode: "cors",
+            cache: "default"
+          })).json());
+        }
+        catch(e: unknown) {
+          console.log("admin api error", e)
+          return NextResponse.json({error: "Unknown api error"}, {status: 400});
+        }
+  
+        if (!response.isAdmin) {
+          return NextResponse.json({error: "Not authorized for this action"}, {status: 403});
+        }
+        return NextResponse.next();
+    }
+
     return NextResponse.next();
   }
+  //non api paths
   else {
     //validate that the loginToken is still alive
     if (loginToken) {
@@ -155,6 +185,7 @@ export async function middleware(request: NextRequest) {
       })).json());
     }
     catch(e: unknown) {
+      console.log("admin e error", e)
       return NextResponse.redirect(new URL("/", request.url));
     }
 
