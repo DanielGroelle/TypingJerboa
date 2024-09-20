@@ -2,6 +2,8 @@
 
 # Building
 
+Docker is required to be installed in order for building to succeed.
+
 Dev: ``npm run dev:up``
 
 Prod: ``npm run prod:up``
@@ -14,10 +16,10 @@ TypingJerboa is a website built for the purpose of teaching others how to type i
 
 TypingJerboa is built primarily with NextJS with TypeScript and runs in a Docker container.
 
-There are two main modes offered in TypingJerboa: Learn, and Race.
+There are two main modes offered in TypingJerboa: **Learn**, and **Race**.
 
-The Learn section focuses on teaching a user where the characters for the selected language are located on the keyboard over many practice levels. These build on each other so that by the end, they'll have the muscle memory to type just about anything in the selected language.
+The Learn section focuses on teaching a user where the characters for the selected language are located on the keyboard over many practice lessons. These lessons build on each other so that by the end, users will have the muscle memory to type just about anything in the selected language.
 
 The Race section puts a users current typing ability to the test by requiring them to type out an entire paragraph in the selected language as quickly as possible. The words per minute and mistakes are displayed at the end of the race.
 
-The features offered by this website do exist elsewhere, but only separately. It was the goal of this project to unify these into one place where someone can focus on improving their typing ability in an unfamiliar language.
+If you&apos;d like to keep track of your progress, it is possible and encouraged to register a completely free account, with no email necessary.
