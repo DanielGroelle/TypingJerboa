@@ -161,7 +161,7 @@ export default function ClientAdminParagraphs() {
         handleFiltering([...paragraphs], true);
       }
       catch(e: unknown) {
-        throw "Delete failed";
+        throw "Edit failed";
       }
     })();
     

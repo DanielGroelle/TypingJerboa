@@ -7,6 +7,14 @@ export default function Admin() {
       <br/>
       <div className="pb-4">
         <div className="text-2xl">
+          <Link href="/admin/news">News</Link>
+        </div>
+        <div>
+          News view
+        </div>
+      </div>
+      <div className="pb-4">
+        <div className="text-2xl">
           <Link href="/admin/users">Users</Link>
         </div>
         <div>
