@@ -142,7 +142,7 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
             return <span className="incorrect" key={i}>&nbsp;</span>
         })}
       </div>
-      <textarea id="main-text-input" className="text-black resize-none min-w-full" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+      <textarea id="main-text-input" className="text-black resize-none min-w-full p-1" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
     </div>
   );
 }

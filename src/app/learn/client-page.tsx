@@ -184,6 +184,7 @@ export default function ClientLearn() {
       <div className="flex justify-end">
         Language Script:
         <select name="script-select" id="script-select" onChange={handleScriptChange} defaultValue={languageScript}>
+          {/*TODO: automatically generate this from languageScripts object*/}
           <option value={LanguageScripts.CYRILLIC_RUSSIAN}>Cyrillic (Russian)</option>
           <option value={LanguageScripts.LATIN_ENGLISH}>Latin (English)</option>
         </select>
@@ -201,6 +202,7 @@ export default function ClientLearn() {
             <input type="button" className="border-solid border-white border rounded-lg p-2 mr-2" onClick={()=>{
               setActiveMode("new-characters");
             }} style={{backgroundColor: (activeMode === "new-characters") ? "rgb(39 39 42)" : ""}} value="New Characters" />
+            {/*TODO: lock word exercise until enough letter new character lessons have been completed, especially for numbers and symbols*/}
             <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
               setActiveMode("word-exercise");
             }} style={{backgroundColor: (activeMode === "word-exercise") ? "rgb(39 39 42)" : ""}} value="Word Exercise" />
@@ -222,13 +224,13 @@ export default function ClientLearn() {
               return <span className={charStatus(userInput, i)} key={i}>{character}</span>
             })}
 
-            {//for inputed characters that exceed paragraph length
+            {//for inputed characters that exceed lessonText length
             [...userInput.slice(lessonText.length)].map((_, i)=>{
                 return <span className="incorrect" key={i}>&nbsp;</span>
             })}
           </div>
 
-          <textarea id="main-text-input" className="text-black resize-none min-w-full font-mono text-lg" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+          <textarea id="main-text-input" className="text-black resize-none min-w-full font-mono text-lg p-1" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
         </div>
       </div>
     </div>

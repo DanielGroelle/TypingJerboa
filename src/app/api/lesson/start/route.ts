@@ -46,6 +46,8 @@ export async function POST(req: NextRequest) {
   if (request.mode === "word-exercise") {
     let learnedChars = [] as string[];
 
+    //TODO: if the activeLesson is on numbers or symbols, pull any words with letters available and place numbers and symbols before and after words
+
     // find all the lessons user has done and add the characters from those lessons to the learnedChars array
     const finishedLessons = await findUniqueFinishedLessons({userId: user?.id, sessionToken: sessionToken});
     if (finishedLessons) learnedChars = finishedLessons.reduce((accumulator, lesson)=>{
@@ -61,6 +63,10 @@ export async function POST(req: NextRequest) {
       }
     });
   
+    /*
+      TODO: make sure an equal proportion of words including each activeLesson letter is used
+      for example, if the letters are q and w, make sure there is an equal share of words using q and words using w
+    */
     //filter the fetched words to only include words that contain a character from the activeLesson, and the rest from previous completed lessons
     const activeCharset = new Set([...request.activeLesson]);
     const completeCharset = new Set([...learnedChars, ...request.activeLesson]);
@@ -70,6 +76,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  //TODO: repeat some words if not long enough
   //if the words array is less than minWords, generate new "words" with random characters
   const minWords = 15;
   const minimumLength = 3;
