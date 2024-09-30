@@ -6,7 +6,7 @@ import { z } from "zod";
 import SidebarComponent from "./SidebarComponent";
 
 export default function ClientLearn() {
-  const [languageScript, setLanguageScript] = useState<string>(LanguageScripts.LATIN_ENGLISH);
+  const [languageScript, setLanguageScript] = useState<string>(LanguageScripts["latin-english"].internal);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [lessonText, setLessonText] = useState("");
   const [userInput, setUserInput] = useState("");
@@ -184,9 +184,10 @@ export default function ClientLearn() {
       <div className="flex justify-end">
         Language Script:
         <select name="script-select" id="script-select" onChange={handleScriptChange} defaultValue={languageScript}>
-          {/*TODO: automatically generate this from languageScripts object*/}
-          <option value={LanguageScripts.CYRILLIC_RUSSIAN}>Cyrillic (Russian)</option>
-          <option value={LanguageScripts.LATIN_ENGLISH}>Latin (English)</option>
+          Language Script
+          {Object.values(LanguageScripts).map(({internal, display})=>(
+            <option key={internal} value={internal}>{display}</option>
+          ))}
         </select>
       </div>
 

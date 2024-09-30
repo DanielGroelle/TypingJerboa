@@ -1,6 +1,12 @@
 export const LanguageScripts = {
-  CYRILLIC_RUSSIAN: "cyrillic-russian",
-  LATIN_ENGLISH: "latin-english"
+  "cyrillic-russian": {
+    internal: "cyrillic-russian",
+    display: "Cyrillic (Russian)"
+  },
+  "latin-english": {
+    internal: "latin-english",
+    display: "Latin (English)"
+  }
 } as const;
 
 //these are ordered in this way so then characters on homerow are always learned first, then upperrow, etc.
@@ -19,7 +25,7 @@ export type ManualKeyboardMapping = {
 };
 
 export const ManualKeyboardMap: {[key: string]: ManualKeyboardMapping} = {
-  [LanguageScripts.LATIN_ENGLISH]: {
+  [LanguageScripts["latin-english"].internal]: {
     letters: {
       homerow: [["d", "f", "j", "k"], ["a", "s", "l"], ["g", "h"]],
       upperrow: [["e", "r"], ["u", "i"], ["q", "w"], ["o", "p"], ["t", "y"]],
@@ -45,7 +51,7 @@ export const ManualKeyboardMap: {[key: string]: ManualKeyboardMapping} = {
       symbolrow: [["!", "@", "#"], ["$", "%", "^"], ["&", "*", "(", ")"], ["-", "="], ["_", "+"], ["`", "~"]]
     }
   },
-  [LanguageScripts.CYRILLIC_RUSSIAN]: {
+  [LanguageScripts["cyrillic-russian"].internal]: {
     letters: {
       homerow: [["в", "а", "о", "л"], ["ф", "ы"], ["д", "ж", "э"], ["п", "р"]],
       upperrow: [["у", "к"], ["г", "ш"], ["й", "ц"], ["щ", "з"], ["е", "н"], ["х", "ъ"]],

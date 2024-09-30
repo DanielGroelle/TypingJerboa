@@ -33,7 +33,7 @@ async function getStats(languageScript: string) {
 }
 
 export default function ClientStats() {
-  const [languageScript, setLanguageScript] = useState<string>(LanguageScripts.LATIN_ENGLISH);
+  const [languageScript, setLanguageScript] = useState<string>(LanguageScripts["latin-english"].internal);
   const [stats, setStats] = useState<z.infer<typeof Z_RESPONSE> | null>(null);
   const [showParagraph, setShowParagraph] = useState(false);
 
@@ -54,9 +54,9 @@ export default function ClientStats() {
       <div className="flex justify-end">
         <p>Language Script:</p>
         <select name="script-select" id="script-select" onChange={handleScriptChange} defaultValue={languageScript}>
-          {/*TODO: automatically generate this from languageScripts object*/}
-          <option value={LanguageScripts.CYRILLIC_RUSSIAN}>Cyrillic (Russian)</option>
-          <option value={LanguageScripts.LATIN_ENGLISH}>Latin (English)</option>
+          {Object.values(LanguageScripts).map(({internal, display})=>(
+            <option key={internal} value={internal}>{display}</option>
+          ))}
           <option value="all">All Scripts</option>
         </select>
       </div>

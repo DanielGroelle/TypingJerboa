@@ -65,9 +65,9 @@ export default function ScriptSelectionComponent({setRaceInfo}: { setRaceInfo: (
       Select the script you&apos;d like to use
       <div className="flex">
         <select name="script" id="script">
-          {/*TODO: automatically generate this from languageScripts object*/}
-          <option value={LanguageScripts.CYRILLIC_RUSSIAN}>Cyrillic (Russian)</option>
-          <option value={LanguageScripts.LATIN_ENGLISH}>Latin (English)</option>
+          {Object.values(LanguageScripts).map(({internal, display})=>(
+            <option key={internal} value={internal}>{display}</option>
+          ))}
         </select>
         <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={() => {
           void (async ()=>await startRace(setRaceInfo, setError))();
