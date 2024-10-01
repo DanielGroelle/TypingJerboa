@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
   const user = await findUserFromLoginToken(loginToken);
 
-  let words = [] as string[]; //words to be used for the lesson text
+  const wordsByLetter: {[activeChar: string]: string[]} = {}; //words grouped by letter in the active lesson
 
   //only fetch words to use in lesson text if the mode selected is word exercise
   if (request.mode === "word-exercise") {
@@ -62,33 +62,37 @@ export async function POST(req: NextRequest) {
         languageScriptId: languageScriptId.id
       }
     });
-  
-    /*
-      TODO: make sure an equal proportion of words including each activeLesson letter is used
-      for example, if the letters are q and w, make sure there is an equal share of words using q and words using w
-    */
+
     //filter the fetched words to only include words that contain a character from the activeLesson, and the rest from previous completed lessons
-    const activeCharset = new Set([...request.activeLesson]);
     const completeCharset = new Set([...learnedChars, ...request.activeLesson]);
-    words = fetchedWords.map((wordObj)=>wordObj.word).filter((word)=>{
-      const wordChars = [...word];
-      return wordChars.some(char => activeCharset.has(char)) && wordChars.every(char => completeCharset.has(char));
-    });
+    for (const activeChar of request.activeLesson) {
+      wordsByLetter[activeChar] = fetchedWords.map((wordObj)=>wordObj.word).filter((word)=>{
+        const wordChars = [...word];
+        return wordChars.some(char => activeChar === char) && wordChars.every(char => completeCharset.has(char));
+      });
+    }
   }
 
-  //TODO: repeat some words if not long enough
-  //if the words array is less than minWords, generate new "words" with random characters
-  const minWords = 15;
+  const wordLimit = 15;
   const minimumLength = 3;
   const lengthRange = 3;
-  while (words.length < minWords) {
-    const length = Math.floor((Math.random() * lengthRange) + minimumLength);
-    words.push(generateRandomWord(request.activeLesson, length));
+  const wordsPerLetter = Math.ceil(wordLimit / request.activeLesson.length);
+  for (const [activeChar, letterWords] of Object.entries(wordsByLetter)) {
+    //TODO: repeat some words if not long enough
+    //if the words array is less than wordLimit, generate new "words" with random characters
+    while (letterWords.length < wordsPerLetter) {
+      const length = Math.floor((Math.random() * lengthRange) + minimumLength);
+      letterWords.push(generateRandomWord(request.activeLesson, length));
+    }
+    shuffle(letterWords);
+    wordsByLetter[activeChar] = letterWords.slice(0, wordsPerLetter);
   }
 
+  const words = Object.values(wordsByLetter).flatMap(letterWord => letterWord);
+
   shuffle(words);
-  //limit the words to minWords and join them into a one string
-  const lessonText = words.slice(0, minWords).join(" ");
+  //limit the words to wordLimit and join them into a one string
+  const lessonText = words.slice(0, wordLimit).join(" ");
 
   const createResult = await prisma.lesson.create({
     select: {
