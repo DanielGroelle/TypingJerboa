@@ -183,7 +183,7 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
           <option value="all">all</option>
           {
             Object.values(LanguageScripts).map((languageScript)=>{
-              return <option key={languageScript} value={languageScript}>{languageScript}</option>
+              return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.display}</option>
             })
           }
         </select>
@@ -208,7 +208,7 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
         languageScript: 
         <select id="language-script-csv-select">
         {Object.values(LanguageScripts).map((languageScript)=>{
-          return <option key={languageScript} defaultValue={languageScript}>{languageScript}</option>
+          return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.display}</option>
         })}
         </select>
         <br/><br/>
@@ -233,7 +233,7 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
                 languageScript:<select id="language-script-edit-select">
                   {
                     Object.values(LanguageScripts).map((languageScript)=>{
-                      return <option key={languageScript} defaultValue={languageScript}>{languageScript}</option>
+                      return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.display}</option>
                     })
                   }
                 </select><br/>

@@ -301,7 +301,7 @@ export default function ClientAdminParagraphs() {
                 languageScript:<select id="language-script-edit-select" defaultValue={paragraph.languageScript.languageScript}>
                   {
                     Object.values(LanguageScripts).map((languageScript)=>{
-                      return <option key={languageScript} defaultValue={languageScript}>{languageScript}</option>
+                      return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.display}</option>
                     })
                   }
                 </select><br/>
