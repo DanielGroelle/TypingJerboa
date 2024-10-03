@@ -49,6 +49,14 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
     handleFiltering();
   }
 
+  function handleExact() {
+    const exactSelect = document.querySelector("#exact-input");
+    if(!(exactSelect instanceof HTMLInputElement)) {
+      throw "ExactSelect not an instance of HTMLInputElement";
+    }
+    handleFiltering();
+  }
+
   function handleAdd(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -183,7 +191,7 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
           <option value="all">all</option>
           {
             Object.values(LanguageScripts).map((languageScript)=>{
-              return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.display}</option>
+              return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.internal}</option>
             })
           }
         </select>
@@ -198,6 +206,9 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
           <option>source</option>
         </select>
 
+        <input type="checkbox" id="exact-input" onChange={handleExact}/>
+        <label className="ml-1" htmlFor="exact-input">Exact</label>
+
         <input type="button" className="border-solid border-red-700 border rounded-lg p-2 ml-2" onClick={handleDeleteAllFiltered} value="Delete all filtered" />
 
         <br/>
@@ -208,7 +219,7 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
         languageScript: 
         <select id="language-script-csv-select">
         {Object.values(LanguageScripts).map((languageScript)=>{
-          return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.display}</option>
+          return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.internal}</option>
         })}
         </select>
         <br/><br/>
@@ -233,7 +244,7 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
                 languageScript:<select id="language-script-edit-select">
                   {
                     Object.values(LanguageScripts).map((languageScript)=>{
-                      return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.display}</option>
+                      return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.internal}</option>
                     })
                   }
                 </select><br/>

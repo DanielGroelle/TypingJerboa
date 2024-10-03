@@ -180,13 +180,15 @@ export default function ClientAdminParagraphs() {
     const languageScriptSelector = document.querySelector("#language-script-select");
     const searchSelector = document.querySelector("#paragraph-search");
     const searchInSelector = document.querySelector("#filter-select");
+    const exactSelector = document.querySelector("#exact-input");
     if (!(sortSelector instanceof HTMLSelectElement) ||
         !(sortBySelector instanceof HTMLSelectElement) ||
         !(languageScriptSelector instanceof HTMLSelectElement) ||
         !(searchSelector instanceof HTMLInputElement) ||
-        !(searchInSelector instanceof HTMLSelectElement)
+        !(searchInSelector instanceof HTMLSelectElement) ||
+        !(exactSelector instanceof HTMLInputElement)
     ) {
-      throw "Selected elements [sortSelector, sortBySelector, languageScriptSelector, searchSelector, searchInSelector] were of unexpected type";
+      throw "Selected elements [sortSelector, sortBySelector, languageScriptSelector, searchSelector, searchInSelector, exactSelector] were of unexpected type";
     }
 
     const sort = sortSelector.value;
@@ -195,6 +197,7 @@ export default function ClientAdminParagraphs() {
     const languageScript = languageScriptSelector.value;
     const search = searchSelector.value.toLowerCase();
     const searchIn = searchInSelector.value;
+    const exact = exactSelector.checked;
 
     let filteringParagraphs = paragraphs;
     if (passedParagraphs) {
@@ -211,16 +214,16 @@ export default function ClientAdminParagraphs() {
 
       let filtered = false;
       if (searchIn === "id" || searchIn === "any") {
-        filtered ||= paragraph.id.toString() === search || paragraph.id.toString().includes(search);
+        filtered ||= (paragraph.id.toString() === search) || (exact ? false : paragraph.id.toString().includes(search));
       }
       if (searchIn === "text" || searchIn === "any") {
-        filtered ||= paragraph.text.toLowerCase().includes(search);
+        filtered ||= (paragraph.text === search) || (exact ? false : paragraph.text.toLowerCase().includes(search));
       }
       if (searchIn === "author" || searchIn === "any") {
-        filtered ||= paragraph.author.toLowerCase().includes(search);
+        filtered ||= (paragraph.author === search) || (exact ? false : paragraph.author.toLowerCase().includes(search));
       }
       if (searchIn === "source" || searchIn === "any") {
-        filtered ||= paragraph.source.toLowerCase().includes(search);
+        filtered ||= (paragraph.source === search) || (exact ? false : paragraph.source.toLowerCase().includes(search));
       }
       return filtered;
     });
@@ -267,6 +270,7 @@ export default function ClientAdminParagraphs() {
   return (
     <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       <FilterOptionsComponent paragraphs={paragraphs} setParagraphs={setParagraphs} handleFiltering={handleFiltering} handleDeleteAllFiltered={handleDeleteAllFiltered}/>
+      
       <div className="flex justify-between">
         <h1>Paragraphs</h1>
         <div className="flex mr-10">
@@ -301,7 +305,7 @@ export default function ClientAdminParagraphs() {
                 languageScript:<select id="language-script-edit-select" defaultValue={paragraph.languageScript.languageScript}>
                   {
                     Object.values(LanguageScripts).map((languageScript)=>{
-                      return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.display}</option>
+                      return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.internal}</option>
                     })
                   }
                 </select><br/>
