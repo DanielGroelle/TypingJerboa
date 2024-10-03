@@ -46,13 +46,15 @@ export async function POST(req: NextRequest) {
   if (request.mode === "word-exercise") {
     let learnedChars = [] as string[];
 
-    //TODO: if the activeLesson is on numbers or symbols, pull any words with letters available and place numbers and symbols before and after words
+    //TODO: if the activeLesson is on numbers, intersperse generated numbers between words
 
     // find all the lessons user has done and add the characters from those lessons to the learnedChars array
     const finishedLessons = await findUniqueFinishedLessons({userId: user?.id, sessionToken: sessionToken});
-    if (finishedLessons) learnedChars = finishedLessons.reduce((accumulator, lesson)=>{
-      return accumulator.concat([...lesson.lessonCharacters.split("")])
-    }, [] as string[]);
+    if (finishedLessons) {
+      learnedChars = finishedLessons.reduce((accumulator, lesson)=>{
+        return accumulator.concat([...lesson.lessonCharacters.split("")]);
+      }, [] as string[]);
+    }
 
     const fetchedWords = await prisma.word.findMany({
       select: {
@@ -63,13 +65,32 @@ export async function POST(req: NextRequest) {
       }
     });
 
+    //regex to check if the character is a letter in unicode
+    const letterRegex = /\p{L}/gu;
+    const nonLetterActiveChars = request.activeLesson.filter(activeChar => !letterRegex.test(activeChar));
+
     //filter the fetched words to only include words that contain a character from the activeLesson, and the rest from previous completed lessons
     const completeCharset = new Set([...learnedChars, ...request.activeLesson]);
     for (const activeChar of request.activeLesson) {
-      wordsByLetter[activeChar] = fetchedWords.map((wordObj)=>wordObj.word).filter((word)=>{
-        const wordChars = [...word];
-        return wordChars.some(char => activeChar === char) && wordChars.every(char => completeCharset.has(char));
-      });
+      //if the char is a letter, make sure its present in the word
+      if (letterRegex.test(activeChar)) {
+        wordsByLetter[activeChar] = fetchedWords.map(wordObj => wordObj.word).filter(word => {
+          const wordChars = [...word];
+          return wordChars.some(char => activeChar === char) && wordChars.every(char => completeCharset.has(char));
+        });
+      }
+      //place random non letters around valid words
+      else {
+        const chanceForEmpty = .5;
+        wordsByLetter[activeChar] = fetchedWords.map(wordObj => {
+          const randomPrefix = Math.random() > chanceForEmpty ? nonLetterActiveChars[Math.floor(Math.random() * nonLetterActiveChars.length)] : "";
+          const randomSuffix = Math.random() > chanceForEmpty ? nonLetterActiveChars[Math.floor(Math.random() * nonLetterActiveChars.length)] : "";
+          return `${randomPrefix}${wordObj.word}${randomSuffix}`;
+        }).filter(word => {
+          const wordChars = [...word];
+          return wordChars.some(char => activeChar === char) && wordChars.every(char => completeCharset.has(char));
+        });
+      }
     }
   }
 
