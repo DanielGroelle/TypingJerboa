@@ -29,13 +29,13 @@ export const ManualKeyboardMap: {[key: string]: ManualKeyboardMapping} = {
     letters: {
       homerow: [["d", "f", "j", "k"], ["a", "s", "l"], ["g", "h"]],
       upperrow: [["e", "r"], ["u", "i"], ["q", "w"], ["o", "p"], ["t", "y"]],
-      lowerrow: [["c", "v"], ["m"], ["z", "x"], ["b", "n"]],
+      lowerrow: [["c", "v"], ["z", "x"], ["b", "n", "m"]],
       symbolrow: []
     },
     capitals: {
       homerow: [["D", "F", "J", "K"], ["A", "S", "L"], ["G", "H"]],
       upperrow: [["E", "R"], ["U", "I"], ["Q", "W"], ["O", "P"], ["T", "Y"]],
-      lowerrow: [["C", "V"], ["M"], ["Z", "X"], ["B", "N"]],
+      lowerrow: [["C", "V"], ["Z", "X"], ["B", "N", "M"]],
       symbolrow: []
     },
     numbers: {

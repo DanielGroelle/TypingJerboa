@@ -231,7 +231,7 @@ export default function ClientLearn() {
             })}
           </div>
 
-          <textarea id="main-text-input" className="text-black resize-none min-w-full font-mono text-lg p-1" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+          <textarea id="main-text-input" className="text-black resize-none font-mono min-w-full text-lg p-1" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
         </div>
       </div>
     </div>

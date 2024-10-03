@@ -14,7 +14,7 @@ const Z_REQUEST = z.object({
 export async function POST(req: NextRequest) {
   const tryRequest = Z_REQUEST.safeParse(await req.json());
   if (!tryRequest.success) {
-    console.log(tryRequest.error)
+    console.log(tryRequest.error);
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
   const request = tryRequest.data;

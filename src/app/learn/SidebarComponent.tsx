@@ -40,7 +40,7 @@ export default function SidebarComponent({lessons, activeLesson, setActiveLesson
   }
 
   return (
-    <div className="flex flex-col overflow-y-hidden">
+    <div className="flex flex-col overflow-y-hidden min-w-fit">
       <h1>Lessons</h1>
       <div className="flex flex-col border-solid border-r-2 rounded border-white p-2 overflow-y-scroll">
         <h4><strong>Letters</strong></h4>

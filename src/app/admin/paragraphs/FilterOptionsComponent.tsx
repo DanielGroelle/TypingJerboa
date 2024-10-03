@@ -9,6 +9,8 @@ export default function FilterOptionsComponent({paragraphs, setParagraphs, handl
 }) {
   const [adding, setAdding] = useState(false);
 
+  //TODO: make FilterOptionsComponent a generic component that can be dropped into any page that needs it
+
   function handleSort() {
     const sortSelect = document.querySelector("#sort-select");
     if(!(sortSelect instanceof HTMLSelectElement)) {

@@ -38,17 +38,29 @@ export async function insertToWordTable(words: string[], languageScriptId: numbe
   return wordInsertCount;
 }
 
-export function generateRandomWord(charset: string[], length: number) {
+export function generateRandomWord(chars: string[], activeChar: string, length: number) {
+  const charSet = new Set([...chars]);
+
   let word = "";
-  for (let i = 0; i < length; i++) {
-    const char = charset[Math.floor(Math.random() * charset.length)];
-    //make sure the same character isnt chosen more than maxRepeats
-    if (char === word[word.length - 1] && char === word[word.length - 2]) {
-      i--;
-      continue;
+  let validWord = false;
+  //generate words until word includes activeChar
+  while (!validWord) {
+    //set word to empty on each loop
+    word = "";
+    for (let i = 0; i < length; i++) {
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      //make sure the same character isnt chosen more than maxRepeats
+      if (char === word[word.length - 1] && char === word[word.length - 2]) {
+        i--;
+        continue;
+      }
+  
+      word += char;
     }
 
-    word += char;
+    const wordChars = [...word];
+    //check the word contains the active char
+    validWord = wordChars.some(char => activeChar === char);
   }
   return word;
 }
