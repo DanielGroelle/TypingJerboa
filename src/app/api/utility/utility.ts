@@ -39,8 +39,6 @@ export async function insertToWordTable(words: string[], languageScriptId: numbe
 }
 
 export function generateRandomWord(chars: string[], activeChar: string, length: number) {
-  const charSet = new Set([...chars]);
-
   let word = "";
   let validWord = false;
   //generate words until word includes activeChar

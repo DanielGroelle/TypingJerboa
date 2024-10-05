@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { findUserFromLoginToken } from "../../admin/user/route";
-import { findUniqueFinishedLessons, generateRandomWord, shuffle } from "../../utility/utility";
+import { findUniqueFinishedLessons, generateRandomWord, getLanguageScriptId, shuffle } from "../../utility/utility";
 
 function generateWordExerciseLessonText(
   activeLesson: string[],
@@ -14,36 +14,39 @@ function generateWordExerciseLessonText(
 ) {
   //find any symbols in the activeLesson
   const symbolActiveChars = activeLesson.filter(activeChar => !(letterRegex.test(activeChar) || numberRegex.test(activeChar)));
+  const completeCharset = new Set([...learnedChars, ...activeLesson]);
 
   //filter the fetched words to only include words that contain a character from the activeLesson, and the rest from previous completed lessons
-  const completeCharset = new Set([...learnedChars, ...activeLesson]);
   for (const activeChar of activeLesson) {
-    //if the char is a char, make sure its present in the word
     if (letterRegex.test(activeChar)) {
       wordsByChar[activeChar] = fetchedWords.map(wordObj => wordObj.word).filter(word => {
         const wordChars = [...word];
+        //if the activeChar is a letter, make sure the letter is present in the word
         return wordChars.some(char => activeChar === char) && wordChars.every(char => completeCharset.has(char));
       });
+      continue;
     }
-    //get all valid words in the case of numbers
-    else if(numberRegex.test(activeChar)) {
+    
+    //return all valid words when activeChar is a number
+    if(numberRegex.test(activeChar)) {
       wordsByChar[activeChar] = fetchedWords.map(wordObj => wordObj.word).filter(word => {
         const wordChars = [...word];
         return wordChars.every(char => completeCharset.has(char));
       });
+      continue;
     }
-    //place random non chars around valid words
-    else {
-      const chanceForEmpty = .5;
-      wordsByChar[activeChar] = fetchedWords.map(wordObj => {
-        const randomPrefix = Math.random() > chanceForEmpty ? symbolActiveChars[Math.floor(Math.random() * symbolActiveChars.length)] : "";
-        const randomSuffix = Math.random() > chanceForEmpty ? symbolActiveChars[Math.floor(Math.random() * symbolActiveChars.length)] : "";
-        return `${randomPrefix}${wordObj.word}${randomSuffix}`;
-      }).filter(word => {
-        const wordChars = [...word];
-        return wordChars.some(char => activeChar === char) && wordChars.every(char => completeCharset.has(char));
-      });
-    }
+
+    //when activeChar is a symbol, place the symbols randomly around valid words
+    const chanceForEmpty = .5;
+    wordsByChar[activeChar] = fetchedWords.map(wordObj => {
+      //place random prefix and suffixes to valid words
+      const randomPrefix = Math.random() > chanceForEmpty ? symbolActiveChars[Math.floor(Math.random() * symbolActiveChars.length)] : "";
+      const randomSuffix = Math.random() > chanceForEmpty ? symbolActiveChars[Math.floor(Math.random() * symbolActiveChars.length)] : "";
+      return `${randomPrefix}${wordObj.word}${randomSuffix}`;
+    }).filter(word => {
+      const wordChars = [...word];
+      return wordChars.some(char => activeChar === char) && wordChars.every(char => completeCharset.has(char));
+    });
   }
 }
 
@@ -70,19 +73,14 @@ export async function POST(req: NextRequest) {
   }
 
   const startTime = new Date();
-
-  //get languageScriptId from languageScript
-  const languageScriptId = await prisma.languageScript.findFirst({
-    select: {id: true},
-    where: {languageScript: request.languageScript}
-  });
+  const user = await findUserFromLoginToken(loginToken);
+  const languageScriptId = await getLanguageScriptId(request.languageScript)
   if (languageScriptId === null) {
     return NextResponse.json({error: "LanguageScript not found"}, {status: 400});
   }
 
-  const user = await findUserFromLoginToken(loginToken);
-
   const wordsByChar: {[activeChar: string]: string[]} = {}; //words grouped by char in the active lesson
+  //initialize to empty array in case the mode is not word-exercise
   for(const activeChar of request.activeLesson) {
     wordsByChar[activeChar] = [];
   }
@@ -91,11 +89,10 @@ export async function POST(req: NextRequest) {
   const letterRegex = /\p{L}/u;
   const numberRegex = /\p{Nd}/u;
   const numberActiveChars = request.activeLesson.filter(activeChar => numberRegex.test(activeChar));
-
-  //only fetch words to use in lesson text if the mode selected is word-exercise
+  
   if (request.mode === "word-exercise") {
     let learnedChars = [] as string[];
-
+    
     // find all the lessons user has done and add the characters from those lessons to the learnedChars array
     const finishedLessons = await findUniqueFinishedLessons({userId: user?.id, sessionToken: sessionToken});
     if (finishedLessons) {
@@ -132,23 +129,27 @@ export async function POST(req: NextRequest) {
       });
     }
     
-    //TODO: repeat some words if not long enough
-    
-    const wordsForChar = wordsByChar[activeChar];
-    
-    //if the words array for a char is less than wordsPerChar, generate new "words" with random characters
+    let wordsForChar = wordsByChar[activeChar];
+    //duplicate each word if not enough words
+    if (wordsForChar.length < wordsPerChar) {
+      wordsForChar = [...wordsForChar, ...wordsForChar];
+    }
+
+    //if still not enough words, generate new "words" with random characters
     while (wordsForChar.length < wordsPerChar) {
       const length = Math.floor((Math.random() * lengthRange) + minimumLength);
       wordsForChar.push(generateRandomWord(request.activeLesson, activeChar, length));
     }
+
+    //shuffle words, since only first several words are returned after slicing
     shuffle(wordsForChar);
     wordsByChar[activeChar] = wordsForChar.slice(0, wordsPerChar);
   }
 
   const words = Object.values(wordsByChar).flatMap(charWord => charWord);
+  shuffle(words); //final shuffle for lesson
 
-  shuffle(words);
-  //limit the words to wordLimit and join them into one string
+  //limit the words to wordLimit and join them into one string for lessonText
   const lessonText = words.slice(0, wordLimit).join(" ");
 
   const createResult = await prisma.lesson.create({
