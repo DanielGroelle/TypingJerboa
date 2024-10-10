@@ -10,7 +10,9 @@ export async function getParagraphs() {
       text: true,
       author: true,
       source: true,
-      languageScript: true,
+      languageScript: {select: {
+        languageScript: true
+      }},
       selectable: true
     }
   });
@@ -30,7 +32,9 @@ const Z_REQUEST = z.object({
   text: z.string(),
   source: z.string(),
   author: z.string(),
-  languageScript: z.string(),
+  languageScript: z.object({
+    languageScript: z.string()
+  }),
   selectable: z.boolean()
 });
 //create paragraph
@@ -42,8 +46,8 @@ export async function POST(req: NextRequest) {
   catch(e: unknown) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
-
-  const languageScriptId = await getLanguageScriptId(request.languageScript);
+  console
+  const languageScriptId = await getLanguageScriptId(request.languageScript.languageScript);
   if (languageScriptId === null) {
     return NextResponse.json({error: "LanguageScript does not exist"}, {status: 400});
   }
