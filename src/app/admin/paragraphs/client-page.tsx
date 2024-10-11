@@ -1,22 +1,13 @@
 "use client";
 
-import { useState, useEffect, FormEvent, ChangeEvent } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
+import { Paragraph, Z_PARAGRAPH } from "@/js/types";
 import { LanguageScripts } from "@/js/language-scripts";
 import FilterOptionsComponent from "../FilterOptionsComponent";
-import Papa from "papaparse";
-
-export const Z_PARAGRAPH = z.object({
-  id: z.number(),
-  text: z.string(),
-  author: z.string(),
-  source: z.string(),
-  languageScript: z.object({
-    languageScript: z.string()
-  }),
-  selectable: z.boolean()
-});
-export type Paragraph = z.infer<typeof Z_PARAGRAPH>;
+import CsvImportComponent from "./CsvImportComponent";
+import AddParagraphFormComponent from "./AddParagraphFormComponent";
+import EditParagraphFormComponent from "./EditParagraphFormComponent";
 
 const Z_PARAGRAPH_RESPONSE = z.object({
   paragraphs: z.array(Z_PARAGRAPH)
@@ -111,122 +102,6 @@ export default function ClientAdminParagraphs() {
     setParagraphs([...newParagraphs]);
   }
 
-  function handleSave(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (editParagraph === null) throw "Edit Paragraph is null!";
-
-    void (async ()=>{
-      try{
-        const response = Z_PARAGRAPH.parse(await(await fetch(`/api/admin/paragraph/edit`, {
-          method: "POST",
-          body: JSON.stringify(editParagraph),
-          mode: "cors",
-          cache: "default"
-        })).json());
-
-        //rerender edits
-        const paragraphIndex = paragraphs.findIndex((paragraph)=>paragraph.id === response.id);
-        paragraphs[paragraphIndex] = response;
-
-        setParagraphs([...paragraphs]);
-      }
-      catch(e: unknown) {
-        throw "Edit failed";
-      }
-    })();
-    
-    setEditParagraph(null);
-  }
-
-  function handleAdd(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (newParagraph === null) throw "New Paragraph is null!";
-
-    void (async ()=>{
-      try{
-        const response = Z_PARAGRAPH.parse(await(await fetch(`/api/admin/paragraph`, {
-          method: "POST",
-          body: JSON.stringify(newParagraph),
-          mode: "cors",
-          cache: "default"
-        })).json());
-
-        setParagraphs([response, ...paragraphs]);
-        setNewParagraph(null);
-      }
-      catch(e: unknown) {
-        console.error("Paragraph add failed", e);
-      }
-    })();
-  }
-
-  function handleCsvSelect(e: ChangeEvent<HTMLInputElement>) {
-    //dont allow upload of files other than csv
-    if (e) {
-      if (e.target.files?.[0]?.type !== "text/csv") {
-        e.target.value = "";
-      }
-    }
-  }
-
-  const Z_CSV_RESULTS_DATA = z.array(z.array(z.string()));
-  const Z_PARAGRAPHS_ARRAY = z.object({
-    data: z.array(Z_PARAGRAPH)
-  });
-
-  function importFromCsv() {
-    const csvFileInput = document.getElementById("csv-import");
-    const languageScriptSelector = document.querySelector("#language-script-csv-select");
-
-    if (csvFileInput instanceof HTMLInputElement && languageScriptSelector instanceof HTMLSelectElement) {
-      const csvFile = csvFileInput.files?.[0];
-      if (csvFile) {
-        Papa.parse(csvFile, {
-          // delimiter: ",", feel like delimiter shouldnt be specified in-case at some point a weird csv variant is used
-          //papaparse is good at guessing anyways, it just returns an error when it has to guess
-          complete: (results)=>{
-            if (results.errors.length) {
-              console.error("Errors parsing csv", results.errors);
-            }
-
-            const data = Z_CSV_RESULTS_DATA.parse(results.data);
-            const author = data?.[0]?.[0];
-            const source = data?.[0]?.[1];
-            const texts = data.slice(1, data.length - 1).map((arr)=>arr[0]);
-            const languageScript = languageScriptSelector.value;
-            const selectable = true;
-
-            void (async ()=>{
-              try{
-                const response = Z_PARAGRAPHS_ARRAY.parse(await(await fetch(`/api/admin/paragraph/bulk`, {
-                  method: "POST",
-                  body: JSON.stringify({
-                    texts,
-                    author,
-                    source,
-                    languageScript,
-                    selectable
-                  }),
-                  mode: "cors",
-                  cache: "default"
-                })).json());
-
-                //rerender edits
-                const newParagraphs = [...response.data, ...paragraphs]
-                setParagraphs(newParagraphs);
-              }
-              catch(e: unknown) {
-                console.error("Bulk paragraph add failed", e);
-              }
-            })();
-          }
-        });
-      }
-    }
-  }
-
   const refFilteredParagraphs: {items: Paragraph[]} = {items: []};
   const filterOptionsComponent = FilterOptionsComponent<Paragraph>({
     items: paragraphs,
@@ -236,7 +111,7 @@ export default function ClientAdminParagraphs() {
       options: Object.values(LanguageScripts).map(languageScript => languageScript.internal)
     },
     filters: {
-      "id": { getter: (paragraph: Paragraph) => paragraph.id.toString() },
+      "id": { getter: (paragraph: Paragraph) => paragraph.id },
       "text": { getter: (paragraph: Paragraph) => paragraph.text },
       "author": { getter: (paragraph: Paragraph) => paragraph.author },
       "source": { getter: (paragraph: Paragraph) => paragraph.source },
@@ -259,66 +134,11 @@ export default function ClientAdminParagraphs() {
           },
           selectable: true
         })} value="Add Paragraph" />
-        <label htmlFor="csv-import" className="mr-1">Import From CSV</label>
-        <input type="file" name="csv-import" id="csv-import" className="text-xs" accept=".csv" onChange={(e)=>handleCsvSelect(e)} />
-        <input type="button" className="border-solid border-green-600 border rounded-lg p-2" onClick={importFromCsv} value="Import"/>
-        languageScript: 
-        <select id="language-script-csv-select">
-        {Object.values(LanguageScripts).map((languageScript)=>{
-          return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.internal}</option>
-        })}
-        </select>
+        <CsvImportComponent paragraphs={paragraphs} setParagraphs={setParagraphs}/>
       </div>
-      {
-          //add paragraph form
-          newParagraph ?
-          <div className="border-solid border-green-700 border" key="adding">
-            <form onSubmit={handleAdd}>
-                <div className="flex">
-                  <span>text:</span>
-                  <textarea id="text-input" className="w-full resize-none" value={newParagraph.text} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>)=>{
-                    setNewParagraph({...newParagraph, text: e.target.value});
-                  }}></textarea><br/>
-                </div>
-                <div className="flex">
-                  <span>author:</span>
-                  <input type="text" id="author-input" className="w-full" value={newParagraph.author} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
-                    setNewParagraph({...newParagraph, author: e.target.value});
-                  }}/><br/>
-                </div>
-                <div className="flex">
-                  <span>source:</span>
-                  <input type="text" id="source-input" className="w-full" value={newParagraph.source} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
-                    setNewParagraph({...newParagraph, source: e.target.value});
-                  }}/><br/>
-                </div>
-                languageScript:<select id="language-script-edit-select" value={newParagraph.languageScript.languageScript} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{
-                    setNewParagraph({...newParagraph, languageScript: {languageScript: e.target.value}});
-                  }}>
-                  {
-                    Object.values(LanguageScripts).map((languageScript)=>{
-                      return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.internal}</option>
-                    })
-                  }
-                </select><br/>
-                <div>
-                  selectable:<select id="selectable-select" value={newParagraph.selectable.toString()} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{
-                    setNewParagraph({...newParagraph, selectable: e.target.value === "true"});
-                  }}>
-                    <option value="true">true</option>
-                    <option value="false">false</option>
-                  </select><br/>
-                </div>
-                <div>
-                  <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setNewParagraph(null)} value="Cancel" />
-                  <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2" value="Add" />
-                </div>
-              </form>
-            </div>
-          :
-          ""
-        }
-      
+
+      <AddParagraphFormComponent paragraphs={paragraphs} setParagraphs={setParagraphs} newParagraph={newParagraph} setNewParagraph={setNewParagraph} />
+
       <div className="flex justify-between">
         <h1>Paragraphs</h1>
         <div className="flex mr-10">
@@ -336,51 +156,7 @@ export default function ClientAdminParagraphs() {
             {
               //if theres a paragraph we're editing, display a form to change values
               editParagraph?.id === paragraph.id ?
-              <form onSubmit={handleSave}>
-                id: {paragraph.id}<br/>
-                <div className="flex">
-                  <span>text:</span>
-                  <textarea id="text-input" className="w-full resize-none" value={editParagraph.text} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>)=>{
-                    setEditParagraph({...editParagraph, text: e.target.value});
-                  }}></textarea><br/>
-                </div>
-                <div className="flex">
-                  <span>author:</span>
-                  <input type="text" id="author-input" className="w-full" value={editParagraph.author} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
-                    setEditParagraph({...editParagraph, author: e.target.value});
-                  }}/><br/>
-                </div>
-                <div className="flex">
-                  <span>source:</span>
-                  <input type="text" id="source-input" className="w-full" value={editParagraph.source} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
-                    setEditParagraph({...editParagraph, source: e.target.value});
-                  }}/><br/>
-                </div>
-                languageScript:<select id="language-script-edit-select" value={editParagraph.languageScript.languageScript} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{
-                    setEditParagraph({...editParagraph, languageScript: {languageScript: e.target.value}});
-                  }}>
-                  {
-                    Object.values(LanguageScripts).map((languageScript)=>{
-                      return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.internal}</option>
-                    })
-                  }
-                </select><br/>
-                <div>
-                  selectable:<select id="selectable-select" value={editParagraph.selectable.toString()} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{
-                    setEditParagraph({...editParagraph, selectable: e.target.value === "true"});
-                  }}>
-                    <option value="true">true</option>
-                    <option value="false">false</option>
-                  </select><br/>
-                </div>
-                <div className="flex justify-between">
-                  <div>
-                    <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setEditParagraph(null)} value="Cancel" />
-                    <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2" value="Save" />
-                  </div>
-                  <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(paragraph.id)} value="X" />
-                </div>
-              </form>
+              <EditParagraphFormComponent paragraphs={paragraphs} setParagraphs={setParagraphs} editParagraph={editParagraph} setEditParagraph={setEditParagraph} handleDelete={handleDelete} />
               :
               //if we're not editing, display the paragraph data normally
               <>

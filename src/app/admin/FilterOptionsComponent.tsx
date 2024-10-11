@@ -15,7 +15,7 @@ export default function FilterOptionsComponent<T>({
     options: string[]
   }
   filters: {[filterType: string]: {
-    getter: (item: T) => string
+    getter: (item: T) => string | number
   }},
   deleteManyItems: (items: T[]) => void,
   setViewPage: (page: number) => void
@@ -45,20 +45,25 @@ export default function FilterOptionsComponent<T>({
     let filtered = false;
     if (filterType === "any") {
       for (const filter of Object.values(filters)) {
-        filtered ||= filter.getter(item) === searchText || (exactSearch ? false : filter.getter(item).includes(searchText));
+        filtered ||= filter.getter(item) === searchText || (exactSearch ? false : filter.getter(item).toString().includes(searchText));
       }
     } else {
       const filter = filters[filterType];
       const itemProperty = filter.getter(item);
-      filtered ||= itemProperty === searchText || (exactSearch ? false : itemProperty.includes(searchText));
+      filtered ||= itemProperty === searchText || (exactSearch ? false : itemProperty.toString().includes(searchText));
     }
     return filtered;
   });
 
   //sort filtered items
   refFilteredItems.items.sort((itemA, itemB)=>{
-    const valueA = filters[sortBy].getter(itemA).toLowerCase();
-    const valueB = filters[sortBy].getter(itemB).toLowerCase();
+    let valueA = filters[sortBy].getter(itemA);
+    let valueB = filters[sortBy].getter(itemB);
+
+    if (typeof valueA === "string" && typeof valueB === "string") {
+      valueA = valueA.toLowerCase();
+      valueB = valueB.toLowerCase();
+    }
 
     if (valueA > valueB) {
       return sortDirection === "ascending" ? 1 : -1;
