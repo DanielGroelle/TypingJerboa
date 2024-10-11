@@ -17,7 +17,7 @@ export default function FilterOptionsComponent<T>({
   filters: {[filterType: string]: {
     getter: (item: T) => string | number
   }},
-  deleteManyItems: (items: T[]) => void,
+  deleteManyItems: ((items: T[]) => void) | null,
   setViewPage: (page: number) => void
 }) {
   const [filter, setFilter] = useState("any")
@@ -49,7 +49,7 @@ export default function FilterOptionsComponent<T>({
       }
     } else {
       const filter = filters[filterType];
-      const itemProperty = filter.getter(item);
+      const itemProperty = filter.getter(item).toString();
       filtered ||= itemProperty === searchText || (exactSearch ? false : itemProperty.toString().includes(searchText));
     }
     return filtered;
@@ -122,7 +122,13 @@ export default function FilterOptionsComponent<T>({
         }}/>
         <label className="ml-1" htmlFor="exact-input">Exact</label>
 
-        <input type="button" className="border-solid border-red-700 border rounded-lg p-2 ml-2" onClick={() => deleteManyItems(refFilteredItems.items)} value="Delete all filtered" />
+        {
+          //if deleteManyItems is null dont show the button
+          deleteManyItems ?
+          <input type="button" className="border-solid border-red-700 border rounded-lg p-2 ml-2" onClick={() => deleteManyItems(refFilteredItems.items)} value="Delete all filtered" />
+          :
+          ""
+        }
       </div>
   );
 }

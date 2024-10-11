@@ -1,17 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { z } from "zod";
-import FilterOptionsComponent from "./FilterOptionsComponent";
-
-export const Z_WORD = z.object({
-  id: z.number(),
-  word: z.string(),
-  languageScript: z.object({
-    languageScript: z.string()
-  })
-});
-export type Word = z.infer<typeof Z_WORD>;
+import FilterOptionsComponent from "../FilterOptionsComponent";
+import { LanguageScripts } from "@/js/language-scripts";
+import { Word, Z_WORD } from "@/js/types";
 
 const Z_RESPONSE = z.object({
   words: z.array(Z_WORD)
@@ -35,15 +28,15 @@ async function getWords() {
 
 export default function ClientAdminWords() {
   const [words, setWords] = useState<Word[]>([]);
-  const [displayWords, setDisplayWords] = useState<Word[]>([]); //used to allow for filtering and searching
   const [viewPage, setViewPage] = useState(1);
   const wordsPerPage = 25;
+
+  const [newWord, setNewWord] = useState<Omit<Word, "id"> | null>(null);
 
   useEffect(()=>{
     void (async ()=>{
       const fetchedWords = await getWords();
       setWords(fetchedWords);
-      handleFiltering(fetchedWords);
     })();
   },[]);
 
@@ -68,94 +61,9 @@ export default function ClientAdminWords() {
     const newWords = words.toSpliced(i, 1);
 
     setWords([...newWords]);
-    handleFiltering([...newWords]);
   }
 
-  function handleFiltering(passedWords: Word[] | null = null, keepOnPage = false) {
-    // sort: ascending/descending
-    // sortBy: id/word
-    // languageScript: all/languageScript1/languageScript2/...
-    // search: input text
-    // searchIn: any/id/word
-
-    const sortSelector = document.querySelector("#sort-select");
-    const sortBySelector = document.querySelector("#sort-by-select");
-    const languageScriptSelector = document.querySelector("#language-script-select");
-    const searchSelector = document.querySelector("#word-search");
-    const searchInSelector = document.querySelector("#filter-select");
-    const exactSelector = document.querySelector("#exact-input");
-    if (!(sortSelector instanceof HTMLSelectElement) ||
-        !(sortBySelector instanceof HTMLSelectElement) ||
-        !(languageScriptSelector instanceof HTMLSelectElement) ||
-        !(searchSelector instanceof HTMLInputElement) ||
-        !(searchInSelector instanceof HTMLSelectElement) ||
-        !(exactSelector instanceof HTMLInputElement)
-    ) {
-      throw "Selected elements [sortSelector, sortBySelector, languageScriptSelector, searchSelector, searchInSelector, exactSelector] were of unexpected type";
-    }
-
-    const sort = sortSelector.value;
-    type Sort = "id" | "word";
-    const sortBy = sortBySelector.value as Sort;
-    const languageScript = languageScriptSelector.value;
-    const search = searchSelector.value.toLowerCase();
-    const searchIn = searchInSelector.value;
-    const exact = exactSelector.checked;
-
-    let filteringWords = words;
-    if (passedWords) {
-      filteringWords = passedWords;
-    }
-
-    //start filtering based on languageScript
-    let newDisplayWords = filteringWords.filter((word)=>word.languageScript.languageScript === languageScript || languageScript === "all");
-    //filter based on search
-    newDisplayWords = newDisplayWords.filter((word)=>{
-      if (search === "") {
-        return true;
-      }
-
-      let filtered = false;
-      if (searchIn === "id" || searchIn === "any") {
-        filtered ||= (word.id.toString() === search) || (exact ? false : word.id.toString().includes(search));
-      }
-      if (searchIn === "word" || searchIn === "any") {
-        filtered ||= (word.word === search) || (exact ? false : word.word.toLowerCase().includes(search));
-      }
-      return filtered;
-    });
-
-    //sort filtered words
-    newDisplayWords.sort((wordA, wordB)=>{
-      let valueA = wordA[sortBy];
-      let valueB = wordB[sortBy];
-      if (typeof valueA === "string" && typeof valueB === "string") {
-        valueA = valueA.toLowerCase();
-        valueB = valueB.toLowerCase();
-      }
-
-      if (valueA > valueB) {
-        return sort === "ascending" ? 1 : -1;
-      }
-      else {
-        return sort === "ascending" ? -1 : 1;
-      }
-    });
-
-    if (!keepOnPage) {
-      //reset the page view to 1 on a new filter
-      setViewPage(1);
-      const pageSelector = document.querySelector("#page-select");
-      if (!(pageSelector instanceof HTMLSelectElement)) {
-        throw "pageSelector is not of HTMLSelectElement type";
-      }
-      pageSelector.value = "1";
-    }
-    
-    setDisplayWords([...newDisplayWords]);
-  }
-
-  function handleDeleteAllFiltered() {
+  function deleteManyWords() {
     const wordIds = words.map((word)=>word.id);
     
     void (async ()=>{
@@ -179,7 +87,6 @@ export default function ClientAdminWords() {
     });
 
     setWords([...newWords]);
-    handleFiltering([...newWords]);
   }
 
   function handlePageChange() {
@@ -191,23 +98,109 @@ export default function ClientAdminWords() {
     setViewPage(Number(pageSelector.value));
   }
 
+  function handleAdd(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const wordSelector = document.querySelector("#word-input");
+    const languageScriptSelector = document.querySelector("#language-script-edit-select");
+    if (!(wordSelector instanceof HTMLInputElement) ||
+        !(languageScriptSelector instanceof HTMLSelectElement)
+    ) {
+      throw "Selected elements [wordSelector, languageScriptSelector] were of unexpected type";
+    }
+
+    const word = wordSelector.value;
+    const languageScript = languageScriptSelector.value;
+
+    void (async ()=>{
+      try{
+        const response = Z_WORD.parse(await(await fetch(`/api/admin/word`, {
+          method: "POST",
+          body: JSON.stringify({
+            word,
+            languageScript,
+          }),
+          mode: "cors",
+          cache: "default"
+        })).json());
+
+        //rerender edits
+        setWords([response, ...words]);
+        setNewWord(null);
+      }
+      catch(e: unknown) {
+        console.error("Word add failed", e);
+      }
+    })();
+  }
+
+  const refFilteredWords: {items: Word[]} = {items: []};
+  const filterOptionsComponent = FilterOptionsComponent<Word>({
+    items: words,
+    refFilteredItems: refFilteredWords,
+    selectFilter: {
+      getter: word => word.languageScript.languageScript,
+      options: Object.values(LanguageScripts).map(languageScript => languageScript.internal)
+    },
+    filters: {
+      "id": { getter: (word: Word) => word.id },
+      "word": { getter: (word: Word) => word.word }
+    },
+    setViewPage: setViewPage,
+    deleteManyItems: deleteManyWords
+  });
+
   return (
     <div>
-      <FilterOptionsComponent words={words} setWords={setWords} handleFiltering={handleFiltering} handleDeleteAllFiltered={handleDeleteAllFiltered}/>
-      
+      {filterOptionsComponent}
+
+      <input type="button" className="border-solid border-blue-600 border rounded-lg p-2 mr-2" onClick={()=>setNewWord(newWord ? null : {
+          word: "",
+          languageScript: {
+            languageScript: Object.values(LanguageScripts)[0].internal
+          }
+        })} value="Add Word" />
+      <br/><br/>
+
+      {
+        //add word form
+        newWord ?
+        <div className="border-solid border-green-700 border">
+          <form onSubmit={handleAdd}>
+              <div className="flex">
+                <span>word:</span>
+                <input type="text" id="word-input" className="w-full"/><br/>
+              </div>
+              languageScript:<select id="language-script-edit-select">
+                {
+                  Object.values(LanguageScripts).map((languageScript)=>{
+                    return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.internal}</option>
+                  })
+                }
+              </select><br/>
+              <div>
+                <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setNewWord(null)} value="Cancel" />
+                <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2" value="Add" />
+              </div>
+            </form>
+          </div>
+        :
+        ""
+      }
+
       <div className="flex justify-between">
         <h1>Words</h1>
         <div className="flex mr-10">
           <p className="leading-10">Page:</p>
           <select onChange={handlePageChange} id="page-select">
-            {Array.from(Array(Math.ceil(displayWords.length / wordsPerPage))).map((_, i)=>{
+            {Array.from(Array(Math.ceil(refFilteredWords.items.length / wordsPerPage))).map((_, i)=>{
               return <option key={i + 1}>{i + 1}</option>
             })}
           </select>
         </div>
       </div>
       <br/>
-      {displayWords.slice(viewPage * wordsPerPage - wordsPerPage, viewPage * wordsPerPage).map((word)=>
+      {refFilteredWords.items.slice(viewPage * wordsPerPage - wordsPerPage, viewPage * wordsPerPage).map((word)=>
         <div className="border-solid border-white border flex justify-between" key={word.id}>
           <div>
             id: {word.id}<br/>

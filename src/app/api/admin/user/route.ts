@@ -7,7 +7,8 @@ export async function getUsers() {
     select: {
       id: true,
       username: true,
-      admin: true
+      admin: true,
+      createdAt: true
     }
   });
   

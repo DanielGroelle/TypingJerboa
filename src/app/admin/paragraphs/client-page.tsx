@@ -107,7 +107,7 @@ export default function ClientAdminParagraphs() {
     items: paragraphs,
     refFilteredItems: refFilteredParagraphs,
     selectFilter: {
-      getter: (paragraph)=>paragraph.languageScript.languageScript,
+      getter: paragraph => paragraph.languageScript.languageScript,
       options: Object.values(LanguageScripts).map(languageScript => languageScript.internal)
     },
     filters: {
