@@ -10,7 +10,10 @@ export async function getRaces() {
       endTime: true,
       mistakes: true,
       paragraph: {
-        select: {text: true}
+        select: {
+          text: true,
+          languageScript: {select: {languageScript: true}}
+        }
       },
       user: {
         select: {id: true, username: true}

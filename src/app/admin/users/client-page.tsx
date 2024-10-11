@@ -122,9 +122,11 @@ export default function ClientAdminUsers() {
   const filterOptionsComponent = FilterOptionsComponent<User>({
     items: users,
     refFilteredItems: refFilteredUsers,
-    selectFilter: {
-      getter: (user) => user.admin ? "admin" : "user",
-      options: ["admin", "user"]
+    selectFilters: {
+      roles: {
+        getter: (user) => user.admin ? "admin" : "user",
+        options: ["admin", "user"]
+      }
     },
     filters: {
       "id": { getter: (user: User) => user.id },

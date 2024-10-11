@@ -138,9 +138,11 @@ export default function ClientAdminWords() {
   const filterOptionsComponent = FilterOptionsComponent<Word>({
     items: words,
     refFilteredItems: refFilteredWords,
-    selectFilter: {
-      getter: word => word.languageScript.languageScript,
-      options: Object.values(LanguageScripts).map(languageScript => languageScript.internal)
+    selectFilters: {
+      languageScripts: {
+        getter: word => word.languageScript.languageScript,
+        options: Object.values(LanguageScripts).map(languageScript => languageScript.internal)
+      }
     },
     filters: {
       "id": { getter: (word: Word) => word.id },

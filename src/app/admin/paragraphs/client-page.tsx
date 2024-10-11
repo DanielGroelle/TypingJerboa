@@ -106,9 +106,11 @@ export default function ClientAdminParagraphs() {
   const filterOptionsComponent = FilterOptionsComponent<Paragraph>({
     items: paragraphs,
     refFilteredItems: refFilteredParagraphs,
-    selectFilter: {
-      getter: paragraph => paragraph.languageScript.languageScript,
-      options: Object.values(LanguageScripts).map(languageScript => languageScript.internal)
+    selectFilters: {
+      languageScripts: {
+        getter: paragraph => paragraph.languageScript.languageScript,
+        options: Object.values(LanguageScripts).map(languageScript => languageScript.internal)
+      }
     },
     filters: {
       "id": { getter: (paragraph: Paragraph) => paragraph.id },
@@ -150,6 +152,7 @@ export default function ClientAdminParagraphs() {
           </select>
         </div>
       </div>
+      
       <div className="flex flex-col overflow-y-auto">
         {refFilteredParagraphs.items.slice(viewPage * paragraphsPerPage - paragraphsPerPage, viewPage * paragraphsPerPage).map((paragraph)=>
           <div className="border-solid border-white border" key={paragraph.id}>
