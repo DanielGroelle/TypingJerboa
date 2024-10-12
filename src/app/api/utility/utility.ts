@@ -29,6 +29,8 @@ export function extractWordsFromTexts(texts: string[]) {
 }
 
 export async function insertToWordTable(words: string[], languageScriptId: number) {
+  //TODO: insert all variations of a word. ex: hello, Hello, HELLO
+  //or maybe do this on the lesson side...
   const newWords = words.map((word)=>{return {word, languageScriptId}});
   const wordInsertCount = await prisma.word.createMany({
     data: newWords,

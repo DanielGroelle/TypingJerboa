@@ -16,9 +16,12 @@ export async function getLessons() {
       mode: true,
       mistakes: true,
       user: {
-        select: {username: true}
+        select: {
+          id: true,
+          username: true
+        }
       },
-      sessionToken: true
+      session: {select: {token: true}}
     }
   });
   

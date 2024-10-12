@@ -49,3 +49,24 @@ export const Z_WORD = z.object({
   })
 });
 export type Word = z.infer<typeof Z_WORD>;
+
+export const Z_LESSON = z.object({
+  id: z.string(),
+  languageScript: z.object({
+    languageScript: z.string()
+  }),
+  lessonCharacters: z.string(),
+  lessonText: z.string(),
+  mode: z.string(),
+  startTime: z.string(),
+  endTime: z.string().nullable(),
+  mistakes: z.number().nullable(),
+  user: z.object({
+    id: z.number(),
+    username: z.string()
+  }).nullable(),
+  session: z.object({
+    token: z.string()
+  }).nullable()
+});
+export type Lesson = z.infer<typeof Z_LESSON>;
