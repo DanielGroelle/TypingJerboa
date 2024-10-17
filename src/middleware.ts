@@ -159,7 +159,7 @@ async function checkUserIsAdmin(loginToken: string) {
     })).json());
   }
   catch(e: unknown) {
-    console.log("admin api error", e)
+    console.log("admin api error", e);
     return NextResponse.json({error: "Unknown api error"}, {status: 400});
   }
 
@@ -215,6 +215,11 @@ export async function middleware(request: NextRequest) {
   if (path.startsWith("/login") && loginToken) {
     return NextResponse.redirect(new URL("/", request.url));
   }
+  
+  //if user not logged in and tries to access account page
+  if (path.startsWith("/account") && !loginToken) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   //if user tries to access admin page
   if (path.startsWith("/admin")) {
@@ -236,7 +241,7 @@ export async function middleware(request: NextRequest) {
       })).json());
     }
     catch(e: unknown) {
-      console.log("admin e error", e)
+      console.log("admin error", e);
       return NextResponse.redirect(new URL("/", request.url));
     }
 
@@ -245,5 +250,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  //everything passes, so continue serving user
   return NextResponse.next();
 }

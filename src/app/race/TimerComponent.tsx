@@ -34,6 +34,7 @@ export default function TimerComponent({startTime}: {startTime: Date | null}) {
     }
   }, [startTime]);
 
+  //TODO: pretty this up
   return (
     <div className="w-96 border-solid border-white border">
       {timer}

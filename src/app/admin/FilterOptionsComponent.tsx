@@ -68,6 +68,7 @@ export default function FilterOptionsComponent<T>({
     return filtered;
   });
 
+  //TODO: fix/allow sorting on Dates (currently sending in strings which obviously doesnt work well)
   //sort filtered items
   refFilteredItems.items.sort((itemA, itemB)=>{
     let valueA = filters[sortBy].getter(itemA);

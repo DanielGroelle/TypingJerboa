@@ -1,34 +1,23 @@
 import { z } from "zod";
 import { LanguageScripts } from "@/js/language-scripts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Z_RESPONSE = z.object({
   startTime: z.string().nullable(),
   paragraphText: z.string().nullable(),
   raceId: z.string().nullable()
-})
-
+});
 async function startRace(
+  languageScript: string,
   setRaceInfo: (raceParagraph: string, startTime: Date | null, raceId: string | null, scriptSelectionHidden: boolean, timerHidden: boolean) => void,
   setError: (error: string | null) => void
 ) {
-  //find the select element
-  const scriptElement = document.querySelector("#script");
-  if (!(scriptElement instanceof HTMLSelectElement)) {
-    throw "Script selector was not select element";
-  }
-
-  //access the selected value in the select
-  const scriptSelected = scriptElement.options[scriptElement.selectedIndex].value;
-
   let response;
   try {
     //fetch startTime and paragraphText
     response = Z_RESPONSE.parse(await (await fetch(`/api/race/start`, {
       method: "POST",
-      body: JSON.stringify({
-        languageScript: scriptSelected
-      }),
+      body: JSON.stringify({languageScript}),
       mode: "cors",
       cache: "default"
     })).json());
@@ -48,6 +37,48 @@ async function startRace(
   }
 }
 
+const Z_ME_RESPONSE = z.object({
+  user: z.object({
+    id: z.number(),
+    username: z.string(),
+    createdAt: z.string()
+  })
+});
+const Z_LANGUAGESCRIPT_RESPONSE = z.object({
+  preferences: z.object({
+    languageScript: z.object({
+      id: z.number(),
+      languageScript: z.string()
+    })
+  })
+});
+async function getLanguageScript() {
+  const tryRequest = Z_ME_RESPONSE.safeParse(await (await fetch(`/api/me`, {
+    method: "GET",
+    mode: "cors",
+    cache: "default"
+  })).json());
+
+  if (!tryRequest.success) {
+    return null;
+  }
+
+  let response;
+  try {
+    response = Z_LANGUAGESCRIPT_RESPONSE.parse(await (await fetch(`/api/user/preferences`, {
+      method: "GET",
+      mode: "cors",
+      cache: "default"
+    })).json());
+  }
+  catch(e: unknown) {
+    console.log(e);
+    throw "getLanguageScript failed";
+  }
+
+  return response.preferences.languageScript.languageScript;
+}
+
 export default function ScriptSelectionComponent({setRaceInfo}: { setRaceInfo: (
   raceParagraph: string,
   startTime: Date | null,
@@ -56,6 +87,14 @@ export default function ScriptSelectionComponent({setRaceInfo}: { setRaceInfo: (
   timerHidden: boolean
 ) => void }) {
   const [error, setError] = useState<string | null>(null);
+  const [languageScript, setLanguageScript] = useState("");
+
+  useEffect(()=>{
+    void (async ()=>{
+      const languageScript = await getLanguageScript();
+      if (languageScript) setLanguageScript(languageScript);
+    })();
+  }, []);
 
   return (
     <div>
@@ -64,13 +103,13 @@ export default function ScriptSelectionComponent({setRaceInfo}: { setRaceInfo: (
       </div>
       Select the script you&apos;d like to use
       <div className="flex">
-        <select name="script" id="script">
+        <select name="script" id="script" value={languageScript} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>setLanguageScript(e.target.value)}>
           {Object.values(LanguageScripts).map(({internal, display})=>(
             <option key={internal} value={internal}>{display}</option>
           ))}
         </select>
         <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={() => {
-          void (async ()=>await startRace(setRaceInfo, setError))();
+          void (async ()=>await startRace(languageScript, setRaceInfo, setError))();
         }} value="Start Race"/>
       </div>
     </div>

@@ -5,8 +5,50 @@ import { useState, useRef, ChangeEvent, ClipboardEvent, MouseEvent, useEffect } 
 import { z } from "zod";
 import SidebarComponent from "./SidebarComponent";
 
+const Z_ME_RESPONSE = z.object({
+  user: z.object({
+    id: z.number(),
+    username: z.string(),
+    createdAt: z.string()
+  })
+});
+const Z_LANGUAGESCRIPT_RESPONSE = z.object({
+  preferences: z.object({
+    languageScript: z.object({
+      id: z.number(),
+      languageScript: z.string()
+    })
+  })
+});
+async function getLanguageScript() {
+  const tryRequest = Z_ME_RESPONSE.safeParse(await (await fetch(`/api/me`, {
+    method: "GET",
+    mode: "cors",
+    cache: "default"
+  })).json());
+  
+  if (!tryRequest.success) {
+    return null;
+  }
+
+  let response;
+  try {
+    response = Z_LANGUAGESCRIPT_RESPONSE.parse(await (await fetch(`/api/user/preferences`, {
+      method: "GET",
+      mode: "cors",
+      cache: "default"
+    })).json());
+  }
+  catch(e: unknown) {
+    console.log(e);
+    throw "getLanguageScript failed";
+  }
+
+  return response.preferences.languageScript.languageScript;
+}
+
 export default function ClientLearn() {
-  const [languageScript, setLanguageScript] = useState<string>(LanguageScripts["latin-english"].internal);
+  const [languageScript, setLanguageScript] = useState<string>(Object.values(LanguageScripts)[0].internal);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [lessonText, setLessonText] = useState("");
   const [userInput, setUserInput] = useState("");
@@ -19,8 +61,14 @@ export default function ClientLearn() {
   const [finishedLessons, setFinishedLessons] = useState<Set<string>>(new Set([]));
   const [lessonId, setLessonId] = useState<string | null>(null);
 
-  //TODO: have the languageScript encoded in the url as a parameter ?ls=cyrillic-russian
   //TODO: make new characters and word exercise show different checkmarks
+
+  useEffect(()=>{
+    void (async ()=>{
+      const languageScript = await getLanguageScript();
+      if (languageScript) setLanguageScript(languageScript);
+    })();
+  }, []);
 
   const Z_FINISHED_LESSONS_RESPONSE = z.object({
     finishedLessons: z.array(
@@ -46,14 +94,6 @@ export default function ClientLearn() {
       }
     })();
   }, [languageScript]);
-  
-  function handleScriptChange() {
-    const scriptSelect = document.querySelector("#script-select");
-    if(!(scriptSelect instanceof HTMLSelectElement)) {
-      throw "ScriptSelect not an instance of HTMLSelectElement";
-    }
-    setLanguageScript(scriptSelect.value);
-  }
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const newUserInput = event.currentTarget.value;
@@ -183,7 +223,7 @@ export default function ClientLearn() {
       {/* script selection */}
       <div className="flex justify-end">
         Language Script:
-        <select name="script-select" id="script-select" onChange={handleScriptChange} defaultValue={languageScript}>
+        <select name="script-select" id="script-select" value={languageScript} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>setLanguageScript(e.target.value)}>
           Language Script
           {Object.values(LanguageScripts).map(({internal, display})=>(
             <option key={internal} value={internal}>{display}</option>

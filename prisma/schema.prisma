@@ -36,7 +36,16 @@ model User {
   races              Race[]
   lessons            Lesson[]
   userWordEncounters UserWordEncounter[]
+  preferences        Preference?
   @@map(name: "users")
+}
+
+model Preference {
+  id               Int  @id
+  user             User @relation(fields: [id], references: [id])
+  languageScript   LanguageScript @relation(fields: [languageScriptId], references: [id]) 
+  languageScriptId Int            @map(name: "language_script_id")
+  @@map(name: "preferences")
 }
 
 model LanguageScript {
@@ -45,6 +54,7 @@ model LanguageScript {
   paragraphs     Paragraph[]
   lessons        Lesson[]
   words          Word[]
+  preferences    Preference[]
   @@map(name: "language_scripts")
 }
 

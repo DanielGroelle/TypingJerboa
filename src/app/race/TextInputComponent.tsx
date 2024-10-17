@@ -132,7 +132,7 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
         {/*if the race is started show wpm*/}
         {raceParagraphArray.length !== 0 ? `${WPM.toFixed(1)}wpm` : ""}
       </div>
-      <div className="border-solid border-white border select-none" onContextMenu={handleParagraphContextMenu}>
+      <div className="border-solid border-white border p-1 select-none" onContextMenu={handleParagraphContextMenu}>
         {raceParagraphArray.map((character, i)=>{
           return <span className={charStatus(userInput, i)} key={i}>{character}</span>
         })}

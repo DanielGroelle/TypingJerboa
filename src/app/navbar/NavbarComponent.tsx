@@ -29,7 +29,7 @@ export default async function NavbarComponent() {
           return (
             <div className="flex">
               <div className="flex-2 px-4 py-2 text-center border-solid border-l-2 border-white">
-                {user.username}
+                <Link href="/account">{user.username}</Link>
               </div>
               <div className="flex-2 px-4 py-2 text-center">
                 <LogoutButtonComponent />
