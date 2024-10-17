@@ -21,7 +21,7 @@ model Session {
 
 model Admin {
   id   Int  @id
-  user User @relation(fields: [id], references: [id])
+  user User @relation(fields: [id], references: [id], onDelete: Cascade)
   @@map(name: "admins")
 }
 
@@ -42,8 +42,8 @@ model User {
 
 model Preference {
   id               Int  @id
-  user             User @relation(fields: [id], references: [id])
-  languageScript   LanguageScript @relation(fields: [languageScriptId], references: [id]) 
+  user             User @relation(fields: [id], references: [id], onDelete: Cascade)
+  languageScript   LanguageScript @relation(fields: [languageScriptId], references: [id], onDelete: Cascade) 
   languageScriptId Int            @map(name: "language_script_id")
   @@map(name: "preferences")
 }

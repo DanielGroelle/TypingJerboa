@@ -26,6 +26,9 @@ async function initializeUserPreferences(userId: number) {
       languageScriptId: firstLanguageScript.id
     }
   });
+  if (!newPreferences) {
+    return NextResponse.json({error: "Error defining user preferences"}, {status: 400});
+  }
 
   return newPreferences;
 }

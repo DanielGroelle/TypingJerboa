@@ -9,7 +9,8 @@ const Z_RESPONSE = z.object({
   avgWpm: z.number(),
   avgMistakes: z.number(),
   bestWpm: z.number(),
-  bestParagraph: z.string().nullable()
+  bestParagraph: z.string().nullable(),
+  createdAt: z.string().nullable()
 });
 
 async function getStats(languageScript: string) {
@@ -41,19 +42,13 @@ export default function ClientStats() {
     void (async ()=>setStats(await getStats(languageScript)))();
   }, [languageScript]);
 
-  function handleScriptChange() {
-    const scriptSelect = document.querySelector("#script-select");
-    if(!(scriptSelect instanceof HTMLSelectElement)) {
-      throw "ScriptSelect not an instance of HTMLSelectElement";
-    }
-    setLanguageScript(scriptSelect.value);
-  }
-
   return (
     <div>
       <div className="flex justify-end">
         <p>Language Script:</p>
-        <select name="script-select" id="script-select" onChange={handleScriptChange} defaultValue={languageScript}>
+        <select name="script-select" id="script-select" value={languageScript} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{
+          setLanguageScript(e.target.value);
+        }}>
           {Object.values(LanguageScripts).map(({internal, display})=>(
             <option key={internal} value={internal}>{display}</option>
           ))}
@@ -76,6 +71,16 @@ export default function ClientStats() {
         }
       </p>
       <p>{showParagraph ? stats?.bestParagraph : ""}</p>
+      {
+        stats?.createdAt ?
+        (() => {
+          const offset = new Date(stats.createdAt).getTimezoneOffset();
+          const createdDate = new Date(new Date(stats.createdAt).getTime() - (offset*60*1000));
+          return <p className="mt-4">Registered: {String(createdDate.toISOString().split('T')[0])}</p>
+        })()
+        :
+        ""
+      }
       {!stats ? "Loading stats..." : ""}
     </div>
   );

@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
   const sessionToken = req.cookies.get("sessionToken")?.value;
 
   const user = await findUserFromLoginToken(loginToken);
+
+  const createdAt = user?.createdAt ?? null;
   
   const finishedRaces = await prisma.race.findMany({
     select: {
@@ -55,7 +57,7 @@ export async function POST(req: NextRequest) {
 
   //in case user has no races, return 0 for everything
   if (raceCount === 0) {
-    const response = {races: 0, avgWpm: 0, avgMistakes: 0, bestWpm: 0, bestParagraph: null};
+    const response = {races: 0, avgWpm: 0, avgMistakes: 0, bestWpm: 0, bestParagraph: null, createdAt};
     return new NextResponse(JSON.stringify(response));
   }
 
@@ -91,6 +93,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const response = {races: raceCount, avgWpm, avgMistakes, bestWpm, bestParagraph};
+  const response = {races: raceCount, avgWpm, avgMistakes, bestWpm, bestParagraph, createdAt};
   return new NextResponse(JSON.stringify(response));
 }

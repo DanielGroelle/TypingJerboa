@@ -40,3 +40,26 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({updatedRaces});
 }
+
+//clear races for a user
+export async function DELETE(req: NextRequest) {
+  //get the login/sessionToken from the users cookies if it exists
+  const loginToken = req.cookies.get("loginToken")?.value;
+
+  const user = await findUserFromLoginToken(loginToken);
+  if (user === null) {
+    return NextResponse.json({error: "User not found from login token"}, {status: 400});
+  }
+
+  const deletedRaces = await prisma.race.deleteMany({
+    where: {
+      user: {id: user.id}
+    }
+  });
+
+  if (!deletedRaces) {
+    return NextResponse.json({error: "Error deleting races"}, {status: 400});
+  }
+
+  return NextResponse.json({success: true});
+}
