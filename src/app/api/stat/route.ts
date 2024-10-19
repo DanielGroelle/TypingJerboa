@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   const raceCount = finishedRaces.length;
 
-  //in case user has no races, return 0 for everything
+  //in case user has no finished races, return 0 for everything
   if (raceCount === 0) {
     const response = {races: 0, avgWpm: 0, avgMistakes: 0, bestWpm: 0, bestParagraph: null, createdAt};
     return new NextResponse(JSON.stringify(response));
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
   const recentRacesRange = 50;
   //find the avgWpm and avgMistakes
   for (const race of finishedRaces.slice(0, recentRacesRange)) {
-    if (!race.endTime || !race.mistakes) continue;
+    if (race.endTime === null || race.mistakes === null) continue;
 
     timeSum += race.endTime.getTime() - race.startTime.getTime();
     wordSum += race.paragraph.text.length / 5;

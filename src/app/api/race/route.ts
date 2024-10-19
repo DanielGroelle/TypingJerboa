@@ -21,7 +21,13 @@ export async function POST(req: NextRequest) {
       startTime: true,
       endTime: true,
       mistakes: true,
-      paragraph: {select: {text: true}}
+      paragraph: {
+        select: {
+          text: true,
+          author: true,
+          source: true
+        }
+      }
     },
     where: {id: request.id}
   });
@@ -30,11 +36,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Race not found"}, {status: 404});
   }
 
-  let username = raceData?.user?.username;
-  if (!username) {
-    username = "";
-  }
+  const username = raceData?.user?.username ?? null;
 
-  const response = {...raceData, user: username, paragraph: raceData.paragraph.text};
+  const response = {...raceData, user: username, paragraph: raceData.paragraph};
   return new NextResponse(JSON.stringify(response));
 }

@@ -4,19 +4,28 @@ import { z } from "zod";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const Z_RESPONSE = z.object({
-  user: z.string(),
+  user: z.string().nullable(),
   startTime: z.string(),
   endTime: z.string(),
   mistakes: z.number(),
-  paragraph: z.string()
+  paragraph: z.object({
+    text: z.string(),
+    author: z.string().nullable(),
+    source: z.string().nullable()
+  })
 });
+
+type RaceData = z.infer<typeof Z_RESPONSE>;
+
 export default function ClientRaceFinish() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const id = searchParams.get("id");
 
-  const [raceData, setRaceData] = useState({user: "", startTime: "", endTime: "", mistakes: 0, paragraph: ""});
+  const [raceData, setRaceData] = useState<RaceData>({user: "", startTime: "", endTime: "", mistakes: 0, paragraph: {text: "", author: "", source: ""}});
 
   useEffect(()=>{
     void fetch(`/api/race`, {
@@ -27,27 +36,37 @@ export default function ClientRaceFinish() {
       mode: "cors",
       cache: "default"
     }).then(async (data) => {
-      setRaceData(Z_RESPONSE.parse(await data.json()));
+      const tryResponse = Z_RESPONSE.safeParse(await data.json());
+      if (!tryResponse.success) return router.push("/404"); //TODO: instead of going to 404, make page say "race not found" or something
+
+      setRaceData(tryResponse.data);
     });
   }, [id]);
 
-  const time = new Date(raceData.endTime).getTime() - new Date(raceData.startTime).getTime();
+  const msTime = new Date(raceData.endTime).getTime() - new Date(raceData.startTime).getTime();
 
-  //TODO: display the paragraphs source and author
   return (
     <div>
-      <p>User: {raceData.user.length > 0 ? `${raceData.user}` : "Unregistered User"}</p> {/*TODO: add a prompt here to login/register*/}
-      <p>WPM: {((raceData.paragraph.length / 5) / (time / 1000 / 60)).toFixed(1)}</p>
-      <p>Time: {time / 1000}s</p>
+      {
+        raceData.user ?
+        <p>User: {raceData.user}</p>
+        :
+        <div className="flex">
+          <p className="flex items-center">Unregistered User</p>
+          <Link href="/register" className="border-solid border-blue-500 border rounded-lg ml-1 p-1 text-sm">Register</Link>
+        </div>
+      }
+      <p>WPM: {((raceData.paragraph.text.length / 5) / (msTime / 1000 / 60)).toFixed(1)}</p>
+      <p>Time: {msTime / 1000}s</p>
       <p>Mistakes: {raceData.mistakes}</p>
-      <p>Paragraph: {raceData.paragraph}</p>
+      <p>Paragraph: {raceData.paragraph.text}</p>
+      <p>Author: {raceData.paragraph.author}</p>
+      <p>Source: {raceData.paragraph.source}</p>
       <br/>
-      <Link href="/race" className="border-solid border-white border rounded-lg p-2">Race again</Link>
+      <div className="flex">
+        <Link href="/race" className="border-solid border-white border-2 rounded-lg p-2">Race again</Link>
+        <input type="button" className="border-solid border-green-600 border-2 rounded-lg ml-1 p-2" onClick={()=>{void navigator.clipboard.writeText(window.location.href)}} value="Copy Share Link" />
+      </div>
     </div>
-    //TODO: add share link here
   );
 }
-
-//TODO: fix issue with going back a page, and causing race finish to be null
-//the text box is shown and is filled from the previous race. and upon doing anything to the text, causes a redirect to /race/finish?id=null
-//TODO: also probably make invalid race finish id's show 404 or something

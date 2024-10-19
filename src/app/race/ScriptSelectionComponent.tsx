@@ -1,15 +1,20 @@
 import { z } from "zod";
 import { LanguageScripts } from "@/js/language-scripts";
 import { useEffect, useState } from "react";
+import { ReturnedParagraph } from "./client-page";
 
 const Z_RESPONSE = z.object({
   startTime: z.string().nullable(),
-  paragraphText: z.string().nullable(),
+  paragraph: z.object({
+    text: z.string().nullable(),
+    author: z.string().nullable(),
+    source: z.string().nullable()
+  }),
   raceId: z.string().nullable()
 });
 async function startRace(
   languageScript: string,
-  setRaceInfo: (raceParagraph: string, startTime: Date | null, raceId: string | null, scriptSelectionHidden: boolean, timerHidden: boolean) => void,
+  setRaceInfo: (raceParagraph: ReturnedParagraph | null, startTime: Date | null, raceId: string | null, scriptSelectionHidden: boolean, timerHidden: boolean) => void,
   setError: (error: string | null) => void
 ) {
   let response;
@@ -23,13 +28,13 @@ async function startRace(
     })).json());
     
     //if no paragraph was found set the error message
-    if (response.raceId === null || response.paragraphText === null || response.startTime === null) {
+    if (response.raceId === null || response.paragraph.text === null || response.startTime === null) {
       setError("No paragraph for that language script found");
     }
     //if paragraph was found set the race info to start the race
     else {
       setError(null);
-      setRaceInfo(response.paragraphText, new Date(response.startTime), response.raceId, true, false);
+      setRaceInfo(response.paragraph, new Date(response.startTime), response.raceId, true, false);
     }
   }
   catch(e: unknown) {
@@ -80,7 +85,7 @@ async function getLanguageScript() {
 }
 
 export default function ScriptSelectionComponent({setRaceInfo}: { setRaceInfo: (
-  raceParagraph: string,
+  raceParagraph: ReturnedParagraph | null,
   startTime: Date | null,
   raceId: string | null,
   scriptSelectionHidden: boolean,

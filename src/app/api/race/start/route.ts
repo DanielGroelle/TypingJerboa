@@ -74,5 +74,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Race creation failed"}, {status: 400});
   }
 
-  return new NextResponse(JSON.stringify({startTime, paragraphText: chosenParagraph.text, raceId: createResult.id}));
+  return new NextResponse(JSON.stringify({startTime, paragraph: {text: chosenParagraph.text, author: chosenParagraph.author, source: chosenParagraph.source}, raceId: createResult.id}));
 }
