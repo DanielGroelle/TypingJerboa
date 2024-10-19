@@ -55,7 +55,6 @@ function clearLessons(setError: (error: string | null) => void, setSuccess: (suc
     })).json());
 
     if (tryRequest.success) {
-      console.log("hi")
       setSuccess("Successfully cleared user lesson data.");
       setError(null);
     }
@@ -75,7 +74,6 @@ function clearRaces(setError: (error: string | null) => void, setSuccess: (succe
     })).json());
 
     if (tryRequest.success) {
-      console.log("hi")
       setSuccess("Successfully cleared user race data.");
       setError(null);
     }
@@ -106,6 +104,7 @@ function deleteAccount(setError: (error: string | null) => void, setSuccess: (su
 
 export default function ClientAccount() {
   const [primaryLanguageScript, setPrimaryLanguageScript] = useState("");
+  const [confirmation, setConfirmation] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -115,8 +114,6 @@ export default function ClientAccount() {
       setPrimaryLanguageScript(userPreferences.languageScript.languageScript);
     })();
   }, []);
-
-  //TODO: have a popup asking "are you sure?"
 
   return (
     <div className="flex flex-col h-full justify-between">
@@ -128,6 +125,26 @@ export default function ClientAccount() {
         <div className="border-solid border-green-500 border rounded-lg p-2" hidden={typeof success !== "string"}>
           {success}
         </div>
+
+        {
+          confirmation ?
+          <div className="fixed left-0 top-0 w-full h-full bg-neutral-950/50 flex justify-center items-center">
+            <div className="absolute border-solid border-white border rounded-lg p-2 text-center">
+              <p className="mb-3">Are you sure? This action is not reversible!</p>
+              <div className="flex">
+                <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 mr-2" value="Confirm" onClick={()=>{
+                  if (confirmation === "clearLessons") clearLessons(setError, setSuccess);
+                  if (confirmation === "clearRaces") clearRaces(setError, setSuccess);
+                  if (confirmation === "deleteAccount") deleteAccount(setError, setSuccess);
+                  setConfirmation(null);
+                }} />
+                <input type="button" className="border-solid border-white border-2 rounded-lg p-2" value="Cancel" />
+              </div>
+            </div>
+          </div>
+          :
+          ""
+        }
 
         <h2 className="text-lg">Preferences</h2>
         <div>
@@ -146,9 +163,9 @@ export default function ClientAccount() {
       <div>
         <h2 className="text-lg">Account Actions</h2>
         <div className="flex flex-col w-1/5">
-          <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1" onClick={()=>clearLessons(setError, setSuccess)} value="Clear Lesson Data" />
-          <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1" onClick={()=>clearRaces(setError, setSuccess)} value="Clear Race Data" />
-          <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1" onClick={()=>deleteAccount(setError, setSuccess)} value="Delete Account" />
+          <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1" onClick={()=>setConfirmation("clearLessons")} value="Clear Lesson Data" />
+          <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1" onClick={()=>setConfirmation("clearRaces")} value="Clear Race Data" />
+          <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1" onClick={()=>setConfirmation("deleteAccount")} value="Delete Account" />
         </div>
       </div>
     </div>

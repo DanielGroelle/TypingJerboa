@@ -93,6 +93,9 @@ export default function ClientLearn() {
         throw "Fetch finishedLessons failed";
       }
     })();
+
+    resetLesson();
+    setActiveLesson(null);
   }, [languageScript]);
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {

@@ -8,6 +8,14 @@ export async function getLanguageScriptId(languageScript: string) {
   });
 }
 
+//convert a language script id to its corresponding string name
+export async function getLanguageScriptString(languageScriptId: number) {
+  return await prisma.languageScript.findFirst({
+    select: {languageScript: true},
+    where: {id: languageScriptId}
+  });
+}
+
 //pick a random paragraph based on language script id
 export async function selectRandomParagraph(languageScriptId: number) {
   const randomParagraph: object[] = await prisma.$queryRaw`SELECT * FROM Paragraphs WHERE Language_script_id = ${languageScriptId} AND selectable = true OFFSET floor(random() * (SELECT COUNT(*) FROM Paragraphs WHERE Language_script_id = ${languageScriptId} and selectable = true)) LIMIT 1`;

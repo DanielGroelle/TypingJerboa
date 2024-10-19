@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { findUserFromLoginToken } from "../../admin/user/route";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { getLanguageScriptId } from "../../utility/utility";
+import { getLanguageScriptId, getLanguageScriptString } from "../../utility/utility";
 
 //if no preferences assigned yet for userId, initialize languageScript to first in db
 async function initializeUserPreferences(userId: number) {
@@ -17,33 +17,18 @@ async function initializeUserPreferences(userId: number) {
     return null;
   }
 
-  const newPreferences = await prisma.preference.create({
-    select: {
-      languageScript: true
-    },
+  const newPreferences = await prisma.user.update({
+    select: {languageScriptPreference: true},
+    where: {id: userId},
     data: {
-      id: userId,
-      languageScriptId: firstLanguageScript.id
+      languageScriptIdPreference: firstLanguageScript.id
     }
   });
   if (!newPreferences) {
-    return NextResponse.json({error: "Error defining user preferences"}, {status: 400});
+    return null;
   }
 
   return newPreferences;
-}
-
-async function getPreferences(userId: number) {
-  const preferences = await prisma.preference.findFirst({
-    select: {
-      languageScript: true
-    },
-    where: {
-      user: {id: userId}
-    }
-  });
-
-  return preferences;
 }
 
 //fetch user preferences
@@ -51,14 +36,13 @@ export async function GET(req: NextRequest) {
   //get the loginToken from the users cookies if it exists
   const loginToken = req.cookies.get("loginToken")?.value;
   if (loginToken === undefined) return NextResponse.json({error: "No loginToken provided"}, {status: 400});
-
+  
   const user = await findUserFromLoginToken(loginToken);
   if (user === null) {
     return NextResponse.json({error: "User not found from login token"}, {status: 400});
   }
 
-  const preferences = await getPreferences(user.id);
-  if (preferences === null) {
+  if (user.languageScriptIdPreference === null) {
     const newPreferences = await initializeUserPreferences(user.id);
     if (newPreferences === null) {
       return NextResponse.json({error: "Error initializing user preferences"}, {status: 400});
@@ -67,13 +51,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({preferences: {...newPreferences}});
   }
 
-  return NextResponse.json({preferences});
+  const languageScript = await getLanguageScriptString(user.languageScriptIdPreference);
+  if (languageScript === null) {
+    return NextResponse.json({error: "Could not find languageScript from id"}, {status: 400});
+  }
+
+  return NextResponse.json({preferences: {
+    languageScript: {
+      id: user.languageScriptIdPreference,
+      languageScript: languageScript.languageScript
+    }
+  }});
 }
 
 const Z_REQUEST = z.object({
   languageScript: z.string()
-})
-//associate races set under a session to be under a user
+});
+//update a users preferences
 export async function POST(req: NextRequest) {
   //get the loginToken from the users cookies if it exists
   const loginToken = req.cookies.get("loginToken")?.value;
@@ -91,8 +85,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "User not found from login token"}, {status: 400});
   }
 
-  const preferences = await getPreferences(user.id);
-  if (preferences === null) {
+  if (user.languageScriptIdPreference === null) {
     const initializedPreferences = await initializeUserPreferences(user.id);
     if (initializedPreferences === null) {
       return NextResponse.json({error: "Error initializing user preferences"}, {status: 400});
@@ -104,15 +97,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Error getting languageScript id"}, {status: 400});
   }
 
-  const updatedPreferences = await prisma.preference.update({
+  const updatedPreferences = await prisma.user.update({
     select: {
-      languageScript: true
+      languageScriptIdPreference: true
     },
     data: {
-      languageScriptId: languageScriptId.id
+      languageScriptIdPreference: languageScriptId.id
     },
     where: {id: user.id}
   });
 
-  return NextResponse.json({preferences: {...updatedPreferences}});
+  if (updatedPreferences === null) {
+    return NextResponse.json({error: "Error updating languageScript preference"}, {status: 400});
+  }
+
+  return NextResponse.json({preferences: {languageScript: {id: updatedPreferences.languageScriptIdPreference, languageScript: request.languageScript}}});
 }

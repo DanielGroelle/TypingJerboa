@@ -26,35 +26,28 @@ model Admin {
 }
 
 model User {
-  id                 Int       @default(autoincrement()) @id
-  username           String    @unique
-  password           String
-  createdAt          DateTime  @default(now()) @map(name: "created_at")
-  loginToken         String?   @unique @map(name: "login_token")
-  loginExpiry        DateTime? @map(name: "login_expiry")
-  admin              Admin?
-  races              Race[]
-  lessons            Lesson[]
-  userWordEncounters UserWordEncounter[]
-  preferences        Preference?
+  id                         Int                 @default(autoincrement()) @id
+  username                   String              @unique
+  password                   String
+  createdAt                  DateTime            @default(now()) @map(name: "created_at")
+  loginToken                 String?             @unique @map(name: "login_token")
+  loginExpiry                DateTime?           @map(name: "login_expiry")
+  languageScriptPreference   LanguageScript?     @relation(fields: [languageScriptIdPreference], references: [id]) 
+  languageScriptIdPreference Int?                @map(name: "language_script_preference_id")
+  admin                      Admin?
+  races                      Race[]
+  lessons                    Lesson[]
+  userWordEncounters         UserWordEncounter[]
   @@map(name: "users")
 }
 
-model Preference {
-  id               Int  @id
-  user             User @relation(fields: [id], references: [id], onDelete: Cascade)
-  languageScript   LanguageScript @relation(fields: [languageScriptId], references: [id], onDelete: Cascade) 
-  languageScriptId Int            @map(name: "language_script_id")
-  @@map(name: "preferences")
-}
-
 model LanguageScript {
-  id             Int         @default(autoincrement()) @id
-  languageScript String      @unique @map(name: "language_script")
-  paragraphs     Paragraph[]
-  lessons        Lesson[]
-  words          Word[]
-  preferences    Preference[]
+  id                       Int         @default(autoincrement()) @id
+  languageScript           String      @unique @map(name: "language_script")
+  paragraphs               Paragraph[]
+  lessons                  Lesson[]
+  words                    Word[]
+  languageScriptPreference User[]
   @@map(name: "language_scripts")
 }
 

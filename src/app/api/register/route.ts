@@ -30,12 +30,21 @@ export async function POST(req: NextRequest) {
 
   const hashedPassword = await hashPassword(request.unhashedPassword);
 
+  const firstLanguageScript = await prisma.languageScript.findFirst({
+    select: { id: true },
+    orderBy: {id: "asc"}
+  });
+  if (firstLanguageScript === null) {
+    return NextResponse.json({error: "Preferences could no be initialized"}, {status: 500});
+  }
+
   const newUser = await prisma.user.create({
     data: {
       username: request.username,
-      password: hashedPassword
+      password: hashedPassword,
+      languageScriptIdPreference: firstLanguageScript.id
     }
-  })
+  });
 
   if (newUser === null) {
     return NextResponse.json({error: "User creation failed"}, {status: 400});
