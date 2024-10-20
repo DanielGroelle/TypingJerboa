@@ -138,7 +138,9 @@ export default function ClientAccount() {
                   if (confirmation === "deleteAccount") deleteAccount(setError, setSuccess);
                   setConfirmation(null);
                 }} />
-                <input type="button" className="border-solid border-white border-2 rounded-lg p-2" value="Cancel" />
+                <input type="button" className="border-solid border-white border-2 rounded-lg p-2" onClick={() => {
+                  setConfirmation(null);
+                }} value="Cancel" />
               </div>
             </div>
           </div>

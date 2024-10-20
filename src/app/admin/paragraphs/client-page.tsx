@@ -36,6 +36,7 @@ export default function ClientAdminParagraphs() {
 
   const [editParagraph, setEditParagraph] = useState<Paragraph | null>(null);
   const [newParagraph, setNewParagraph] = useState<Omit<Paragraph, "id"> | null>(null);
+  const [confirmation, setConfirmation] = useState<(() => void) | null>(null);
 
   useEffect(()=>{
     void (async ()=>{
@@ -45,61 +46,61 @@ export default function ClientAdminParagraphs() {
   }, []);
 
   function handleDelete(paragraphId: number) {
-    void (async ()=>{
-      try{
-        await fetch(`/api/admin/paragraph`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            id: paragraphId
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
+    setConfirmation(() => () => {
+      void (async ()=>{
+        try{
+          await fetch(`/api/admin/paragraph`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              id: paragraphId
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
+    
+      const i = paragraphs.findIndex((paragraph)=>paragraph.id === paragraphId);
+      const newParagraphs = paragraphs.toSpliced(i, 1);
 
-    //TODO: give some prompt that deleting is a destructive action for any races that used the paragraph
-  
-    const i = paragraphs.findIndex((paragraph)=>paragraph.id === paragraphId);
-    const newParagraphs = paragraphs.toSpliced(i, 1);
-
-    //go to previous page if deleting the last paragraph on the current page
-    if (viewPage * paragraphsPerPage - paragraphsPerPage >= refFilteredParagraphs.items.length - 1) {
-      if (viewPage > 1) setViewPage(viewPage - 1);
-    }
-  
-    setParagraphs([...newParagraphs]);
+      //go to previous page if deleting the last paragraph on the current page
+      if (viewPage * paragraphsPerPage - paragraphsPerPage >= refFilteredParagraphs.items.length - 1) {
+        if (viewPage > 1) setViewPage(viewPage - 1);
+      }
+    
+      setParagraphs([...newParagraphs]);
+    });
   }
 
   function deleteManyParagraphs(paragraphs: Paragraph[]) {
-    const paragraphIds = paragraphs.map((paragraph)=>paragraph.id);
+    setConfirmation(() => () => {
+      const paragraphIds = paragraphs.map((paragraph)=>paragraph.id);
+      
+      void (async ()=>{
+        try{
+          await fetch(`/api/admin/paragraph/bulk`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              ids: paragraphIds
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
     
-    void (async ()=>{
-      try{
-        await fetch(`/api/admin/paragraph/bulk`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            ids: paragraphIds
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
+      const newParagraphs = paragraphs.filter((paragraph)=>{
+        return !paragraphIds.includes(paragraph.id)
+      });
 
-    //TODO: give some prompt that deleting is a destructive action for any races that used the paragraph
-  
-    const newParagraphs = paragraphs.filter((paragraph)=>{
-      return !paragraphIds.includes(paragraph.id)
+      setParagraphs([...newParagraphs]);
     });
-
-    setParagraphs([...newParagraphs]);
   }
 
   const refFilteredParagraphs: {items: Paragraph[]} = {items: []};
@@ -144,6 +145,26 @@ export default function ClientAdminParagraphs() {
       </div>
 
       <AddParagraphFormComponent paragraphs={paragraphs} setParagraphs={setParagraphs} newParagraph={newParagraph} setNewParagraph={setNewParagraph} />
+
+      {
+        confirmation ?
+        <div className="fixed left-0 top-0 w-full h-full bg-neutral-950/50 flex justify-center items-center">
+          <div className="absolute border-solid border-white border bg-black rounded-lg p-2 text-center">
+            <p className="mb-3">Are you sure? Deleting a paragraph will also delete any associated races. This action is not reversible!</p>
+            <div className="flex">
+              <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 mr-2" value="Confirm" onClick={() => {
+                confirmation();
+                setConfirmation(null);
+              }} />
+              <input type="button" className="border-solid border-white border-2 rounded-lg p-2" onClick={() => {
+                setConfirmation(null);
+              }} value="Cancel" />
+            </div>
+          </div>
+        </div>
+        :
+        ""
+      }
 
       <div className="flex justify-between">
         <h1>Paragraphs</h1>
