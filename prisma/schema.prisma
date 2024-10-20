@@ -19,12 +19,6 @@ model Session {
   @@map(name:"sessions")
 }
 
-model Admin {
-  id   Int  @id
-  user User @relation(fields: [id], references: [id], onDelete: Cascade)
-  @@map(name: "admins")
-}
-
 model User {
   id                         Int                 @default(autoincrement()) @id
   username                   String              @unique
@@ -34,7 +28,7 @@ model User {
   loginExpiry                DateTime?           @map(name: "login_expiry")
   languageScriptPreference   LanguageScript?     @relation(fields: [languageScriptIdPreference], references: [id]) 
   languageScriptIdPreference Int?                @map(name: "language_script_preference_id")
-  admin                      Admin?
+  admin                      Boolean             @default(false)
   races                      Race[]
   lessons                    Lesson[]
   userWordEncounters         UserWordEncounter[]

@@ -110,6 +110,10 @@ export default function ClientAdminParagraphs() {
       languageScripts: {
         getter: paragraph => paragraph.languageScript.languageScript,
         options: Object.values(LanguageScripts).map(languageScript => languageScript.internal)
+      },
+      selectable: {
+        getter: paragraph => paragraph.selectable.toString(),
+        options: ["true", "false"]
       }
     },
     filters: {

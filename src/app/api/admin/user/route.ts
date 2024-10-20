@@ -11,11 +11,8 @@ export async function getUsers() {
       createdAt: true
     }
   });
-  
-  //convert admin data to a simple true or false
-  const users = returnedUsers.map((user)=>{return {...user, admin: user.admin !== null}});
 
-  return users;
+  return returnedUsers;
 }
 
 //return all users

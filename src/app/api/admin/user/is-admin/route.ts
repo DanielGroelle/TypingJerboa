@@ -14,7 +14,7 @@ export async function userIsAdmin(token: string) {
     return false;
   }
 
-  return user.admin !== null;
+  return user.admin;
 }
 
 //sending the loginToken in the POST body because it comes from middleware
