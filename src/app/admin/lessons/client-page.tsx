@@ -105,8 +105,8 @@ export default function ClientAdminLessons() {
     },
     filters: {
       "id": { getter: (lesson: Lesson) => lesson.id },
-      "startTime": { getter: (lesson: Lesson) => lesson.startTime },
-      "endTime": { getter: (lesson: Lesson) => String(lesson.endTime) },
+      "startTime": { getter: (lesson: Lesson) => new Date(lesson.startTime) },
+      "endTime": { getter: (lesson: Lesson) => new Date(lesson.endTime ?? 0) },
       "mistakes": { getter: (lesson: Lesson) => String(lesson.mistakes) },
       "lessonCharacters": { getter: (lesson: Lesson) => lesson.lessonCharacters },
       "lessonText": { getter: (lesson: Lesson) => lesson.lessonText },

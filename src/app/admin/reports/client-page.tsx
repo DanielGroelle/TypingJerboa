@@ -147,7 +147,7 @@ export default function ClientAdminReports() {
       "paragraphText": { getter: (report: ParagraphReport) => report.paragraphText },
       "username": { getter: (report: ParagraphReport) => String(report.user?.username) },
       "sessionToken": { getter: (report: ParagraphReport) => String(report.session?.token) },
-      "createdAt": { getter: (report: ParagraphReport) => report.createdAt },
+      "createdAt": { getter: (report: ParagraphReport) => new Date(report.createdAt) },
     },
     setViewPage: setViewPage,
     deleteManyItems: deleteManyReports

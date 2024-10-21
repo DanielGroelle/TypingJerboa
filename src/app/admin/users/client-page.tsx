@@ -130,7 +130,8 @@ export default function ClientAdminUsers() {
     },
     filters: {
       "id": { getter: (user: User) => user.id },
-      "username": { getter: (user: User) => user.username }
+      "username": { getter: (user: User) => user.username },
+      "createdAt": { getter: (user: User) => new Date(user.createdAt) }
     },
     setViewPage: setViewPage,
     deleteManyItems: null

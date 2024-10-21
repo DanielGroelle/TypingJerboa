@@ -100,8 +100,8 @@ export default function ClientAdminRaces() {
     },
     filters: {
       "id": { getter: (race: Race) => race.id },
-      "startTime": { getter: (race: Race) => race.startTime },
-      "endTime": { getter: (race: Race) => String(race.endTime) },
+      "startTime": { getter: (race: Race) => new Date(race.startTime) },
+      "endTime": { getter: (race: Race) => new Date(race.endTime ?? 0) },
       "mistakes": { getter: (race: Race) => String(race.mistakes) },
       "paragraph": { getter: (race: Race) => race.paragraph.text },
       "user": { getter: (race: Race) => String(race.user?.username) },

@@ -17,7 +17,7 @@ export default function FilterOptionsComponent<T>({
     }
   }
   filters: {[filterType: string]: {
-    getter: (item: T) => (string | number | null)
+    getter: (item: T) => (string | number | Date | null)
   }},
   deleteManyItems: ((items: T[]) => void) | null,
   setViewPage: (page: number) => void
@@ -68,7 +68,6 @@ export default function FilterOptionsComponent<T>({
     return filtered;
   });
 
-  //TODO: fix/allow sorting on Dates (currently sending in strings which obviously doesnt work well)
   //sort filtered items
   refFilteredItems.items.sort((itemA, itemB)=>{
     let valueA = filters[sortBy].getter(itemA);
