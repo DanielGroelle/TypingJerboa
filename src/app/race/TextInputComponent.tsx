@@ -97,8 +97,8 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
       setMistakes(newMistakes);
     }
 
-    //check if the userInput is equal to the raceParagraph in order to end the race
-    if (newUserInput === raceParagraphArray.join("")) {
+    //check if the userInput is equal to the raceParagraph and that race has actually started in order to end the race
+    if (newUserInput === raceParagraphArray.join("") && new Date().getTime() >= (startTime?.getTime() ?? 0)) {
       setRaceFinished(true);
       endRace(mistakes, raceId, router);
     }
