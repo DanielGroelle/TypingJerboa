@@ -137,6 +137,12 @@ export default function ClientAdminRaces() {
               session: {race.session?.token ? `${String(race.session?.token)}` : "null"}<br/>
               startTime: {race.startTime}<br/>
               endTime: {String(race.endTime)}<br/>
+              wpm: {
+                race.endTime ?
+                  ((race.paragraph.text.length / 5) / ((new Date(race.endTime).getTime() - new Date(race.startTime).getTime()) / 1000 / 60)).toFixed(1)
+                :
+                "N/A"
+              }<br/>
               mistakes: {String(race.mistakes)}<br/>
               paragraph: {race.paragraph.text}
             </div>

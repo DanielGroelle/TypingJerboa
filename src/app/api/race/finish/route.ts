@@ -17,6 +17,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
+  const race = await prisma.race.findFirst({
+    where: {id: request.raceId},
+    select: {startTime: true}
+  });
+  if (race === null) {
+    return NextResponse.json({error: "Race ID not found"}, {status: 400});
+  }
+
+  if (new Date(request.endTime).getTime() <= race.startTime.getTime()) {
+    return NextResponse.json({error: "Race endTime cannot be before startTime"}, {status: 400});
+  }
+
   //update the race with the endTime and the mistakes
   const raceFinishResult = await prisma.race.update({
     where: {id: request.raceId},
