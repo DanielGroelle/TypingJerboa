@@ -70,3 +70,24 @@ export const Z_LESSON = z.object({
   }).nullable()
 });
 export type Lesson = z.infer<typeof Z_LESSON>;
+
+export const Z_PARAGRAPH_REPORT = z.object({
+  id: z.number(),
+  paragraph: z.object({
+    id: z.number(),
+    text: z.string(),
+    author: z.string(),
+    source: z.string()
+  }).nullable(),
+  paragraphText: z.string(),
+  user: z.object({
+    id: z.number(),
+    username: z.string()
+  }).nullable(),
+  session: z.object({
+    token: z.string()
+  }).nullable(),
+  resolved: z.boolean(),
+  createdAt: z.string()
+});
+export type ParagraphReport = z.infer<typeof Z_PARAGRAPH_REPORT>;

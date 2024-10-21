@@ -20,12 +20,43 @@ const Z_RESPONSE = z.object({
 
 type RaceData = z.infer<typeof Z_RESPONSE>;
 
+const Z_REPORT_RESPONSE = z.object({
+  success: z.boolean()
+});
+
+function reportParagraph(raceId: string, setError: (error: string | null) => void, setSuccess: (success: string | null) => void) {
+  void fetch(`/api/paragraph/report`, {
+    method: "POST",
+    body: JSON.stringify({
+      raceId: raceId
+    }),
+    mode: "cors",
+    cache: "default"
+  }).then(async (data) => {
+    const tryResponse = Z_REPORT_RESPONSE.safeParse(await data.json());
+    if (!tryResponse.success) {
+      setError("Error Reporting Paragraph!");
+      setSuccess(null);
+    }
+    else {
+      setSuccess("Successfully Reported Paragraph");
+      setError(null);
+    }
+  });
+}
+
 export default function ClientRaceFinish() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = searchParams.get("id");
+  if (id === null) {
+    router.push("/404");
+    throw "404";
+  }
 
   const [raceData, setRaceData] = useState<RaceData>({user: "", startTime: "", endTime: "", mistakes: 0, paragraph: {text: "", author: "", source: ""}});
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(()=>{
     void fetch(`/api/race`, {
@@ -63,9 +94,17 @@ export default function ClientRaceFinish() {
       <p>Author: {raceData.paragraph.author}</p>
       <p>Source: {raceData.paragraph.source}</p>
       <br/>
+
+      <div className="border-solid border-red-500 border rounded-lg p-2" hidden={typeof error !== "string"}>
+        {error}
+      </div>
+      <div className="border-solid border-green-500 border rounded-lg p-2" hidden={typeof success !== "string"}>
+        {success}
+      </div>
       <div className="flex">
         <Link href="/race" className="border-solid border-white border-2 rounded-lg p-2">Race again</Link>
         <input type="button" className="border-solid border-green-600 border-2 rounded-lg ml-1 p-2" onClick={()=>{void navigator.clipboard.writeText(window.location.href)}} value="Copy Share Link" />
+        <input type="button" className="border-solid border-red-700 border-2 rounded-lg ml-1 p-2" onClick={()=>reportParagraph(id, setError, setSuccess)} value="Report Paragraph" />
       </div>
     </div>
   );

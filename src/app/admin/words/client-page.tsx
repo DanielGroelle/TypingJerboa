@@ -203,7 +203,7 @@ export default function ClientAdminWords() {
       </div>
       <br/>
       {refFilteredWords.items.slice(viewPage * wordsPerPage - wordsPerPage, viewPage * wordsPerPage).map((word)=>
-        <div className="border-solid border-white border flex justify-between" key={word.id}>
+        <div className="border-solid border-white border" key={word.id}>
           <div>
             id: {word.id}<br/>
             word: {word.word}<br/>

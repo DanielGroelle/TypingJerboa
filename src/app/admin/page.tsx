@@ -53,6 +53,14 @@ export default function Admin() {
           Words view
         </div>
       </div>
+      <div className="pb-4">
+        <div className="text-2xl">
+          <Link href="/admin/reports">Reports</Link>
+        </div>
+        <div>
+          Paragraph Reports view
+        </div>
+      </div>
     </div>
   );
 }

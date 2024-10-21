@@ -16,6 +16,7 @@ model Session {
   races              Race[]
   lessons            Lesson[]
   userWordEncounters UserWordEncounter[]
+  paragraphReports   ParagraphReport[]
   @@map(name:"sessions")
 }
 
@@ -32,6 +33,7 @@ model User {
   races                      Race[]
   lessons                    Lesson[]
   userWordEncounters         UserWordEncounter[]
+  paragraphReports           ParagraphReport[]
   @@map(name: "users")
 }
 
@@ -80,7 +82,7 @@ model UserWordEncounter {
   mistakes        Int
   timeEncountered DateTime @map(name: "time_encountered")
   lesson          Lesson?  @relation(fields: [lessonId], references: [id])
-  lessonId        String?     @map(name: "lesson_id")
+  lessonId        String?  @map(name: "lesson_id")
   race            Race?    @relation(fields: [raceId], references: [id])
   raceId          String?  @map(name: "race_id")
   session         Session? @relation(fields: [sessionToken], references: [token])
@@ -91,15 +93,30 @@ model UserWordEncounter {
 }
 
 model Paragraph {
-  id               Int            @default(autoincrement()) @id
+  id               Int               @default(autoincrement()) @id
   text             String
   source           String?
   author           String?
-  languageScript   LanguageScript @relation(fields: [languageScriptId], references: [id]) 
-  languageScriptId Int            @map(name: "language_script_id")
-  selectable       Boolean        @default(true)
+  languageScript   LanguageScript    @relation(fields: [languageScriptId], references: [id]) 
+  languageScriptId Int               @map(name: "language_script_id")
+  selectable       Boolean           @default(true)
   races            Race[]
+  paragraphReports ParagraphReport[]
   @@map(name: "paragraphs")
+}
+
+model ParagraphReport {
+  id            Int        @default(autoincrement()) @id
+  paragraph     Paragraph? @relation(fields: [paragraphId], references: [id], onDelete: SetNull)
+  paragraphId   Int?       @map(name: "paragraph_id")
+  paragraphText String     @map(name: "paragraph_text")
+  user          User?      @relation(fields: [userId], references: [id])
+  userId        Int?       @map(name: "user_id")
+  session       Session?   @relation(fields: [sessionToken], references: [token])
+  sessionToken  String?    @map(name: "session_token")
+  resolved      Boolean    @default(false)
+  createdAt     DateTime   @default(now()) @map(name: "created_at")
+  @@map(name: "paragraph_reports")
 }
 
 model Race {

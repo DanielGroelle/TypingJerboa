@@ -44,7 +44,7 @@ export default function EditParagraphFormComponent({paragraphs, setParagraphs, e
   handleDelete: (id: number) => void
 }) {
   return (
-    <form onSubmit={(e)=>handleSave(e, paragraphs, setParagraphs, editParagraph, setEditParagraph)}>
+    <form onSubmit={e => handleSave(e, paragraphs, setParagraphs, editParagraph, setEditParagraph)}>
       id: {editParagraph.id}<br/>
       <div className="flex">
         <span>text:</span>
