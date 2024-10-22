@@ -1,24 +1,36 @@
-import { z } from "zod";
+import { CronJob } from "cron";
+import prisma from "@/lib/prisma";
 
-const Z_RESPONSE = z.object({
-  deletedTokens: z.object({
-    count: z.number()
-  })
-});
-
-//runs on build and compilation and calls the api to cleanup old session tokens
+//on build, start cron job for session token cleanup
+//actually minorly errors on each compile, because it cant find the cron module
+//but somehow it works anyways?
 export function register() {
   void (async ()=>{
     try {
-      const response = Z_RESPONSE.parse(await (await fetch(new URL("/api/tokens", process.env.BASE_URL), {
-        method: "DELETE",
-        mode: "cors",
-        cache: "default"
-      })).json());
-      console.log("Ran session token cleanup", response);
+      CronJob.from({
+        cronTime: "0 0 12 * * *", //will run every day at 12pm
+        onTick: async () => {
+          const deletedTokens = await prisma.session.deleteMany({
+            where: {
+              expiry: {
+                lte: new Date()
+              }
+            }
+          });
+          if (!deletedTokens) {
+            console.log("Error deleting sessionTokens");
+          }
+
+          console.log("Ran session token cleanup", deletedTokens);
+        },
+        start: true,
+        timeZone: "America/Los_Angeles"
+      });
+
+      console.log("Started cron job");
     }
     catch(e: unknown) {
-      console.log("SessionToken cleanup error", e);
+      console.log("Instrumentation error", e);
     }
   })();
 }
