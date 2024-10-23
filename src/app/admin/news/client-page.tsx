@@ -2,6 +2,7 @@
 
 import React, { FormEvent, useEffect, useState } from "react";
 import { z } from "zod";
+import FilterOptionsComponent from "../FilterOptionsComponent";
 
 const Z_NEWSPOST = z.object({
   id: z.number(),
@@ -36,8 +37,11 @@ async function getNewsPosts() {
 
 export default function ClientAdminNews() {
   const [newsPosts, setNewsPosts] = useState<NewsPost[]>([]);
-  const [adding, setAdding] = useState(false);
-  const [newsPostEditing, setNewsPostEditing] = useState<number | null>(null);
+  const [viewPage, setViewPage] = useState(1);
+  const newsPostsPerPage = 25;
+
+  const [editNewsPost, setEditNewsPost] = useState<NewsPost | null>();
+  const [newNewsPost, setNewNewsPost] = useState<Omit<NewsPost, "id" | "postDate"> | null>();
 
   useEffect(()=>{
     void (async ()=>setNewsPosts(await getNewsPosts()))();
@@ -46,40 +50,18 @@ export default function ClientAdminNews() {
   function handleAdd(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const titleSelector = document.querySelector("#title-input");
-    const authorSelector = document.querySelector("#author-input");
-    const bodySelector = document.querySelector("#body-input");
-    const tagsSelector = document.querySelector("#tags-input");
-    if (!(titleSelector instanceof HTMLInputElement) ||
-        !(authorSelector instanceof HTMLInputElement) ||
-        !(bodySelector instanceof HTMLTextAreaElement) ||
-        !(tagsSelector instanceof HTMLInputElement)
-    ) {
-      throw "Selected elements [titleSelector, authorSelector, bodySelector, tagsSelector] were of unexpected type";
-    }
-
-    const title = titleSelector.value;
-    const author = authorSelector.value;
-    const body = bodySelector.value;
-    const tags = tagsSelector.value;
-
     void (async ()=>{
-      try{
+      try {
         const response = Z_NEWSPOST.parse(await(await fetch(`/api/admin/news`, {
           method: "POST",
-          body: JSON.stringify({
-            title,
-            author,
-            body,
-            tags: [tags]
-          }),
+          body: JSON.stringify(newNewsPost),
           mode: "cors",
           cache: "default"
         })).json());
 
         //rerender edits
         setNewsPosts([response, ...newsPosts]);
-        setAdding(false);
+        setNewNewsPost(null);
       }
       catch(e: unknown) {
         console.error("NewsPost add failed", e);
@@ -90,34 +72,13 @@ export default function ClientAdminNews() {
   function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const titleSelector = document.querySelector("#title-input");
-    const authorSelector = document.querySelector("#author-input");
-    const bodySelector = document.querySelector("#body-input");
-    const tagsSelector = document.querySelector("#tags-input");
-    if (!(titleSelector instanceof HTMLInputElement) ||
-        !(authorSelector instanceof HTMLInputElement) ||
-        !(bodySelector instanceof HTMLTextAreaElement) ||
-        !(tagsSelector instanceof HTMLInputElement)
-    ) {
-      throw "Selected elements [titleSelector, authorSelector, bodySelector, tagsSelector] were of unexpected type";
-    }
-
-    const title = titleSelector.value;
-    const author = authorSelector.value;
-    const body = bodySelector.value;
-    const tags = tagsSelector.value;
+    if (editNewsPost === null) throw "editNewsPost is null!";
 
     void (async ()=>{
-      try{
+      try {
         const response = Z_NEWSPOST.parse(await(await fetch(`/api/admin/news/edit`, {
           method: "POST",
-          body: JSON.stringify({
-            id: newsPostEditing,
-            title,
-            author,
-            body,
-            tags: [tags]
-          }),
+          body: JSON.stringify(editNewsPost),
           mode: "cors",
           cache: "default"
         })).json());
@@ -133,12 +94,12 @@ export default function ClientAdminNews() {
       }
     })();
     
-    setNewsPostEditing(null);
+    setEditNewsPost(null);
   }
 
   function handleDelete(newsPostId: number) {
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/news`, {
           method: "DELETE",
           body: JSON.stringify({
@@ -159,34 +120,77 @@ export default function ClientAdminNews() {
     setNewsPosts([...newNewsPosts]);
   }
 
+  const refFilteredNewsPosts: {items: NewsPost[]} = {items: []};
+  const filterOptionsComponent = FilterOptionsComponent<NewsPost>({
+    items: newsPosts,
+    refFilteredItems: refFilteredNewsPosts,
+    selectFilters: {},
+    filters: {
+      "id": { getter: (newsPost: NewsPost) => newsPost.id },
+      "postDate": { getter: (newsPost: NewsPost) => newsPost.postDate },
+      "title": { getter: (newsPost: NewsPost) => newsPost.title },
+      // "tags": { getter: (newsPost: NewsPost) => newsPost.tags },
+      "body": { getter: (newsPost: NewsPost) => newsPost.body }
+    },
+    setViewPage: setViewPage,
+    deleteManyItems: null
+  });
+
   return (
-    <div>
-      <h1>Posts</h1>
-      <br/>
-      <input type="button" className="border-solid border-blue-600 border rounded-lg p-2 mr-2" onClick={()=>setAdding(true)} value="Create News Post" />
-      <br/><br/>
+    <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
+      {filterOptionsComponent}
+
+      <div>
+        <input type="button" className="border-solid border-blue-600 border rounded-lg p-2 mr-2" onClick={()=>setNewNewsPost(newNewsPost ? null : {
+          title: "",
+          author: "",
+          body: "",
+          tags: []
+        })} value="Add News Post" />
+      </div>
+
+      <div className="flex justify-between">
+        <h1>News Posts</h1>
+        <div className="flex mr-10">
+          <p className="leading-10">Page:</p>
+          <select onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{setViewPage(Number(e.target.value))}} value={viewPage} id="page-select">
+            {Array.from(Array(Math.ceil(refFilteredNewsPosts.items.length / newsPostsPerPage))).map((_, i)=>{
+              return <option key={i + 1}>{i + 1}</option>
+            })}
+          </select>
+        </div>
+      </div>
+
       {
-        adding ?
-        <div className="border-solid border-green-700 border" key="adding">
+        newNewsPost ?
+        <div className="border-solid border-green-700 border">
         <form onSubmit={handleAdd}>
             <div className="flex">
               <span>title:</span>
-              <input type="text" id="title-input" className="w-full" /><br/>
+              <input type="text" id="title-input" className="w-full" onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+                setNewNewsPost({...newNewsPost, title: e.target.value});
+              }}/><br/>
             </div>
             <div className="flex">
               <span>author:</span>
-              <input type="text" id="author-input" className="w-full"/><br/>
-            </div>
-            <div className="flex">
-              <span>body:</span>
-              <textarea id="body-input" className="w-full resize-none"></textarea><br/>
+              <input type="text" id="author-input" className="w-full" onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+                setNewNewsPost({...newNewsPost, author: e.target.value});
+              }}/><br/>
             </div>
             <div className="flex">
               <span>tags:</span>
-              <input type="text" id="tags-input" className="w-full"/><br/>
+              <input type="text" id="tags-input" className="w-full" onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+                setNewNewsPost({...newNewsPost, tags: [e.target.value]});
+              }}/><br/>
+            </div>
+            <div className="flex">
+              <span>body:</span>
+              <textarea id="body-input" className="w-full resize-none" onChange={(e: React.ChangeEvent<HTMLTextAreaElement>)=>{
+                setNewNewsPost({...newNewsPost, body: e.target.value});
+              }}></textarea><br/>
             </div>
             <div>
-              <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setAdding(false)} value="Cancel" />
+              <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setNewNewsPost(null)} value="Cancel" />
               <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2" value="Add" />
             </div>
           </form>
@@ -194,56 +198,66 @@ export default function ClientAdminNews() {
         :
         ""
       }
-      {newsPosts.map((newsPost)=>
-        <div className="border-solid border-white border" key={newsPost.id}>
-        {
-          //if theres a newsPost we're editing, display a form to change values
-          newsPostEditing === newsPost.id ?
-          <form onSubmit={handleSave}>
-            id: {newsPost.id}<br/>
-            <div className="flex">
-              <span>title:</span>
-              <input type="text" id="title-input" className="w-full" defaultValue={newsPost.title}/><br/>
-            </div>
-            <div className="flex">
-              <span>author:</span>
-              <input type="text" id="author-input" className="w-full" defaultValue={newsPost.author}/><br/>
-            </div>
-            <div className="flex">
-              <span>body:</span>
-              <textarea id="body-input" className="w-full resize-none" defaultValue={newsPost.body}></textarea><br/>
-            </div>
-            <div className="flex">
-              <span>tags:</span>
-              <input type="text" id="tags-input" className="w-full" defaultValue={newsPost.tags}/><br/>
-            </div>
-            <div className="flex justify-between">
-              <div>
-                <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setNewsPostEditing(null)} value="Cancel" />
-                <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2" value="Save" />
-              </div>
-              <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(newsPost.id)} value="X" />
-            </div>
-          </form>
-          :
-          //if we're not editing, display the newsPost data normally
-          <>
-            <div>
-              id: {newsPost.id}<br/>
-              title: {newsPost.title}<br/>
-              author: {newsPost.author}<br/>
-              tags: {newsPost.tags}<br/>
-              postDate: {newsPost.postDate}<br/>
-              body: {newsPost.body}<br/>
-            </div>
-            <div className="flex justify-between">
-              <input type="button" className="border-solid border-green-700 border-2 rounded-lg p-2" onClick={()=>setNewsPostEditing(newsPost.id)} value="Edit" />
-              <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(newsPost.id)} value="X" />
-            </div>
-          </>
-        }
-        </div>
-      )}
+      <div className="flex flex-col overflow-y-auto">
+        {refFilteredNewsPosts.items.slice(viewPage * newsPostsPerPage - newsPostsPerPage, viewPage * newsPostsPerPage).map((newsPost)=>
+          <div className="border-solid border-white border" key={newsPost.id}>
+            {
+              //if theres a newsPost we're editing, display a form to change values
+              editNewsPost?.id === newsPost.id ?
+              <form onSubmit={handleSave}>
+                id: {newsPost.id}<br/>
+                <div className="flex">
+                  <span>title:</span>
+                  <input type="text" id="title-input" className="w-full" value={editNewsPost.title} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+                    setEditNewsPost({...editNewsPost, title: e.target.value});
+                  }}/><br/>
+                </div>
+                <div className="flex">
+                  <span>author:</span>
+                  <input type="text" id="author-input" className="w-full" value={editNewsPost.author} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+                    setEditNewsPost({...editNewsPost, author: e.target.value});
+                  }}/><br/>
+                </div>
+                <div className="flex">
+                  <span>tags:</span>
+                  <input type="text" id="tags-input" className="w-full" value={editNewsPost.tags} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+                    setEditNewsPost({...editNewsPost, tags: [e.target.value]});
+                  }}/><br/>
+                </div>
+                <div className="flex">
+                  <span>body:</span>
+                  <textarea id="body-input" className="w-full resize-none" value={editNewsPost.body} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>)=>{
+                    setEditNewsPost({...editNewsPost, body: e.target.value});
+                  }}></textarea><br/>
+                </div>
+                <div className="flex justify-between">
+                  <div>
+                    <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setEditNewsPost(null)} value="Cancel" />
+                    <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2" value="Save" />
+                  </div>
+                  <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(newsPost.id)} value="X" />
+                </div>
+              </form>
+              :
+              //if we're not editing, display the newsPost data normally
+              <>
+                <div>
+                  id: {newsPost.id}<br/>
+                  title: {newsPost.title}<br/>
+                  author: {newsPost.author}<br/>
+                  tags: {newsPost.tags}<br/>
+                  postDate: {newsPost.postDate}<br/>
+                  body: {newsPost.body}<br/>
+                </div>
+                <div className="flex justify-between">
+                  <input type="button" className="border-solid border-green-700 border-2 rounded-lg p-2" onClick={()=>setEditNewsPost(newsPost)} value="Edit" />
+                  <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(newsPost.id)} value="X" />
+                </div>
+              </>
+            }
+          </div>
+        )}
+      </div>
       {newsPosts.length === 0 ? "Nobody here but us chickens!" : ""}
     </div>
   );
