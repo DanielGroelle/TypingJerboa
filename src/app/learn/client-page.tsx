@@ -54,14 +54,13 @@ export default function ClientLearn() {
   const [userInput, setUserInput] = useState("");
   const userInputRef = useRef("");
   const [error, setError] = useState<string | null>(null);
-  const [activeMode, setActiveMode] = useState<string>("new-characters");
+  const [activeMode, setActiveMode] = useState<"new-characters" | "word-exercise">("new-characters");
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
   const [lessonFinished, setLessonFinished] = useState(false);
   const lessons = ManualKeyboardMap[languageScript];
-  const [finishedLessons, setFinishedLessons] = useState<Set<string>>(new Set([]));
+  const [finishedLessonsNewCharacters, setFinishedLessonsNewCharacters] = useState<Set<string>>(new Set([]));
+  const [finishedLessonsWordExercise, setFinishedLessonsWordExercise] = useState<Set<string>>(new Set([]));
   const [lessonId, setLessonId] = useState<string | null>(null);
-
-  //TODO: make new characters and word exercise show different checkmarks
 
   useEffect(()=>{
     void (async ()=>{
@@ -71,11 +70,18 @@ export default function ClientLearn() {
   }, []);
 
   const Z_FINISHED_LESSONS_RESPONSE = z.object({
-    finishedLessons: z.array(
-      z.object({
-        lessonCharacters: z.string()
-      }
-    ))
+    finishedLessons: z.object({
+      newCharacters: z.array(
+        z.object({
+          lessonCharacters: z.string()
+        }
+      )),
+      wordExercise: z.array(
+        z.object({
+          lessonCharacters: z.string()
+        }
+      ))
+    })
   });
   useEffect(()=>{
     void (async()=>{
@@ -86,8 +92,10 @@ export default function ClientLearn() {
           mode: "cors",
           cache: "default"
         })).json());
-        const newFinishedLessons = response.finishedLessons.map((lesson)=>lesson.lessonCharacters);
-        setFinishedLessons(new Set([...newFinishedLessons]));
+        const newCharactersFinishedLessons = response.finishedLessons.newCharacters.map((lesson)=>lesson.lessonCharacters);
+        setFinishedLessonsNewCharacters(new Set([...newCharactersFinishedLessons]));
+        const wordExerciseFinishedLessons = response.finishedLessons.wordExercise.map((lesson)=>lesson.lessonCharacters);
+        setFinishedLessonsWordExercise(new Set([...wordExerciseFinishedLessons]));
       }
       catch(e: unknown) {
         throw "Fetch finishedLessons failed";
@@ -200,7 +208,14 @@ export default function ClientLearn() {
       }
     })();
 
-    if (activeLesson) setFinishedLessons(new Set([...finishedLessons, activeLesson]));
+    if (activeLesson) {
+      if (activeMode === "new-characters") {
+        setFinishedLessonsNewCharacters(new Set([...finishedLessonsNewCharacters, activeLesson]));
+      }
+      else {
+        setFinishedLessonsWordExercise(new Set([...finishedLessonsWordExercise, activeLesson]));
+      }
+    }
     resetLesson();
   }
 
@@ -235,7 +250,14 @@ export default function ClientLearn() {
       </div>
 
       <div className="flex overflow-y-hidden">
-        <SidebarComponent lessons={lessons} activeLesson={activeLesson} setActiveLesson={setActiveLesson} finishedLessons={finishedLessons} resetLesson={resetLesson} />
+        <SidebarComponent
+          lessons={lessons}
+          activeLesson={activeLesson}
+          setActiveLesson={setActiveLesson}
+          finishedLessonsNewCharacters={finishedLessonsNewCharacters}
+          finishedLessonsWordExercise={finishedLessonsWordExercise}
+          resetLesson={resetLesson}
+        />
         
         {/* center area */}
         <div className="m-4">

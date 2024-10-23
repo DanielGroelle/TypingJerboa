@@ -1,10 +1,11 @@
 import { ManualKeyboardMapping } from "@/js/language-scripts";
 
-export default function SidebarComponent({lessons, activeLesson, setActiveLesson, finishedLessons, resetLesson}: {
+export default function SidebarComponent({lessons, activeLesson, setActiveLesson, finishedLessonsNewCharacters, finishedLessonsWordExercise, resetLesson}: {
   lessons: ManualKeyboardMapping,
   activeLesson: string | null,
   setActiveLesson: (activeLesson: string | null)=>void,
-  finishedLessons: Set<string>,
+  finishedLessonsNewCharacters: Set<string>,
+  finishedLessonsWordExercise: Set<string>,
   resetLesson: ()=>void
 }) {
   function displaySidebarCharsByType(lessonType: keyof ManualKeyboardMapping) {
@@ -28,12 +29,19 @@ export default function SidebarComponent({lessons, activeLesson, setActiveLesson
       return (
         <div className={tailwindClassNames} key={lesson} onClick={()=>{setActiveLesson(lesson); resetLesson()}}>
           <input type="button" value={(i + 1) + ": " + spacedLesson} />
-          {/*add checkmark if the lesson is complete*/}
-          {finishedLessons.has(lesson) ?
-            <span className="checkmark"></span>
-            :
-            ""
-          }
+          <div>
+            {/*add checkmark if the lesson is complete*/}
+            {finishedLessonsNewCharacters.has(lesson) ?
+              <span className="checkmark"></span>
+              :
+              <span className="checkmark invisible"></span>
+            }
+            {finishedLessonsWordExercise.has(lesson) ?
+              <span className="checkmark after:bg-amber-400 before:bg-amber-400"></span>
+              :
+              <span className="checkmark invisible"></span>
+            }
+          </div>
         </div>
       );
     });

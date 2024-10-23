@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const finishedLessons = await findUniqueFinishedLessons({userId: user?.id, sessionToken: sessionToken});
 
   if (finishedLessons === undefined) {
-    return new NextResponse(JSON.stringify({finishedLessons: []}));
+    return new NextResponse(JSON.stringify({finishedLessons: {newCharacters: [], wordExercise: []}}));
   }
 
   return new NextResponse(JSON.stringify({finishedLessons}));

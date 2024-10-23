@@ -89,29 +89,31 @@ export function shuffle<T>(array: T[]) {
 }
 
 export async function findUniqueFinishedLessons(options: {userId?: number | undefined, sessionToken?: string | undefined}) {
-  if (options.userId) {
-    return await prisma.lesson.findMany({
-      select: {
-        lessonCharacters: true
-      },
-      where: {
-        userId: options.userId,
-        endTime: {not: null}
-      },
-      distinct: ["lessonCharacters"]
-    });
-  }
+  const newCharacters = await prisma.lesson.findMany({
+    select: {
+      lessonCharacters: true
+    },
+    where: {
+      mode: "new-characters",
+      userId: options.userId,
+      sessionToken: options.sessionToken,
+      endTime: {not: null}
+    },
+    distinct: ["lessonCharacters"]
+  });
 
-  if (options.sessionToken) {
-    return await prisma.lesson.findMany({
-      select: {
-        lessonCharacters: true
-      },
-      where: {
-        sessionToken: options.sessionToken,
-        endTime: {not: null}
-      },
-      distinct: ["lessonCharacters"]
-    });
-  }
+  const wordExercise = await prisma.lesson.findMany({
+    select: {
+      lessonCharacters: true
+    },
+    where: {
+      mode: "word-exercise",
+      userId: options.userId,
+      sessionToken: options.sessionToken,
+      endTime: {not: null}
+    },
+    distinct: ["lessonCharacters"]
+  });
+
+  return {newCharacters, wordExercise}
 }

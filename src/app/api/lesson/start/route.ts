@@ -6,7 +6,7 @@ import { findUniqueFinishedLessons, generateRandomWord, getLanguageScriptId, shu
 
 function generateWordExerciseLessonText(
   activeLesson: string[],
-  learnedChars: string[],
+  learnedChars: Set<string>,
   fetchedWords: {word: string}[],
   wordsByChar: {[activeChar: string]: string[]},
   letterRegex: RegExp,
@@ -53,7 +53,10 @@ function generateWordExerciseLessonText(
 const Z_REQUEST = z.object({
   activeLesson: z.array(z.string()),
   languageScript: z.string(),
-  mode: z.string()
+  mode: z.union([
+    z.literal("new-characters"),
+    z.literal("word-exercise")
+  ])
 });
 //start lesson and get lessonText and startTime
 export async function POST(req: NextRequest) {
@@ -91,14 +94,18 @@ export async function POST(req: NextRequest) {
   const numberActiveChars = request.activeLesson.filter(activeChar => numberRegex.test(activeChar));
   
   if (request.mode === "word-exercise") {
-    let learnedChars = [] as string[];
+    let learnedChars = new Set([]) as Set<string>;
     
-    // find all the lessons user has done and add the characters from those lessons to the learnedChars array
+    // find all the lessons user has done and add the characters from those lessons in both modes to the learnedChars set
     const finishedLessons = await findUniqueFinishedLessons({userId: user?.id, sessionToken: sessionToken});
     if (finishedLessons) {
-      learnedChars = finishedLessons.reduce((accumulator, lesson)=>{
+      const newCharacterLearnedChars = finishedLessons.newCharacters.reduce((accumulator, lesson)=>{
         return accumulator.concat([...lesson.lessonCharacters.split("")]);
       }, [] as string[]);
+      const wordExerciseLearnedChars = finishedLessons.wordExercise.reduce((accumulator, lesson)=>{
+        return accumulator.concat([...lesson.lessonCharacters.split("")]);
+      }, [] as string[]);
+      learnedChars = new Set([...newCharacterLearnedChars, ...wordExerciseLearnedChars]);
     }
     
     const fetchedWords = await prisma.word.findMany({

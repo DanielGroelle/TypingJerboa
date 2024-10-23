@@ -160,3 +160,7 @@ export default function ClientAdminLessons() {
     </div>
   );
 }
+
+//TODO: genericize the card for each lesson, so can be used by words, users, races, etc
+//TODO: make the delete button show a confirmation
+//TODO: genericize page select into a component

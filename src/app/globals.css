@@ -60,7 +60,7 @@ option {
   color: white;
 }
 
-/* text color classes for /race */
+/* text color classes for /race and /lesson */
 .empty {
   color: auto;
 }
@@ -78,8 +78,8 @@ option {
 
 .checkmark {
   display:inline-block;
-  width: 22px;
-  height:22px;
+  width: 18px;
+  height:18px;
   -ms-transform: rotate(45deg); /* IE 9 */
   -webkit-transform: rotate(45deg); /* Chrome, Safari, Opera */
   transform: rotate(45deg);
