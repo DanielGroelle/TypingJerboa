@@ -38,7 +38,7 @@ export default function ClientAdminUsers() {
 
   function handleDelete(userId: number) {
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/user`, {
           method: "DELETE",
           body: JSON.stringify({
@@ -63,7 +63,7 @@ export default function ClientAdminUsers() {
     const adminChecked = event.currentTarget.checked;
     
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/user/edit`, {
           method: "POST",
           body: JSON.stringify({
@@ -96,7 +96,7 @@ export default function ClientAdminUsers() {
     if (editUser === null) throw "Edit User is null!";
   
     void (async ()=>{
-      try{
+      try {
         const response = Z_USER.parse(await(await fetch(`/api/admin/user/edit`, {
           method: "POST",
           body: JSON.stringify(editUser),

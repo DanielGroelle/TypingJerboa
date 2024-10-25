@@ -14,7 +14,7 @@ function handleSave(
   if (editParagraph === null) throw "Edit Paragraph is null!";
 
   void (async ()=>{
-    try{
+    try {
       const response = Z_PARAGRAPH.parse(await(await fetch(`/api/admin/paragraph/edit`, {
         method: "POST",
         body: JSON.stringify(editParagraph),

@@ -42,7 +42,7 @@ export default function ClientAdminWords() {
 
   function handleDelete(wordId: number) {
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/word`, {
           method: "DELETE",
           body: JSON.stringify({
@@ -67,7 +67,7 @@ export default function ClientAdminWords() {
     const wordIds = words.map((word)=>word.id);
     
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/word/bulk`, {
           method: "DELETE",
           body: JSON.stringify({
@@ -113,7 +113,7 @@ export default function ClientAdminWords() {
     const languageScript = languageScriptSelector.value;
 
     void (async ()=>{
-      try{
+      try {
         const response = Z_WORD.parse(await(await fetch(`/api/admin/word`, {
           method: "POST",
           body: JSON.stringify({

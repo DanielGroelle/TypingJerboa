@@ -37,7 +37,7 @@ function handleSave(
   if (editReport === null) throw "Edit Report is null!";
 
   void (async ()=>{
-    try{
+    try {
       const response = Z_PARAGRAPH_REPORT.parse(await(await fetch(`/api/admin/report/edit`, {
         method: "POST",
         body: JSON.stringify(editReport),
@@ -75,7 +75,7 @@ export default function ClientAdminReports() {
 
   function handleDelete(reportId: number) {
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/report`, {
           method: "DELETE",
           body: JSON.stringify({
@@ -100,7 +100,7 @@ export default function ClientAdminReports() {
     const reportIds = reports.map((report)=>report.id);
     
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/report/bulk`, {
           method: "DELETE",
           body: JSON.stringify({

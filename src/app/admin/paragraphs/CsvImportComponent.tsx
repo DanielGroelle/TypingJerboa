@@ -41,7 +41,7 @@ function importFromCsv(paragraphs: Paragraph[], setParagraphs: (paragraphs: Para
           const selectable = true;
 
           void (async ()=>{
-            try{
+            try {
               const response = Z_PARAGRAPHS_ARRAY.parse(await(await fetch(`/api/admin/paragraph/bulk`, {
                 method: "POST",
                 body: JSON.stringify({

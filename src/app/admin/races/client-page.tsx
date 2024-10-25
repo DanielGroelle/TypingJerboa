@@ -37,7 +37,7 @@ export default function ClientAdminRaces() {
 
   function handleDelete(raceId: string) {
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/race`, {
           method: "DELETE",
           body: JSON.stringify({
@@ -62,7 +62,7 @@ export default function ClientAdminRaces() {
     const raceIds = races.map((race)=>race.id);
     
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/race/bulk`, {
           method: "DELETE",
           body: JSON.stringify({

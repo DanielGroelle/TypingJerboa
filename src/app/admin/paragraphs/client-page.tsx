@@ -48,7 +48,7 @@ export default function ClientAdminParagraphs() {
   function handleDelete(paragraphId: number) {
     setConfirmation(() => () => {
       void (async ()=>{
-        try{
+        try {
           await fetch(`/api/admin/paragraph`, {
             method: "DELETE",
             body: JSON.stringify({
@@ -80,7 +80,7 @@ export default function ClientAdminParagraphs() {
       const paragraphIds = paragraphs.map((paragraph)=>paragraph.id);
       
       void (async ()=>{
-        try{
+        try {
           await fetch(`/api/admin/paragraph/bulk`, {
             method: "DELETE",
             body: JSON.stringify({

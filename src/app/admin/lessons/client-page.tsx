@@ -5,6 +5,7 @@ import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
 import { Lesson, Z_LESSON } from "@/js/types";
 import { LanguageScripts } from "@/js/language-scripts";
+import ItemCardComponent from "../ItemCardComponent";
 
 const Z_RESPONSE = z.object({
   lessons: z.array(Z_LESSON)
@@ -38,7 +39,7 @@ export default function ClientAdminLessons() {
 
   function handleDelete(lessonId: string) {
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/lesson`, {
           method: "DELETE",
           body: JSON.stringify({
@@ -63,7 +64,7 @@ export default function ClientAdminLessons() {
     const lessonIds = lessons.map((lesson)=>lesson.id);
     
     void (async ()=>{
-      try{
+      try {
         await fetch(`/api/admin/lesson/bulk`, {
           method: "DELETE",
           body: JSON.stringify({
@@ -137,23 +138,24 @@ export default function ClientAdminLessons() {
 
       <div className="flex flex-col overflow-y-auto">
         {refFilteredLessons.items.slice(viewPage * lessonsPerPage - lessonsPerPage, viewPage * lessonsPerPage).map((lesson)=>
-          <div className="border-solid border-white border flex justify-between" key={lesson.id}>
-            <div>
-              id: {lesson.id}<br/>
-              user: {lesson.user ? `${String(lesson.user?.username)} - ${String(lesson.user?.id)}` : "null"}<br/>
-              session: {lesson.session?.token ? `${String(lesson.session?.token)}` : "null"}<br/>
-              startTime: {String(lesson.startTime)}<br/>
-              endTime: {String(lesson.endTime)}<br/>
-              languageScript: {lesson.languageScript.languageScript}<br/>
-              lessonCharacters: {lesson.lessonCharacters}<br/>
-              lessonText: {lesson.lessonText}<br/>
-              mode: {lesson.mode}<br/>
-              mistakes: {String(lesson.mistakes)}<br/>
-            </div>
-            <div>
-              <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(lesson.id)} value="X" />
-            </div>
-          </div>
+          (<ItemCardComponent
+            item={lesson}
+            itemFields={{
+              "id": {getter: (lesson: Lesson) => lesson.id, editType: null, options: null},
+              "user": {getter: (lesson: Lesson) => lesson.user ? `${String(lesson.user?.username)} - ${String(lesson.user?.id)}` : "null", editType: null, options: null},
+              "session": {getter: (lesson: Lesson) => lesson.session?.token ? `${String(lesson.session?.token)}` : "null", editType: null, options: null},
+              "startTime": {getter: (lesson: Lesson) => String(lesson.startTime), editType: null, options: null},
+              "endTime": {getter: (lesson: Lesson) => String(lesson.endTime), editType: null, options: null},
+              "languageScript": {getter: (lesson: Lesson) => lesson.languageScript.languageScript, editType: null, options: null},
+              "lessonCharacters": {getter: (lesson: Lesson) => lesson.lessonCharacters, editType: null, options: null},
+              "lessonText": {getter: (lesson: Lesson) => lesson.lessonText, editType: null, options: null},
+              "mode": {getter: (lesson: Lesson) => lesson.mode, editType: null, options: null},
+              "mistakes": {getter: (lesson: Lesson) => String(lesson.mistakes), editType: null, options: null}
+            }}
+            editParams={null}
+            deleteItem={handleDelete}
+            key={lesson.id}
+          />)
         )}
       </div>
       {lessons.length === 0 ? "No lessons found" : ""}
@@ -161,6 +163,5 @@ export default function ClientAdminLessons() {
   );
 }
 
-//TODO: genericize the card for each lesson, so can be used by words, users, races, etc
 //TODO: make the delete button show a confirmation
 //TODO: genericize page select into a component

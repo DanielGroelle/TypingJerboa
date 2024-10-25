@@ -14,7 +14,7 @@ function handleAdd(
   if (newParagraph === null) throw "New Paragraph is null!";
 
   void (async ()=>{
-    try{
+    try {
       const response = Z_PARAGRAPH.parse(await(await fetch(`/api/admin/paragraph`, {
         method: "POST",
         body: JSON.stringify(newParagraph),
