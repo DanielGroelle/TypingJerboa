@@ -1,9 +1,10 @@
 "use client";
 
 import { User, Z_USER } from "@/js/types";
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
+import ItemCardComponent from "../ItemCardComponent";
 
 const Z_RESPONSE = z.object({
   users: z.array(Z_USER)
@@ -29,8 +30,6 @@ export default function ClientAdminUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [viewPage, setViewPage] = useState(1);
   const usersPerPage = 25;
-
-  const [editUser, setEditUser] = useState<User | null>(null);
 
   useEffect(()=>{
     void (async ()=>setUsers(await getUsers()))();
@@ -59,47 +58,14 @@ export default function ClientAdminUsers() {
     setUsers([...newUsers]);
   }
 
-  function handleAdminCheckbox(event: ChangeEvent<HTMLInputElement>, userId: number) {
-    const adminChecked = event.currentTarget.checked;
-    
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/user/edit`, {
-          method: "POST",
-          body: JSON.stringify({
-            id: userId,
-            username: null,
-            admin: adminChecked,
-            createdAt: null
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Update failed";
-      }
-    })();
-
-    const newUsers = users.map((user)=>{
-      if (user.id === userId) {
-        return {...user, admin: !user.admin};
-      }
-      return {...user};
-    });
-    setUsers(newUsers);
-  }
-
-  function handleSave(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-  
+  function handleSave(editUser: User) {
     if (editUser === null) throw "Edit User is null!";
   
     void (async ()=>{
       try {
         const response = Z_USER.parse(await(await fetch(`/api/admin/user/edit`, {
           method: "POST",
-          body: JSON.stringify(editUser),
+          body: JSON.stringify({...editUser}),
           mode: "cors",
           cache: "default"
         })).json());
@@ -114,8 +80,6 @@ export default function ClientAdminUsers() {
         throw "Edit failed";
       }
     })();
-    
-    setEditUser(null);
   }
 
   const refFilteredUsers: {items: User[]} = {items: []};
@@ -154,42 +118,24 @@ export default function ClientAdminUsers() {
       </div>
       <div className="flex flex-col overflow-y-auto">
         {refFilteredUsers.items.slice(viewPage * usersPerPage - usersPerPage, viewPage * usersPerPage).map((user)=>
-          <div className="flex border-solid border-white border" key={user.id}>
-            {
-              editUser?.id === user.id ?
-              <form onSubmit={handleSave}>
-                id: {editUser.id}<br/>
-                <div className="flex">
-                  <span>username:</span>
-                  <input type="text" id="username-input" className="w-full" value={editUser.username} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
-                    setEditUser({...editUser, username: e.target.value});
-                  }}/><br/>
-                </div>
-                <div className="flex justify-between">
-                  <div>
-                    <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setEditUser(null)} value="Cancel" />
-                    <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2" value="Save" />
-                  </div>
-                  <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(editUser.id)} value="X" />
-                </div>
-              </form>
-              :
-              <>
-              <div className="flex-1">
-                id: {user.id}<br/>
-                username: {user.username}<br/>
-                admin: {String(user.admin)}
-                <input type="checkbox" checked={user.admin} onChange={(event)=>handleAdminCheckbox(event, user.id)}></input>
-                <br/>
-                created at: {user.createdAt}
-              </div>
-              <div>
-                <input type="button" className="border-solid border-green-700 border-2 rounded-lg p-2" onClick={()=>setEditUser(user)} value="Edit" />
-                <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(user.id)} value="X" />
-              </div>
-              </>
-            }
-          </div>
+          (
+            <ItemCardComponent
+              item={user}
+              itemFields={{
+                "id": {getter: (user: User) => user.id, editType: null, options: null},
+                "username": {getter: (user: User) => user.username, editType: "text", options: null},
+                "admin": {getter: (user: User) => String(user.admin), editType: "checkbox", options: null},
+                "createdAt": {getter: (user: User) => user.createdAt, editType: null, options: null}
+              }}
+              editParams={{
+                items: users,
+                setItems: setUsers,
+                saveItem: handleSave
+              }}
+              deleteItem={handleDelete}
+              key={user.id}
+            />
+          )
         )}
       </div>
       {users.length === 0 ? "No users found" : ""}

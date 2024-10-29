@@ -119,12 +119,11 @@ export default function ItemCardComponent<T, IdT extends string | number>(
                 );
               }
               if (field.editType === "checkbox") {
-                throw "not implemented";
                 return (
                   <div className="flex" key={key}>
                     <span>{key}:</span>
-                    <input type="checkbox" className="w-full" checked={itemFields[key].getter(editItem) === "true"} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
-                      setEditItem({...editItem, [key]: String(e.target.checked)});
+                    <input type="checkbox" checked={itemFields[key].getter(editItem) === "true"} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+                      setEditItem({...editItem, [key]: e.target.checked});
                     }}/>
                   </div>
                 );
