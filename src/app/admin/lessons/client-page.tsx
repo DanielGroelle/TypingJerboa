@@ -142,8 +142,8 @@ export default function ClientAdminLessons() {
             item={lesson}
             itemFields={{
               "id": {getter: (lesson: Lesson) => lesson.id, editType: null, options: null},
-              "user": {getter: (lesson: Lesson) => lesson.user ? `${String(lesson.user?.username)} - ${String(lesson.user?.id)}` : "null", editType: null, options: null},
-              "session": {getter: (lesson: Lesson) => lesson.session?.token ? `${String(lesson.session?.token)}` : "null", editType: null, options: null},
+              "user": {getter: (lesson: Lesson) => lesson.user ? `${String(lesson.user?.username)} - ${String(lesson.user?.id)}` : null, editType: null, options: null},
+              "session": {getter: (lesson: Lesson) => lesson.session?.token ? `${String(lesson.session?.token)}` : null, editType: null, options: null},
               "startTime": {getter: (lesson: Lesson) => String(lesson.startTime), editType: null, options: null},
               "endTime": {getter: (lesson: Lesson) => String(lesson.endTime), editType: null, options: null},
               "languageScript": {getter: (lesson: Lesson) => lesson.languageScript.languageScript, editType: null, options: null},

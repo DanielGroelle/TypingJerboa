@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
 import { ParagraphReport, Z_PARAGRAPH_REPORT } from "@/js/types";
+import ItemCardComponent from "../ItemCardComponent";
 
 const Z_RESPONSE = z.object({
   reports: z.array(Z_PARAGRAPH_REPORT)
@@ -25,46 +26,10 @@ async function getReports() {
   return response.reports;
 }
 
-function handleSave(
-  event: FormEvent<HTMLFormElement>,
-  reports: ParagraphReport[],
-  setReports: (reports: ParagraphReport[]) => void,
-  editReport: ParagraphReport | null,
-  setEditReport: (editReport: ParagraphReport | null) => void
-) {
-  event.preventDefault();
-
-  if (editReport === null) throw "Edit Report is null!";
-
-  void (async ()=>{
-    try {
-      const response = Z_PARAGRAPH_REPORT.parse(await(await fetch(`/api/admin/report/edit`, {
-        method: "POST",
-        body: JSON.stringify(editReport),
-        mode: "cors",
-        cache: "default"
-      })).json());
-
-      //rerender edits
-      const reportIndex = reports.findIndex((report)=>report.id === response.id);
-      reports[reportIndex] = response;
-
-      setReports([...reports]);
-    }
-    catch(e: unknown) {
-      throw "Edit failed";
-    }
-  })();
-  
-  setEditReport(null);
-}
-
 export default function ClientAdminReports() {
   const [reports, setReports] = useState<ParagraphReport[]>([]);
   const [viewPage, setViewPage] = useState(1);
   const reportsPerPage = 25;
-
-  const [editReport, setEditReport] = useState<ParagraphReport | null>(null);
 
   useEffect(()=>{
     void (async ()=>{
@@ -72,6 +37,28 @@ export default function ClientAdminReports() {
       setReports(fetchedReports);
     })();
   },[]);
+
+  function handleSave(editReport: ParagraphReport) {
+    void (async ()=>{
+      try {
+        const response = Z_PARAGRAPH_REPORT.parse(await(await fetch(`/api/admin/report/edit`, {
+          method: "POST",
+          body: JSON.stringify(editReport),
+          mode: "cors",
+          cache: "default"
+        })).json());
+  
+        //rerender edits
+        const reportIndex = reports.findIndex((report)=>report.id === response.id);
+        reports[reportIndex] = response;
+  
+        setReports([...reports]);
+      }
+      catch(e: unknown) {
+        throw "Edit failed";
+      }
+    })();
+  }
 
   function handleDelete(reportId: number) {
     void (async ()=>{
@@ -173,56 +160,29 @@ export default function ClientAdminReports() {
       </div>
       <br/>
       {refFilteredReports.items.slice(viewPage * reportsPerPage - reportsPerPage, viewPage * reportsPerPage).map(report =>
-        <div className="border-solid border-white border" key={report.id}>
-          <div>
-          {
-            //if theres a report we're editing, display a form to change values
-            editReport?.id === report.id ?
-            <form onSubmit={e => handleSave(e, reports, setReports, editReport, setEditReport)}>
-              id: {report.id}<br/>
-              paragraphId: {report.paragraph?.id}<br/>
-              paragraphText: {report.paragraphText}<br/>
-              paragraphAuthor: {report.paragraph?.author}<br/>
-              paragraphSource: {report.paragraph?.source}<br/>
-              user: {report.user?.username} - {report.user?.id}<br/>
-              session: {report.session?.token}<br/>
-              <div>
-                resolved:<select id="resolved-select" value={editReport.resolved.toString()} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{
-                  setEditReport({...editReport, resolved: e.target.value === "true"});
-                }}>
-                  <option value="true">true</option>
-                  <option value="false">false</option>
-                </select><br/>
-              </div>
-              createdAt: {report.createdAt}<br/>
-              <div className="flex justify-between">
-                <div>
-                  <input type="button" className="border-solid border-gray-200 border-2 rounded-lg p-2" onClick={()=>setEditReport(null)} value="Cancel" />
-                  <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2" value="Save" />
-                </div>
-                <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(editReport.id)} value="X" />
-              </div>
-            </form>
-            :
-            //if we're not editing, display the paragraph data normally
-            <>
-              id: {report.id}<br/>
-              paragraphId: {report.paragraph?.id}<br/>
-              paragraphText: {report.paragraphText}<br/>
-              paragraphAuthor: {report.paragraph?.author}<br/>
-              paragraphSource: {report.paragraph?.source}<br/>
-              user: {report.user?.username} - {report.user?.id}<br/>
-              session: {report.session?.token}<br/>
-              resolved: {String(report.resolved)}<br/>
-              createdAt: {report.createdAt}<br/>
-              <div className="flex justify-between">
-                <input type="button" className="border-solid border-green-700 border-2 rounded-lg p-2" onClick={()=>setEditReport(report)} value="Edit" />
-                <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(report.id)} value="X" />
-              </div>
-            </>
-            }
-          </div>
-        </div>
+        (
+          <ItemCardComponent
+            item={report}
+            itemFields={{
+              "id": {getter: (report: ParagraphReport) => report.id, editType: null, options: null},
+              "paragraphId": {getter: (report: ParagraphReport) => report.paragraph?.id ?? null, editType: null, options: null},
+              "paragraphText": {getter: (report: ParagraphReport) => report.paragraphText, editType: null, options: null},
+              "paragraphAuthor": {getter: (report: ParagraphReport) => report.paragraph?.author ?? null, editType: null, options: null},
+              "paragraphSource": {getter: (report: ParagraphReport) => report.paragraph?.source ?? null, editType: null, options: null},
+              "user": {getter: (report: ParagraphReport) => report.user ? `${String(report.user?.username)} - ${String(report.user?.id)}` : null, editType: null, options: null},
+              "session": {getter: (report: ParagraphReport) => report.session?.token ? `${String(report.session?.token)}` : null, editType: null, options: null},
+              "resolved": {getter: (report: ParagraphReport) => String(report.resolved), editType: "checkbox", options: null},
+              "createdAt": {getter: (report: ParagraphReport) => report.createdAt, editType: null, options: null},
+            }}
+            editParams={{
+              items: reports,
+              setItems: setReports,
+              saveItem: handleSave
+            }}
+            deleteItem={handleDelete}
+            key={report.id}
+          />
+        )
       )}
       {refFilteredReports.items.length === 0 ? "No reports found" : ""}
     </div>

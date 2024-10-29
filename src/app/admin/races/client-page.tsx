@@ -135,8 +135,8 @@ export default function ClientAdminRaces() {
             item={race}
             itemFields={{
               "id": {getter: (race: Race) => race.id, editType: null, options: null},
-              "user": {getter: (race: Race) => race.user ? `${String(race.user?.username)} - ${String(race.user?.id)}` : "null", editType: null, options: null},
-              "session": {getter: (race: Race) => race.session?.token ? `${String(race.session?.token)}` : "null", editType: null, options: null},
+              "user": {getter: (race: Race) => race.user ? `${String(race.user?.username)} - ${String(race.user?.id)}` : null, editType: null, options: null},
+              "session": {getter: (race: Race) => race.session?.token ? `${String(race.session?.token)}` : null, editType: null, options: null},
               "startTime": {getter: (race: Race) => String(race.startTime), editType: null, options: null},
               "endTime": {getter: (race: Race) => String(race.endTime), editType: null, options: null},
               "languageScript": {getter: (race: Race) => race.paragraph.languageScript.languageScript, editType: null, options: null},
