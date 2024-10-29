@@ -158,7 +158,7 @@ export default function ClientAdminLessons() {
           />)
         )}
       </div>
-      {lessons.length === 0 ? "No lessons found" : ""}
+      {refFilteredLessons.items.length === 0 ? "No lessons found" : ""}
     </div>
   );
 }

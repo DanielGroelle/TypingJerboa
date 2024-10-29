@@ -214,7 +214,7 @@ export default function ClientAdminWords() {
           </div>
         </div>
       )}
-      {words.length === 0 ? "No words found" : ""}
+      {refFilteredWords.items.length === 0 ? "No words found" : ""}
     </div>
   );
 }

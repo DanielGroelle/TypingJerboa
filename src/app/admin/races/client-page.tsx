@@ -5,6 +5,7 @@ import { Race, Z_RACE } from "@/js/types";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
+import ItemCardComponent from "../ItemCardComponent";
 
 const Z_RESPONSE = z.object({
   races: z.array(Z_RACE)
@@ -130,29 +131,25 @@ export default function ClientAdminRaces() {
 
       <div className="flex flex-col overflow-y-auto">
         {refFilteredRaces.items.slice(viewPage * racesPerPage - racesPerPage, viewPage * racesPerPage).map((race)=>
-          <div className="border-solid border-white border flex justify-between" key={race.id}>
-            <div>
-              id: {race.id}<br/>
-              user: {race.user ? `${String(race.user?.username)} - ${String(race.user?.id)}` : "null"}<br/>
-              session: {race.session?.token ? `${String(race.session?.token)}` : "null"}<br/>
-              startTime: {race.startTime}<br/>
-              endTime: {String(race.endTime)}<br/>
-              wpm: {
-                race.endTime ?
-                  ((race.paragraph.text.length / 5) / ((new Date(race.endTime).getTime() - new Date(race.startTime).getTime()) / 1000 / 60)).toFixed(1)
-                :
-                "N/A"
-              }<br/>
-              mistakes: {String(race.mistakes)}<br/>
-              paragraph: {race.paragraph.text}
-            </div>
-            <div>
-              <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(race.id)} value="X" />
-            </div>
-          </div>
+          (<ItemCardComponent
+            item={race}
+            itemFields={{
+              "id": {getter: (race: Race) => race.id, editType: null, options: null},
+              "user": {getter: (race: Race) => race.user ? `${String(race.user?.username)} - ${String(race.user?.id)}` : "null", editType: null, options: null},
+              "session": {getter: (race: Race) => race.session?.token ? `${String(race.session?.token)}` : "null", editType: null, options: null},
+              "startTime": {getter: (race: Race) => String(race.startTime), editType: null, options: null},
+              "endTime": {getter: (race: Race) => String(race.endTime), editType: null, options: null},
+              "languageScript": {getter: (race: Race) => race.paragraph.languageScript.languageScript, editType: null, options: null},
+              "text": {getter: (race: Race) => race.paragraph.text, editType: null, options: null},
+              "mistakes": {getter: (race: Race) => String(race.mistakes), editType: null, options: null}
+            }}
+            editParams={null}
+            deleteItem={handleDelete}
+            key={race.id}
+          />)
         )}
       </div>
-      {races.length === 0 ? "No races found" : ""}
+      {refFilteredRaces.items.length === 0 ? "No races found" : ""}
     </div>
   );
 }

@@ -224,7 +224,7 @@ export default function ClientAdminReports() {
           </div>
         </div>
       )}
-      {reports.length === 0 ? "No reports found" : ""}
+      {refFilteredReports.items.length === 0 ? "No reports found" : ""}
     </div>
   );
 }

@@ -216,7 +216,7 @@ export default function ClientAdminNews() {
           )
         )}
       </div>
-      {newsPosts.length === 0 ? "Nobody here but us chickens!" : ""}
+      {refFilteredNewsPosts.items.length === 0 ? "Nobody here but us chickens!" : ""}
     </div>
   );
 }

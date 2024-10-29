@@ -136,7 +136,7 @@ export default function ClientAdminUsers() {
           )
         )}
       </div>
-      {users.length === 0 ? "No users found" : ""}
+      {refFilteredUsers.items.length === 0 ? "No users found" : ""}
     </div>
   );
 }
