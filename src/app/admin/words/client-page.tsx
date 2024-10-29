@@ -5,6 +5,7 @@ import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
 import { LanguageScripts } from "@/js/language-scripts";
 import { Word, Z_WORD } from "@/js/types";
+import ItemCardComponent from "../ItemCardComponent";
 
 const Z_RESPONSE = z.object({
   words: z.array(Z_WORD)
@@ -39,6 +40,28 @@ export default function ClientAdminWords() {
       setWords(fetchedWords);
     })();
   },[]);
+
+  function handleSave(editWord: Word) {
+    void (async ()=>{
+      try {
+        const response = Z_WORD.parse(await(await fetch(`/api/admin/word/edit`, {
+          method: "POST",
+          body: JSON.stringify({...editWord}),
+          mode: "cors",
+          cache: "default"
+        })).json());
+
+        //rerender edits
+        const wordIndex = words.findIndex((word)=>word.id === response.id);
+        words[wordIndex] = response;
+  
+        setWords([...words]);
+      }
+      catch(e: unknown) {
+        throw "Edit failed";
+      }
+    })();
+  }
 
   function handleDelete(wordId: number) {
     void (async ()=>{
@@ -203,16 +226,23 @@ export default function ClientAdminWords() {
       </div>
       <br/>
       {refFilteredWords.items.slice(viewPage * wordsPerPage - wordsPerPage, viewPage * wordsPerPage).map((word)=>
-        <div className="border-solid border-white border" key={word.id}>
-          <div>
-            id: {word.id}<br/>
-            word: {word.word}<br/>
-            languageScript: {word.languageScript.languageScript}<br/>
-          </div>
-          <div>
-            <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(word.id)} value="X" />
-          </div>
-        </div>
+        (
+          <ItemCardComponent
+            item={word}
+            itemFields={{
+              "id": {getter: (word: Word) => word.id, editType: null, options: null},
+              "word": {getter: (word: Word) => word.word, editType: "text", options: null},
+              "languageScript": {getter: (word: Word) => word.languageScript.languageScript, editType: "languageScript", options: null}
+            }}
+            editParams={{
+              items: words,
+              setItems: setWords,
+              saveItem: handleSave
+            }}
+            deleteItem={handleDelete}
+            key={word.id}
+          />
+        )
       )}
       {refFilteredWords.items.length === 0 ? "No words found" : ""}
     </div>
