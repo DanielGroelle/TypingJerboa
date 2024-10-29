@@ -7,7 +7,7 @@ import { LanguageScripts } from "@/js/language-scripts";
 import FilterOptionsComponent from "../FilterOptionsComponent";
 import CsvImportComponent from "./CsvImportComponent";
 import AddParagraphFormComponent from "./AddParagraphFormComponent";
-import EditParagraphFormComponent from "./EditParagraphFormComponent";
+import ItemCardComponent from "../ItemCardComponent";
 
 const Z_PARAGRAPH_RESPONSE = z.object({
   paragraphs: z.array(Z_PARAGRAPH)
@@ -34,7 +34,6 @@ export default function ClientAdminParagraphs() {
   const [viewPage, setViewPage] = useState(1);
   const paragraphsPerPage = 25;
 
-  const [editParagraph, setEditParagraph] = useState<Paragraph | null>(null);
   const [newParagraph, setNewParagraph] = useState<Omit<Paragraph, "id"> | null>(null);
   const [confirmation, setConfirmation] = useState<(() => void) | null>(null);
 
@@ -44,6 +43,28 @@ export default function ClientAdminParagraphs() {
       setParagraphs(fetchedParagraphs);
     })();
   }, []);
+
+  function handleSave(editParagraph: Paragraph) {
+    void (async ()=>{
+      try {
+        const response = Z_PARAGRAPH.parse(await(await fetch(`/api/admin/paragraph/edit`, {
+          method: "POST",
+          body: JSON.stringify(editParagraph),
+          mode: "cors",
+          cache: "default"
+        })).json());
+  
+        //rerender edits
+        const paragraphIndex = paragraphs.findIndex((paragraph)=>paragraph.id === response.id);
+        paragraphs[paragraphIndex] = response;
+  
+        setParagraphs([...paragraphs]);
+      }
+      catch(e: unknown) {
+        throw "Edit failed";
+      }
+    })();
+  }
 
   function handleDelete(paragraphId: number) {
     setConfirmation(() => () => {
@@ -180,36 +201,26 @@ export default function ClientAdminParagraphs() {
       
       <div className="flex flex-col overflow-y-auto">
         {refFilteredParagraphs.items.slice(viewPage * paragraphsPerPage - paragraphsPerPage, viewPage * paragraphsPerPage).map((paragraph)=>
-          <div className="border-solid border-white border" key={paragraph.id}>
-            {
-              //if theres a paragraph we're editing, display a form to change values
-              editParagraph?.id === paragraph.id ?
-              <EditParagraphFormComponent paragraphs={paragraphs} setParagraphs={setParagraphs} editParagraph={editParagraph} setEditParagraph={setEditParagraph} handleDelete={handleDelete} />
-              :
-              //if we're not editing, display the paragraph data normally
-              <>
-                id: {paragraph.id}<br/>
-                <div className="flex">
-                  <span className="mr-1">text:</span>
-                  <span>{paragraph.text}</span>
-                </div>
-                <div className="flex">
-                  <span className="mr-1">author:</span>
-                  <span>{paragraph.author}</span>
-                </div>
-                <div className="flex">
-                  <span className="mr-1">source:</span>
-                  <span>{paragraph.source}</span>
-                </div>
-                languageScript: {paragraph.languageScript.languageScript}<br/>
-                selectable: {paragraph.selectable.toString()}<br/>
-                <div className="flex justify-between">
-                  <input type="button" className="border-solid border-green-700 border-2 rounded-lg p-2" onClick={()=>setEditParagraph(paragraph)} value="Edit" />
-                  <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2" onClick={()=>handleDelete(paragraph.id)} value="X" />
-                </div>
-              </>
-            }
-          </div>
+          (
+            <ItemCardComponent
+              item={paragraph}
+              itemFields={{
+                "id": {getter: (paragraph: Paragraph) => paragraph.id, editType: null, options: null},
+                "author": {getter: (paragraph: Paragraph) => paragraph.author, editType: "text", options: null},
+                "source": {getter: (paragraph: Paragraph) => paragraph.source, editType: "text", options: null},
+                "text": {getter: (paragraph: Paragraph) => paragraph.text, editType: "text", options: null},
+                "languageScript": {getter: (paragraph: Paragraph) => paragraph.languageScript.languageScript, editType: "languageScript", options: null},
+                "selectable": {getter: (paragraph: Paragraph) => String(paragraph.selectable), editType: "checkbox", options: null}
+              }}
+              editParams={{
+                items: paragraphs,
+                setItems: setParagraphs,
+                saveItem: handleSave
+              }}
+              deleteItem={handleDelete}
+              key={paragraph.id}
+            />
+          )
         )}
         {/*if there are no paragraphs to show, display not found message*/}
         {refFilteredParagraphs.items.length === 0 ? "No paragraphs found" : ""}

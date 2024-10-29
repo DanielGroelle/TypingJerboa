@@ -109,7 +109,7 @@ export default function ItemCardComponent<T, IdT extends string | number>(
                   <div className="flex" key={key}>
                     <span>{key}:</span>
                     <select id="language-script-edit-select" value={itemFields[key].getter(editItem) ?? ""} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{
-                      setEditItem({...editItem, [key]: e.target.value});
+                      setEditItem({...editItem, [key]: {languageScript: e.target.value}});
                     }}>
                       {Object.values(LanguageScripts).map((languageScript)=>{
                         return <option key={languageScript.internal} value={languageScript.internal}>{languageScript.internal}</option>

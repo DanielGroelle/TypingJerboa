@@ -59,8 +59,6 @@ export default function ClientAdminUsers() {
   }
 
   function handleSave(editUser: User) {
-    if (editUser === null) throw "Edit User is null!";
-  
     void (async ()=>{
       try {
         const response = Z_USER.parse(await(await fetch(`/api/admin/user/edit`, {
