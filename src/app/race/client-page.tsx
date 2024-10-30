@@ -31,7 +31,7 @@ export default function ClientRace() {
 
   return (
     <div>
-      <div className="flex flex-col m-10">
+      <div className="flex flex-col m-10 w-full">
         <div className="flex w-full justify-between">
           {!scriptSelectionHidden ? <ScriptSelectionComponent setRaceInfo={setRaceInfo} /> : ""}
           {!timerHidden ? <TimerComponent startTime={startTime} /> : ""}

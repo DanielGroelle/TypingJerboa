@@ -285,7 +285,7 @@ export default function ClientLearn() {
             ""
           }
 
-          <div className="border-solid border-white border select-none font-mono text-lg" onContextMenu={handleParagraphContextMenu}>
+          <div className="border-solid border-white border select-none font-mono text-lg" hidden={lessonText.length === 0} onContextMenu={handleParagraphContextMenu}>
             {[...lessonText].map((character, i)=>{
               return <span className={charStatus(userInput, i)} key={i}>{character}</span>
             })}
@@ -296,7 +296,7 @@ export default function ClientLearn() {
             })}
           </div>
 
-          <textarea id="main-text-input" className="text-black resize-none font-mono min-w-full text-lg p-1" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+          <textarea id="main-text-input" className="text-black resize-none font-mono min-w-full text-lg p-1" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
         </div>
       </div>
     </div>

@@ -71,16 +71,11 @@ export default function ClientStats() {
         }
       </p>
       <p>{showParagraph ? stats?.bestParagraph : ""}</p>
-      {
-        stats?.createdAt ?
-        (() => {
-          const offset = new Date(stats.createdAt).getTimezoneOffset();
-          const createdDate = new Date(new Date(stats.createdAt).getTime() - (offset*60*1000));
-          return <p className="mt-4">Registered: {String(createdDate.toISOString().split('T')[0])}</p>
-        })()
-        :
-        ""
-      }
+      {stats?.createdAt && (() => {
+        const offset = new Date(stats.createdAt).getTimezoneOffset();
+        const createdDate = new Date(new Date(stats.createdAt).getTime() - (offset*60*1000));
+        return <p className="mt-4">Registered: {String(createdDate.toISOString().split('T')[0])}</p>
+      })()}
       {!stats ? "Loading stats..." : ""}
     </div>
   );

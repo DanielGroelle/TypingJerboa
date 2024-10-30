@@ -132,7 +132,7 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
         {/*if the race is started show wpm*/}
         {raceParagraphArray.length !== 0 ? `${WPM.toFixed(1)}wpm` : ""}
       </div>
-      <div className="border-solid border-white border p-1 select-none" onContextMenu={handleParagraphContextMenu}>
+      <div className="border-solid border-white border font-mono text-lg p-1 select-none" hidden={raceParagraphArray.length === 0} onContextMenu={handleParagraphContextMenu}>
         {raceParagraphArray.map((character, i)=>{
           return <span className={charStatus(userInput, i)} key={i}>{character}</span>
         })}
@@ -142,7 +142,8 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
             return <span className="incorrect" key={i}>&nbsp;</span>
         })}
       </div>
-      <textarea id="main-text-input" className="text-black resize-none min-w-full p-1" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+
+      <textarea id="main-text-input" className="text-black resize-none font-mono text-lg min-w-full p-1" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
     </div>
   );
 }

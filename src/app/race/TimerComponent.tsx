@@ -18,13 +18,17 @@ export default function TimerComponent({startTime}: {startTime: Date | null}) {
     }
   }, [startTime]);
 
-  //TODO: pretty this up
   return (
-    <div className="w-96 border-solid border-white border">
-      {timer}
-      <span className="h-12 w-12 bg-red-600 rounded-full inline-block m-2"></span>
-      <span className="h-12 w-12 bg-yellow-400 rounded-full inline-block m-2"></span>
-      <span className="h-12 w-12 bg-green-600 rounded-full inline-block m-2"></span>
+    <div className="flex w-1/2">
+      <div className="flex text-4xl w-32 items-center m-2">
+        <span className="h-fit p-6">{timer.toFixed(2)}</span>
+      </div>
+
+      <div className="flex border-solid border-white border rounded-xl w-fit items-center m-2">
+        <span className="h-12 w-12 bg-red-600 rounded-full inline-block m-2" style={{visibility: timer < 4 ? "visible" : "hidden"}}></span>
+        <span className="h-12 w-12 bg-yellow-400 rounded-full inline-block m-2" style={{visibility: timer < 2 ? "visible" : "hidden"}}></span>
+        <span className="h-12 w-12 bg-green-600 rounded-full inline-block m-2" style={{visibility: timer <= 0 ? "visible" : "hidden"}}></span>
+      </div>
     </div>
   );
 }

@@ -10,7 +10,7 @@ const Z_RESPONSE = z.object({
   user: z.string().nullable(),
   startTime: z.string(),
   endTime: z.string(),
-  mistakes: z.number(),
+  mistakes: z.number().nullable(),
   paragraph: z.object({
     text: z.string(),
     author: z.string().nullable(),
@@ -54,7 +54,7 @@ export default function ClientRaceFinish() {
     throw "404";
   }
 
-  const [raceData, setRaceData] = useState<RaceData>({user: "", startTime: "", endTime: "", mistakes: 0, paragraph: {text: "", author: "", source: ""}});
+  const [raceData, setRaceData] = useState<RaceData>({user: "", startTime: "", endTime: "", mistakes: null, paragraph: {text: "", author: "", source: ""}});
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,6 +75,7 @@ export default function ClientRaceFinish() {
   }, [id]);
 
   const msTime = new Date(raceData.endTime).getTime() - new Date(raceData.startTime).getTime();
+  const wpm = (raceData.paragraph.text.length / 5) / (msTime / 1000 / 60);
 
   return (
     <div>
@@ -87,8 +88,18 @@ export default function ClientRaceFinish() {
           <Link href="/register" className="border-solid border-blue-500 border rounded-lg ml-1 p-1 text-sm">Register</Link>
         </div>
       }
-      <p>WPM: {((raceData.paragraph.text.length / 5) / (msTime / 1000 / 60)).toFixed(1)}</p>
-      <p>Time: {msTime / 1000}s</p>
+      {
+        raceData?.endTime ?
+        (() => {
+          const offset = new Date(raceData.endTime).getTimezoneOffset();
+          const createdDate = new Date(new Date(raceData.endTime).getTime() - (offset*60*1000));
+          return <p>Date Achieved: {String(createdDate.toISOString().split('T')[0])}</p>
+        })()
+        :
+        <p>Date Achieved:</p>
+      }
+      <p>WPM: {!isNaN(wpm) && wpm.toFixed(1)}</p>
+      <p>Time: {!isNaN(msTime) && `${msTime / 1000}s`}</p>
       <p>Mistakes: {raceData.mistakes}</p>
       <p>Paragraph: {raceData.paragraph.text}</p>
       <p>Author: {raceData.paragraph.author}</p>
