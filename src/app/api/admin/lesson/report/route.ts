@@ -3,18 +3,17 @@ import { z } from "zod";
 import prisma from "@/lib/prisma";
 
 export async function getReports() {
-  const returnedReports = await prisma.paragraphReport.findMany({
+  const returnedReports = await prisma.lessonReport.findMany({
     select: {
       id: true,
-      paragraph: {
+      lesson: {
         select: {
           id: true,
-          text: true,
-          author: true,
-          source: true
+          lessonText: true,
+          lessonCharacters: true
         }
       },
-      paragraphText: true,
+      lessonText: true,
       user: {
         select: {
           id: true,
@@ -33,7 +32,7 @@ export async function getReports() {
   
   return returnedReports;
 }
-//return all reports
+//return all lesson reports
 export async function GET() {
   const returnedReports = await getReports();
 
@@ -47,7 +46,7 @@ export async function GET() {
 const Z_DELETE_REQUEST = z.object({
   id: z.number()
 });
-//delete single report
+//delete single lesson report
 export async function DELETE(req: NextRequest) {
   let request;
   try {
@@ -57,7 +56,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  const deleteResult = await prisma.paragraphReport.delete({
+  const deleteResult = await prisma.lessonReport.delete({
     where: {id: request.id}
   })
 

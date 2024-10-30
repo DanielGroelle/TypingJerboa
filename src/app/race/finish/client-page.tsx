@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { reportParagraph } from "@/utility/utility";
 
 const Z_RESPONSE = z.object({
   user: z.string().nullable(),
@@ -19,31 +20,6 @@ const Z_RESPONSE = z.object({
 });
 
 type RaceData = z.infer<typeof Z_RESPONSE>;
-
-const Z_REPORT_RESPONSE = z.object({
-  success: z.boolean()
-});
-
-function reportParagraph(raceId: string, setError: (error: string | null) => void, setSuccess: (success: string | null) => void) {
-  void fetch(`/api/paragraph/report`, {
-    method: "POST",
-    body: JSON.stringify({
-      raceId: raceId
-    }),
-    mode: "cors",
-    cache: "default"
-  }).then(async (data) => {
-    const tryResponse = Z_REPORT_RESPONSE.safeParse(await data.json());
-    if (!tryResponse.success) {
-      setError("Error Reporting Paragraph!");
-      setSuccess(null);
-    }
-    else {
-      setSuccess("Successfully Reported Paragraph");
-      setError(null);
-    }
-  });
-}
 
 export default function ClientRaceFinish() {
   const searchParams = useSearchParams();

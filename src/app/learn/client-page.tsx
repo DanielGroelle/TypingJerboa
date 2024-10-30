@@ -4,6 +4,7 @@ import { ManualKeyboardMap, LanguageScripts } from "@/js/language-scripts";
 import { useState, useRef, ChangeEvent, ClipboardEvent, MouseEvent, useEffect } from "react";
 import { z } from "zod";
 import SidebarComponent from "./SidebarComponent";
+import { reportLesson } from "@/utility/utility";
 
 const Z_ME_RESPONSE = z.object({
   user: z.object({
@@ -53,7 +54,7 @@ export default function ClientLearn() {
   const [lessonText, setLessonText] = useState("");
   const [userInput, setUserInput] = useState("");
   const userInputRef = useRef("");
-  const [error, setError] = useState<string | null>(null);
+
   const [activeMode, setActiveMode] = useState<"new-characters" | "word-exercise">("new-characters");
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
   const [lessonFinished, setLessonFinished] = useState(false);
@@ -61,6 +62,9 @@ export default function ClientLearn() {
   const [finishedLessonsNewCharacters, setFinishedLessonsNewCharacters] = useState<Set<string>>(new Set([]));
   const [finishedLessonsWordExercise, setFinishedLessonsWordExercise] = useState<Set<string>>(new Set([]));
   const [lessonId, setLessonId] = useState<string | null>(null);
+  
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(()=>{
     void (async ()=>{
@@ -224,6 +228,8 @@ export default function ClientLearn() {
     setLessonText("");
     setUserInput("");
     setLessonFinished(false);
+    setError(null);
+    setSuccess(null);
   }
 
   const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
@@ -261,9 +267,13 @@ export default function ClientLearn() {
         
         {/* center area */}
         <div className="m-4">
-          <div className="border-solid border-red-500 border rounded-lg p-2" hidden={typeof error !== "string"}>
+          <div className="border-solid border-red-500 border rounded-lg mb-1 p-2" hidden={typeof error !== "string"}>
             {error}
           </div>
+          <div className="border-solid border-green-500 border rounded-lg mb-1 p-2" hidden={typeof success !== "string"}>
+            {success}
+          </div>
+
           <div>
             <input type="button" className="border-solid border-white border rounded-lg p-2 mr-2" onClick={()=>{
               setActiveMode("new-characters");
@@ -297,6 +307,13 @@ export default function ClientLearn() {
           </div>
 
           <textarea id="main-text-input" className="text-black resize-none font-mono min-w-full text-lg p-1" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+          
+          <div>
+            {
+              lessonId &&
+              <input type="button" className="border-solid border-red-700 border-2 rounded-lg my-1 p-2" onClick={()=>reportLesson(lessonId, setError, setSuccess)} value="Report Lesson" />
+            }
+          </div>
         </div>
       </div>
     </div>

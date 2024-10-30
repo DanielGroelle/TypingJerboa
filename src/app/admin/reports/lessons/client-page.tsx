@@ -2,18 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { z } from "zod";
-import FilterOptionsComponent from "../FilterOptionsComponent";
-import { ParagraphReport, Z_PARAGRAPH_REPORT } from "@/js/types";
-import ItemCardComponent from "../ItemCardComponent";
+import FilterOptionsComponent from "../../FilterOptionsComponent";
+import { LessonReport, Z_LESSON_REPORT } from "@/js/types";
+import ItemCardComponent from "../../ItemCardComponent";
 
 const Z_RESPONSE = z.object({
-  reports: z.array(Z_PARAGRAPH_REPORT)
+  reports: z.array(Z_LESSON_REPORT)
 });
 
 async function getReports() {
   let response;
   try {
-    response = Z_RESPONSE.parse(await (await fetch(`/api/admin/report`, {
+    response = Z_RESPONSE.parse(await (await fetch(`/api/admin/lesson/report`, {
       method: "GET",
       mode: "cors",
       cache: "default"
@@ -26,8 +26,8 @@ async function getReports() {
   return response.reports;
 }
 
-export default function ClientAdminReports() {
-  const [reports, setReports] = useState<ParagraphReport[]>([]);
+export default function ClientAdminLessonReports() {
+  const [reports, setReports] = useState<LessonReport[]>([]);
   const [viewPage, setViewPage] = useState(1);
   const reportsPerPage = 25;
 
@@ -38,10 +38,10 @@ export default function ClientAdminReports() {
     })();
   },[]);
 
-  function handleSave(editReport: ParagraphReport) {
+  function handleSave(editReport: LessonReport) {
     void (async ()=>{
       try {
-        const response = Z_PARAGRAPH_REPORT.parse(await(await fetch(`/api/admin/report/edit`, {
+        const response = Z_LESSON_REPORT.parse(await(await fetch(`/api/admin/lesson/report/edit`, {
           method: "POST",
           body: JSON.stringify(editReport),
           mode: "cors",
@@ -63,7 +63,7 @@ export default function ClientAdminReports() {
   function handleDelete(reportId: number) {
     void (async ()=>{
       try {
-        await fetch(`/api/admin/report`, {
+        await fetch(`/api/admin/lesson/report`, {
           method: "DELETE",
           body: JSON.stringify({
             id: reportId
@@ -83,12 +83,12 @@ export default function ClientAdminReports() {
     setReports([...newReports]);
   }
 
-  function deleteManyReports(deleteReports: ParagraphReport[]) {
+  function deleteManyReports(deleteReports: LessonReport[]) {
     const reportIds = deleteReports.map(report => report.id);
     
     void (async ()=>{
       try {
-        await fetch(`/api/admin/report/bulk`, {
+        await fetch(`/api/admin/lesson/report/bulk`, {
           method: "DELETE",
           body: JSON.stringify({
             ids: reportIds
@@ -118,8 +118,8 @@ export default function ClientAdminReports() {
     setViewPage(Number(pageSelector.value));
   }
 
-  const refFilteredReports: {items: ParagraphReport[]} = {items: []};
-  const filterOptionsComponent = FilterOptionsComponent<ParagraphReport>({
+  const refFilteredReports: {items: LessonReport[]} = {items: []};
+  const filterOptionsComponent = FilterOptionsComponent<LessonReport>({
     items: reports,
     refFilteredItems: refFilteredReports,
     selectFilters: {
@@ -129,18 +129,19 @@ export default function ClientAdminReports() {
       }
     },
     filters: {
-      "id": { getter: (report: ParagraphReport) => report.id },
-      "paragraphId": { getter: (report: ParagraphReport) => String(report.paragraph?.id) },
-      "paragraphText": { getter: (report: ParagraphReport) => report.paragraphText },
-      "username": { getter: (report: ParagraphReport) => String(report.user?.username) },
-      "sessionToken": { getter: (report: ParagraphReport) => String(report.session?.token) },
-      "createdAt": { getter: (report: ParagraphReport) => new Date(report.createdAt) },
+      "id": { getter: (report: LessonReport) => report.id },
+      "lessonId": { getter: (report: LessonReport) => String(report.lesson?.id) },
+      "lessonChararcters": { getter: (report: LessonReport) => String(report.lesson?.lessonCharacters) },
+      "lessonText": { getter: (report: LessonReport) => report.lessonText },
+      "username": { getter: (report: LessonReport) => String(report.user?.username) },
+      "sessionToken": { getter: (report: LessonReport) => String(report.session?.token) },
+      "createdAt": { getter: (report: LessonReport) => new Date(report.createdAt) },
     },
     setViewPage: setViewPage,
     deleteManyItems: deleteManyReports
   });
 
-  //TODO: have some way to delete paragraphs or go to /admin/paragraphs page filtered on the specific paragraph to handle the report
+  //TODO: have some way to delete lessons or go to /admin/lessons page filtered on the specific lesson to handle the report
 
   return (
     <div>
@@ -164,15 +165,14 @@ export default function ClientAdminReports() {
           <ItemCardComponent
             item={report}
             itemFields={{
-              "id": {getter: (report: ParagraphReport) => report.id, editType: null, options: null},
-              "paragraphId": {getter: (report: ParagraphReport) => report.paragraph?.id ?? null, editType: null, options: null},
-              "paragraphText": {getter: (report: ParagraphReport) => report.paragraphText, editType: null, options: null},
-              "paragraphAuthor": {getter: (report: ParagraphReport) => report.paragraph?.author ?? null, editType: null, options: null},
-              "paragraphSource": {getter: (report: ParagraphReport) => report.paragraph?.source ?? null, editType: null, options: null},
-              "user": {getter: (report: ParagraphReport) => report.user ? `${String(report.user?.username)} - ${String(report.user?.id)}` : null, editType: null, options: null},
-              "session": {getter: (report: ParagraphReport) => report.session?.token ? `${String(report.session?.token)}` : null, editType: null, options: null},
-              "resolved": {getter: (report: ParagraphReport) => String(report.resolved), editType: "checkbox", options: null},
-              "createdAt": {getter: (report: ParagraphReport) => report.createdAt, editType: null, options: null},
+              "id": {getter: (report: LessonReport) => report.id, editType: null, options: null},
+              "lessonId": {getter: (report: LessonReport) => report.lesson?.id ?? null, editType: null, options: null},
+              "lessonCharacters": {getter: (report: LessonReport) => report.lesson?.lessonCharacters ?? null, editType: null, options: null},
+              "lessonText": {getter: (report: LessonReport) => report.lessonText, editType: null, options: null},
+              "user": {getter: (report: LessonReport) => report.user ? `${String(report.user?.username)} - ${String(report.user?.id)}` : null, editType: null, options: null},
+              "session": {getter: (report: LessonReport) => report.session?.token ? `${String(report.session?.token)}` : null, editType: null, options: null},
+              "resolved": {getter: (report: LessonReport) => String(report.resolved), editType: "checkbox", options: null},
+              "createdAt": {getter: (report: LessonReport) => report.createdAt, editType: null, options: null},
             }}
             editParams={{
               items: reports,

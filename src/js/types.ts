@@ -91,3 +91,23 @@ export const Z_PARAGRAPH_REPORT = z.object({
   createdAt: z.string()
 });
 export type ParagraphReport = z.infer<typeof Z_PARAGRAPH_REPORT>;
+
+export const Z_LESSON_REPORT = z.object({
+  id: z.number(),
+  lesson: z.object({
+    id: z.string(),
+    lessonText: z.string(),
+    lessonCharacters: z.string()
+  }).nullable(),
+  lessonText: z.string(),
+  user: z.object({
+    id: z.number(),
+    username: z.string()
+  }).nullable(),
+  session: z.object({
+    token: z.string()
+  }).nullable(),
+  resolved: z.boolean(),
+  createdAt: z.string()
+});
+export type LessonReport = z.infer<typeof Z_LESSON_REPORT>;

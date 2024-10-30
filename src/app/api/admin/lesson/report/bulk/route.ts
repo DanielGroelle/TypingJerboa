@@ -5,7 +5,7 @@ import { z } from "zod";
 const Z_DELETE_REQUEST = z.object({
   ids: z.array(z.number())
 });
-//bulk delete reports
+//bulk delete lesson reports
 export async function DELETE(req: NextRequest) {
   let request;
   try {
@@ -15,7 +15,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  const deletedWordCount = await prisma.paragraphReport.deleteMany({
+  const deletedWordCount = await prisma.lessonReport.deleteMany({
     where: {
       id: {in: request.ids}
     }

@@ -6,7 +6,7 @@ const Z_REQUEST = z.object({
   id: z.number(),
   resolved: z.boolean()
 });
-//edit report
+//edit lesson report
 export async function POST(req: NextRequest) {
   let request;
   try {
@@ -16,22 +16,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  const updatedReport = await prisma.paragraphReport.update({
+  const updatedReport = await prisma.lessonReport.update({
     where: { id: request.id },
     data: {
       resolved: request.resolved
     },
     select: {
       id: true,
-      paragraph: {
+      lesson: {
         select: {
           id: true,
-          text: true,
-          author: true,
-          source: true
+          lessonText: true,
+          lessonCharacters: true
         }
       },
-      paragraphText: true,
+      lessonText: true,
       user: {
         select: {
           id: true,
