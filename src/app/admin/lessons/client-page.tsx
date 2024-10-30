@@ -60,8 +60,8 @@ export default function ClientAdminLessons() {
     setLessons([...newLessons]);
   }
 
-  function deleteManyLessons() {
-    const lessonIds = lessons.map((lesson)=>lesson.id);
+  function deleteManyLessons(deleteLessons: Lesson[]) {
+    const lessonIds = deleteLessons.map(lesson => lesson.id);
     
     void (async ()=>{
       try {

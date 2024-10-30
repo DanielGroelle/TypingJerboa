@@ -86,9 +86,9 @@ export default function ClientAdminWords() {
     setWords([...newWords]);
   }
 
-  function deleteManyWords() {
-    const wordIds = words.map((word)=>word.id);
-    
+  function deleteManyWords(deleteWords: Word[]) {
+    const wordIds = deleteWords.map(word => word.id);
+
     void (async ()=>{
       try {
         await fetch(`/api/admin/word/bulk`, {

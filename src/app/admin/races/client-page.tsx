@@ -59,8 +59,8 @@ export default function ClientAdminRaces() {
     setRaces([...newRaces]);
   }
 
-  function deleteManyRaces(races: Race[]) {
-    const raceIds = races.map((race)=>race.id);
+  function deleteManyRaces(deleteRaces: Race[]) {
+    const raceIds = deleteRaces.map(race => race.id);
     
     void (async ()=>{
       try {

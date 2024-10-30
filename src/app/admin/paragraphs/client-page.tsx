@@ -96,10 +96,10 @@ export default function ClientAdminParagraphs() {
     });
   }
 
-  function deleteManyParagraphs(paragraphs: Paragraph[]) {
+  function deleteManyParagraphs(deleteParagraphs: Paragraph[]) {
     setConfirmation(() => () => {
-      const paragraphIds = paragraphs.map((paragraph)=>paragraph.id);
-      
+      const paragraphIds = deleteParagraphs.map(paragraph => paragraph.id);
+
       void (async ()=>{
         try {
           await fetch(`/api/admin/paragraph/bulk`, {
@@ -115,7 +115,7 @@ export default function ClientAdminParagraphs() {
           throw "Delete failed";
         }
       })();
-    
+
       const newParagraphs = paragraphs.filter((paragraph)=>{
         return !paragraphIds.includes(paragraph.id)
       });

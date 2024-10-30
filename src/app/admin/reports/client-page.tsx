@@ -83,8 +83,8 @@ export default function ClientAdminReports() {
     setReports([...newReports]);
   }
 
-  function deleteManyReports() {
-    const reportIds = reports.map((report)=>report.id);
+  function deleteManyReports(deleteReports: ParagraphReport[]) {
+    const reportIds = deleteReports.map(report => report.id);
     
     void (async ()=>{
       try {
