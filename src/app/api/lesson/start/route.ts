@@ -4,6 +4,7 @@ import { z } from "zod";
 import { findUserFromLoginToken } from "../../admin/user/route";
 import { findUniqueFinishedLessons, generateRandomWord, getLanguageScriptId, shuffle } from "../../utility/utility";
 
+//generates the lesson text when the selected mode is word-exercise
 function generateWordExerciseLessonText(
   activeLesson: string[],
   learnedChars: Set<string>,
@@ -12,6 +13,8 @@ function generateWordExerciseLessonText(
   letterRegex: RegExp,
   numberRegex: RegExp
 ) {
+  const wordCapitalizedVariants = fetchedWords.flatMap(wordObj => [wordObj.word, wordObj.word.toUpperCase(), `${wordObj.word.toUpperCase()[0]}${wordObj.word.slice(1)}`]);
+
   //find any symbols in the activeLesson
   const symbolActiveChars = activeLesson.filter(activeChar => !(letterRegex.test(activeChar) || numberRegex.test(activeChar)));
   const completeCharset = new Set([...learnedChars, ...activeLesson]);
@@ -19,7 +22,7 @@ function generateWordExerciseLessonText(
   //filter the fetched words to only include words that contain a character from the activeLesson, and the rest from previous completed lessons
   for (const activeChar of activeLesson) {
     if (letterRegex.test(activeChar)) {
-      wordsByChar[activeChar] = fetchedWords.map(wordObj => wordObj.word).filter(word => {
+      wordsByChar[activeChar] = wordCapitalizedVariants.filter(word => {
         const wordChars = [...word];
         //if the activeChar is a letter, make sure the letter is present in the word
         return wordChars.some(char => activeChar === char) && wordChars.every(char => completeCharset.has(char));
@@ -29,7 +32,7 @@ function generateWordExerciseLessonText(
     
     //return all valid words when activeChar is a number
     if(numberRegex.test(activeChar)) {
-      wordsByChar[activeChar] = fetchedWords.map(wordObj => wordObj.word).filter(word => {
+      wordsByChar[activeChar] = wordCapitalizedVariants.filter(word => {
         const wordChars = [...word];
         return wordChars.every(char => completeCharset.has(char));
       });
@@ -38,11 +41,11 @@ function generateWordExerciseLessonText(
 
     //when activeChar is a symbol, place the symbols randomly around valid words
     const chanceForEmpty = .5;
-    wordsByChar[activeChar] = fetchedWords.map(wordObj => {
+    wordsByChar[activeChar] = wordCapitalizedVariants.map(word => {
       //place random prefix and suffixes to valid words
       const randomPrefix = Math.random() > chanceForEmpty ? symbolActiveChars[Math.floor(Math.random() * symbolActiveChars.length)] : "";
       const randomSuffix = Math.random() > chanceForEmpty ? symbolActiveChars[Math.floor(Math.random() * symbolActiveChars.length)] : "";
-      return `${randomPrefix}${wordObj.word}${randomSuffix}`;
+      return `${randomPrefix}${word}${randomSuffix}`;
     }).filter(word => {
       const wordChars = [...word];
       return wordChars.some(char => activeChar === char) && wordChars.every(char => completeCharset.has(char));
