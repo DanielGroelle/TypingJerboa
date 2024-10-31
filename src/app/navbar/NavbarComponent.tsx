@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import LogoutButtonComponent from "./LogoutButtonComponent";
+import NavigationComponent from "../NavigationComponent";
 
 export default async function NavbarComponent() {
   //get loginToken from cookie to check if the user is logged in
@@ -29,7 +30,7 @@ export default async function NavbarComponent() {
           return (
             <div className="flex">
               <div className="flex-2 px-4 py-2 text-center border-solid border-l-2 border-white">
-                <Link href="/account">{user.username}</Link>
+                <NavigationComponent name={user.username} route="/account" />
               </div>
               <div className="flex-2 px-4 py-2 text-center">
                 <LogoutButtonComponent />

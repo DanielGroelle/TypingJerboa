@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import prisma from "@/lib/prisma";
+import { z } from "zod";
 
 const Z_REQUEST = z.object({
-  loginToken: z.string()
-});
-
-const Z_EXPIRY = z.object({
-  loginExpiry: z.date().nullable()
+  loginToken: z.string(),
+  secret: z.string()
 });
 //returns the expiry of a loginToken
 export async function POST(req: NextRequest) {
@@ -19,18 +16,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  let expiry;
-  try {
-    expiry = Z_EXPIRY.parse(await prisma.user.findFirst({
-      select: {loginExpiry: true},
-      where: {loginToken: request.loginToken}
-    }));
-  }
-  catch(e: unknown) {
-    return NextResponse.json({error: "Login token not found"}, {status: 400});
+  if (request.secret !== process.env.TOKEN_SECRET) {
+    return NextResponse.json({error: "Not authorized for this action"}, {status: 400});
   }
 
-  if (expiry.loginExpiry === null) {
+  const expiry = await prisma.user.findFirst({
+    select: {loginExpiry: true},
+    where: {loginToken: request.loginToken}
+  });
+
+  if (expiry === null || expiry?.loginExpiry === null) {
     return NextResponse.json({error: "Expiry is null"}, {status: 400});
   }
 
@@ -45,6 +40,10 @@ export async function DELETE(req: NextRequest) {
   }
   catch(e: unknown) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
+  }
+
+  if (request.secret !== process.env.TOKEN_SECRET) {
+    return NextResponse.json({error: "Not authorized for this action"}, {status: 400});
   }
 
   const updatedUser = await prisma.user.update({

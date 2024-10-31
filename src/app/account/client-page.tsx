@@ -2,7 +2,7 @@
 
 import { LanguageScripts } from "@/js/language-scripts";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const Z_RESPONSE = z.object({
   preferences: z.object({
@@ -12,23 +12,6 @@ const Z_RESPONSE = z.object({
     })
   })
 });
-async function getPreferences() {
-  let response;
-  try {
-    response = Z_RESPONSE.parse(await (await fetch(`/api/user/preferences`, {
-      method: "GET",
-      mode: "cors",
-      cache: "default"
-    })).json());
-  }
-  catch(e: unknown) {
-    console.log(e);
-    throw "getPreferences failed";
-  }
-
-  return response.preferences;
-}
-
 async function setPreferences(languageScript: string) {
   try {
     Z_RESPONSE.parse(await (await fetch(`/api/user/preferences`, {
@@ -102,18 +85,11 @@ function deleteAccount(setError: (error: string | null) => void, setSuccess: (su
   })();
 }
 
-export default function ClientAccount() {
-  const [primaryLanguageScript, setPrimaryLanguageScript] = useState("");
+export default function ClientAccount({languageScriptPreference}: {languageScriptPreference: string | undefined}) {
+  const [primaryLanguageScript, setPrimaryLanguageScript] = useState(languageScriptPreference ?? "");
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  useEffect(()=>{
-    void (async ()=>{
-      const userPreferences = await getPreferences();
-      setPrimaryLanguageScript(userPreferences.languageScript.languageScript);
-    })();
-  }, []);
 
   return (
     <div className="flex flex-col h-full justify-between">

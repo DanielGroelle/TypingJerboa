@@ -1,34 +1,36 @@
 import { NextResponse, NextRequest } from "next/server";
 import { z } from "zod";
 
+//Abandon all hope, ye who enter here
+
+//TODO: if this ever happens, make all of this sensible
+//https://github.com/vercel/next.js/discussions/71727
+
 const Z_ADMIN_RESPONSE = z.object({
   isAdmin: z.boolean()
-});
-
-const Z_EXPIRY_RESPONSE = z.object({
-  expiry: z.number()
 });
 
 const Z_TOKEN_RESPONSE = z.object({
   token: z.string(),
   expiry: z.string()
 });
-
 async function createNewSession(request: NextRequest) {
   let zodResponse;
   try {
     //must be an api fetch because PrismaClient cant run in vercel edge functions
-    zodResponse = Z_TOKEN_RESPONSE.parse(await (await fetch(new URL("/api/user/session-token/create", process.env.BASE_URL), {
-      method: "GET",
+    zodResponse = Z_TOKEN_RESPONSE.parse(await (await fetch(new URL("/api/admin/user/session-token/create", process.env.BASE_URL), {
+      method: "POST",
+      body: JSON.stringify({secret: process.env.TOKEN_SECRET}),
       mode: "cors",
       cache: "default"
     })).json());
   }
   catch(e: unknown) {
-    console.log("Create New Session", e);
+    console.log("createNewSession error", e);
     return NextResponse.redirect(new URL("/", request.url));
   }
-  const response = NextResponse.redirect(new URL("/", request.url));
+
+  const response = NextResponse.next();
   response.cookies.set("sessionToken", zodResponse.token, {
     secure: true,
     httpOnly: true,
@@ -39,14 +41,18 @@ async function createNewSession(request: NextRequest) {
   return response;
 }
 
+const Z_EXPIRY_RESPONSE = z.object({
+  expiry: z.number()
+});
 async function validateLoginToken(request: NextRequest, loginToken: string) {
   let response;
   try {
     //must be an api fetch because PrismaClient cant run in vercel edge functions
-    response = Z_EXPIRY_RESPONSE.parse(await (await fetch(new URL("/api/user/login-token", process.env.BASE_URL), {
+    response = Z_EXPIRY_RESPONSE.parse(await (await fetch(new URL("/api/admin/user/login-token", process.env.BASE_URL), {
       method: "POST",
       body: JSON.stringify({
-        loginToken: loginToken
+        loginToken: loginToken,
+        secret: process.env.TOKEN_SECRET
       }),
       mode: "cors",
       cache: "default"
@@ -66,10 +72,11 @@ async function validateLoginToken(request: NextRequest, loginToken: string) {
     //delete login from login table
     try {
       //must be an api fetch because PrismaClient cant run in vercel edge functions
-      Z_TOKEN_RESPONSE.parse(await (await fetch(new URL("/api/user/login-token", process.env.BASE_URL), {
+      Z_TOKEN_RESPONSE.parse(await (await fetch(new URL("/api/admin/user/login-token", process.env.BASE_URL), {
         method: "DELETE",
         body: JSON.stringify({
-          loginToken: loginToken
+          loginToken: loginToken,
+          secret: process.env.TOKEN_SECRET
         }),
         mode: "cors",
         cache: "default"
@@ -88,10 +95,11 @@ async function validateSessionToken(request: NextRequest, sessionToken: string) 
   let response;
   try {
     //must be an api fetch because PrismaClient cant run in vercel edge functions
-    response = Z_EXPIRY_RESPONSE.parse(await (await fetch(new URL("/api/user/session-token", process.env.BASE_URL), {
+    response = Z_EXPIRY_RESPONSE.parse(await (await fetch(new URL("/api/admin/user/session-token", process.env.BASE_URL), {
       method: "POST",
       body: JSON.stringify({
-        sessionToken: sessionToken
+        sessionToken: sessionToken,
+        secret: process.env.TOKEN_SECRET
       }),
       mode: "cors",
       cache: "default"
@@ -99,7 +107,7 @@ async function validateSessionToken(request: NextRequest, sessionToken: string) 
   }
   catch(e: unknown) {
     //if theres an error its probably because the sessionToken doesnt exist so just delete it from the users cookies
-    console.log("check sessionToken alive", e)
+    console.log("validate sessionToken error", e)
     const errorResponse = NextResponse.redirect(new URL("/", request.url));
     errorResponse.cookies.delete("sessionToken");
     return errorResponse;
@@ -109,6 +117,38 @@ async function validateSessionToken(request: NextRequest, sessionToken: string) 
   if (Date.now() > response.expiry.valueOf()) {
     return await createNewSession(request);
   }
+}
+
+const Z_PREFERENCE_RESPONSE = z.object({
+  preferences: z.object({
+    languageScript: z.object({
+      id: z.number(),
+      languageScript: z.string()
+    })
+  })
+});
+async function getUserPreferences(loginToken: string) {
+  const tryResponse = Z_PREFERENCE_RESPONSE.safeParse(await (await fetch(new URL("/api/user/preferences", process.env.BASE_URL), {
+    headers: {
+      Cookie: `loginToken=${loginToken}`,
+    },
+    credentials: "include",
+    method: "GET",
+    mode: "cors",
+    cache: "default"
+  })).json());
+  
+  if (!tryResponse.success) {
+    return NextResponse.json({error: "Failed to receive preferences"}, {status: 500});
+  }
+
+  const response = NextResponse.next();
+  response.cookies.set("languageScriptPreference", tryResponse.data.preferences.languageScript.languageScript, {
+    secure: true,
+    httpOnly: true,
+    sameSite: "strict"
+  });
+  return response;
 }
 
 async function moveSessionDataToUser(request: NextRequest, sessionToken: string, loginToken: string) {
@@ -165,7 +205,7 @@ async function checkUserIsAdmin(loginToken: string) {
   }
   catch(e: unknown) {
     console.log("admin api error", e);
-    return NextResponse.json({error: "Unknown api error"}, {status: 400});
+    return NextResponse.json({error: "Unknown api error"}, {status: 500});
   }
 
   if (!response.isAdmin) {
@@ -179,9 +219,19 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const loginToken = request.cookies.get("loginToken")?.value;
   const sessionToken = request.cookies.get("sessionToken")?.value;
+  const preferences = request.cookies.get("preferences")?.value;
 
   //if the path is /api/, could be an internal request. this check prevents infinite redirects
   if (path.startsWith("/api/")) {
+    //allow internal requests being made to login-token or session-token api routes
+    //these routes check if the token secret sent in the body is correct
+    if (path === "/api/admin/user/login-token" ||
+      path === "/api/admin/user/session-token" ||
+      path === "/api/admin/user/session-token/create"
+    ) {
+      return NextResponse.next();
+    }
+
     if (path.startsWith("/api/admin") && path !== "/api/admin/user/is-admin") {
       //no loginToken so cant be authorized
       if (!loginToken) {
@@ -203,8 +253,8 @@ export async function middleware(request: NextRequest) {
     if (sessionToken) {
       return await moveSessionDataToUser(request, sessionToken, loginToken);
     }
-  }  
-
+  }
+  
   //validate that the sessionToken is still alive
   if (sessionToken) {
     const response = await validateSessionToken(request, sessionToken);
@@ -255,6 +305,20 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  //fetch and assign user preferences to cookie
+  if (loginToken && !preferences) {
+    return await getUserPreferences(loginToken);
+  }
+
   //everything passes, so continue serving user
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: [
+    /*
+     * Apply middleware to all pages except * /_next/* (exclude Next.js assets, e.g., /_next/static/*)
+     */
+    "/((?!_next/static|_next/image).*)",
+  ]
+};

@@ -6,50 +6,10 @@ import { z } from "zod";
 import SidebarComponent from "./SidebarComponent";
 import { reportLesson } from "@/utility/utility";
 
-const Z_ME_RESPONSE = z.object({
-  user: z.object({
-    id: z.number(),
-    username: z.string(),
-    createdAt: z.string()
-  })
-});
-const Z_LANGUAGESCRIPT_RESPONSE = z.object({
-  preferences: z.object({
-    languageScript: z.object({
-      id: z.number(),
-      languageScript: z.string()
-    })
-  })
-});
-async function getLanguageScript() {
-  const tryRequest = Z_ME_RESPONSE.safeParse(await (await fetch(`/api/me`, {
-    method: "GET",
-    mode: "cors",
-    cache: "default"
-  })).json());
-  
-  if (!tryRequest.success) {
-    return null;
-  }
+//TODO: refactor this into several smaller components
 
-  let response;
-  try {
-    response = Z_LANGUAGESCRIPT_RESPONSE.parse(await (await fetch(`/api/user/preferences`, {
-      method: "GET",
-      mode: "cors",
-      cache: "default"
-    })).json());
-  }
-  catch(e: unknown) {
-    console.log(e);
-    throw "getLanguageScript failed";
-  }
-
-  return response.preferences.languageScript.languageScript;
-}
-
-export default function ClientLearn() {
-  const [languageScript, setLanguageScript] = useState<string>(Object.values(LanguageScripts)[0].internal);
+export default function ClientLearn({languageScriptPreference}: {languageScriptPreference: string | undefined}) {
+  const [languageScript, setLanguageScript] = useState<string>(languageScriptPreference ?? Object.values(LanguageScripts)[0].internal);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [lessonText, setLessonText] = useState("");
   const [userInput, setUserInput] = useState("");
@@ -65,13 +25,6 @@ export default function ClientLearn() {
   
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  useEffect(()=>{
-    void (async ()=>{
-      const languageScript = await getLanguageScript();
-      if (languageScript) setLanguageScript(languageScript);
-    })();
-  }, []);
 
   const Z_FINISHED_LESSONS_RESPONSE = z.object({
     finishedLessons: z.object({

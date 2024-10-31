@@ -3,7 +3,8 @@ import { z } from "zod";
 import prisma from "@/lib/prisma";
 
 const Z_REQUEST = z.object({
-  sessionToken: z.string()
+  sessionToken: z.string(),
+  secret: z.string()
 });
 //returns the expiry of a sessionToken
 export async function POST(req: NextRequest) {
@@ -13,6 +14,10 @@ export async function POST(req: NextRequest) {
   }
   catch(e: unknown) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
+  }
+
+  if (request.secret !== process.env.TOKEN_SECRET) {
+    return NextResponse.json({error: "Not authorized for this action"}, {status: 400});
   }
 
   const expiry = await prisma.session.findFirst({
@@ -35,6 +40,10 @@ export async function DELETE(req: NextRequest) {
   }
   catch(e: unknown) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
+  }
+
+  if (request.secret !== process.env.TOKEN_SECRET) {
+    return NextResponse.json({error: "Not authorized for this action"}, {status: 400});
   }
 
   const deletedToken = await prisma.session.delete({

@@ -21,15 +21,15 @@ function handleRegister(event: FormEvent<HTMLFormElement>, username: string, pas
       cache: "default"
     });
 
-    const tryRequest = Z_RESPONSE.safeParse(await response.json());
+    const tryResponse = Z_RESPONSE.safeParse(await response.json());
     
-    if (!tryRequest.success) {
+    if (!tryResponse.success) {
       setError("Unknown error, try again later");
       return;
     }
 
     if (response.status !== 200) {
-      setError(tryRequest.data.error ?? "");
+      setError(tryResponse.data.error ?? "");
       return;
     }
 
@@ -65,11 +65,11 @@ export default function ClientRegister() {
       <form onSubmit={e => handleRegister(e, username, password, setError)}>
       <div className="flex mb-1">
           <p style={{width: "5.5rem"}}>Username</p>
-          <input className="text-black" type="text" id="username" required value={username} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setUsername(e.target.value)} />
+          <input className="text-black p-1" type="text" id="username" required value={username} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setUsername(e.target.value)} />
         </div>
         <div className="flex mb-1">
           <p style={{width: "5.5rem"}}>Password</p>
-          <input className="text-black" type="password" id="password" required value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setPassword(e.target.value)} />
+          <input className="text-black p-1" type="password" id="password" required value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setPassword(e.target.value)} />
         </div>
         <input type="submit" className="border-solid border-white border rounded-lg p-2" value="Register Account"/>
       </form>

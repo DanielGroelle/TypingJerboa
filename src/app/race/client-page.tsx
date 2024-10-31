@@ -12,7 +12,7 @@ export type ReturnedParagraph = {
   source: string | null
 }
 
-export default function ClientRace() {
+export default function ClientRace({languageScriptPreference}: {languageScriptPreference: string | undefined}) {
   const [raceParagraph, setRaceParagraph] = useState<ReturnedParagraph | null>(null);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [raceId, setRaceId] = useState<string | null>(null);
@@ -37,7 +37,7 @@ export default function ClientRace() {
     <div>
       <div className="flex flex-col m-10 w-full">
         <div className="flex w-full justify-between">
-          {!scriptSelectionHidden && <ScriptSelectionComponent setRaceInfo={setRaceInfo} />}
+          {!scriptSelectionHidden && <ScriptSelectionComponent setRaceInfo={setRaceInfo} languageScriptPreference={languageScriptPreference} />}
           {!timerHidden && <TimerComponent startTime={startTime} />}
         </div>
         <TextInputComponent raceParagraphArray={raceParagraphArray} raceId={raceId} startTime={startTime} />

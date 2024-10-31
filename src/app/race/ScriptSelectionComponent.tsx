@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { LanguageScripts } from "@/js/language-scripts";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ReturnedParagraph } from "./client-page";
 
 const Z_RESPONSE = z.object({
@@ -43,64 +43,18 @@ async function startRace(
   }
 }
 
-const Z_ME_RESPONSE = z.object({
-  user: z.object({
-    id: z.number(),
-    username: z.string(),
-    createdAt: z.string()
-  })
-});
-const Z_LANGUAGESCRIPT_RESPONSE = z.object({
-  preferences: z.object({
-    languageScript: z.object({
-      id: z.number(),
-      languageScript: z.string()
-    })
-  })
-});
-async function getLanguageScript() {
-  const tryRequest = Z_ME_RESPONSE.safeParse(await (await fetch(`/api/me`, {
-    method: "GET",
-    mode: "cors",
-    cache: "default"
-  })).json());
-
-  if (!tryRequest.success) {
-    return null;
-  }
-
-  let response;
-  try {
-    response = Z_LANGUAGESCRIPT_RESPONSE.parse(await (await fetch(`/api/user/preferences`, {
-      method: "GET",
-      mode: "cors",
-      cache: "default"
-    })).json());
-  }
-  catch(e: unknown) {
-    console.log(e);
-    throw "getLanguageScript failed";
-  }
-
-  return response.preferences.languageScript.languageScript;
-}
-
-export default function ScriptSelectionComponent({setRaceInfo}: { setRaceInfo: (
-  raceParagraph: ReturnedParagraph | null,
-  startTime: Date | null,
-  raceId: string | null,
-  scriptSelectionHidden: boolean,
-  timerHidden: boolean
-) => void }) {
+export default function ScriptSelectionComponent({setRaceInfo, languageScriptPreference}: {
+  setRaceInfo: (
+    raceParagraph: ReturnedParagraph | null,
+    startTime: Date | null,
+    raceId: string | null,
+    scriptSelectionHidden: boolean,
+    timerHidden: boolean
+  ) => void,
+  languageScriptPreference: string | undefined
+}) {
   const [error, setError] = useState<string | null>(null);
-  const [languageScript, setLanguageScript] = useState("");
-
-  useEffect(()=>{
-    void (async ()=>{
-      const languageScript = await getLanguageScript();
-      if (languageScript) setLanguageScript(languageScript);
-    })();
-  }, []);
+  const [languageScript, setLanguageScript] = useState(languageScriptPreference ?? "");
 
   return (
     <div>

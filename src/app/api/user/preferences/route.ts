@@ -111,5 +111,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Error updating languageScript preference"}, {status: 400});
   }
 
-  return NextResponse.json({preferences: {languageScript: {id: updatedPreferences.languageScriptIdPreference, languageScript: request.languageScript}}});
+  const response = NextResponse.json({preferences: {languageScript: {id: updatedPreferences.languageScriptIdPreference, languageScript: request.languageScript}}});
+  response.cookies.set("languageScriptPreference", request.languageScript);
+  return response;
 }
