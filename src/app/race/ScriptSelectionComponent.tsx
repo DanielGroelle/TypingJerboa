@@ -104,7 +104,7 @@ export default function ScriptSelectionComponent({setRaceInfo}: { setRaceInfo: (
 
   return (
     <div>
-      <div className="border-solid border-red-500 border rounded-lg p-2" hidden={typeof error !== "string"}>
+      <div className="border-solid border-red-500 border rounded-lg w-fit p-2" hidden={typeof error !== "string"}>
         {error}
       </div>
       Select the script you&apos;d like to use

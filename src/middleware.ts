@@ -29,7 +29,12 @@ async function createNewSession(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
   const response = NextResponse.redirect(new URL("/", request.url));
-  response.cookies.set("sessionToken", zodResponse.token, { secure: true, httpOnly: true, expires: new Date(zodResponse.expiry) });
+  response.cookies.set("sessionToken", zodResponse.token, {
+    secure: true,
+    httpOnly: true,
+    sameSite: "strict",
+    expires: new Date(zodResponse.expiry)
+  });
   
   return response;
 }

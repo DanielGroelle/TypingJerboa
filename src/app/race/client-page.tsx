@@ -46,10 +46,10 @@ export default function ClientRace() {
             raceId &&
             <input type="button" className="border-solid border-red-700 border-2 rounded-lg my-1 p-2" onClick={()=>reportParagraph(raceId, setError, setSuccess)} value="Report Paragraph" />
           }
-          <div className="border-solid border-red-500 border rounded-lg p-2" hidden={typeof error !== "string"}>
+          <div className="border-solid border-red-500 border rounded-lg w-fit p-2" hidden={typeof error !== "string"}>
             {error}
           </div>
-          <div className="border-solid border-green-500 border rounded-lg p-2" hidden={typeof success !== "string"}>
+          <div className="border-solid border-green-500 border rounded-lg w-fit p-2" hidden={typeof success !== "string"}>
             {success}
           </div>
         </div>

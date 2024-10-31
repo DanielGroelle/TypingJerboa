@@ -82,10 +82,10 @@ export default function ClientRaceFinish() {
       <p>Source: {raceData.paragraph.source}</p>
       <br/>
 
-      <div className="border-solid border-red-500 border rounded-lg p-2" hidden={typeof error !== "string"}>
+      <div className="border-solid border-red-500 border rounded-lg w-fit p-2" hidden={typeof error !== "string"}>
         {error}
       </div>
-      <div className="border-solid border-green-500 border rounded-lg p-2" hidden={typeof success !== "string"}>
+      <div className="border-solid border-green-500 border rounded-lg w-fit p-2" hidden={typeof success !== "string"}>
         {success}
       </div>
       <div className="flex">

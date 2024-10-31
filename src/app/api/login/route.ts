@@ -51,10 +51,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Failed to create login"}, {status: 400});
   }
 
-  const response = new NextResponse();
+  const response = NextResponse.json({}, {status: 200});
   response.cookies.set("loginToken", loginToken, {
     secure: true,
     httpOnly: true,
+    sameSite: "strict",
     expires: createdLogin.loginExpiry
   });
   return response;

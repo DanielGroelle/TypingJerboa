@@ -224,6 +224,7 @@ export default function ClientLearn() {
   }
 
   function resetLesson() {
+    setLessonId(null);
     setStartTime(null);
     setLessonText("");
     setUserInput("");
@@ -267,10 +268,10 @@ export default function ClientLearn() {
         
         {/* center area */}
         <div className="m-4">
-          <div className="border-solid border-red-500 border rounded-lg mb-1 p-2" hidden={typeof error !== "string"}>
+          <div className="border-solid border-red-500 border rounded-lg w-fit mb-1 p-2" hidden={typeof error !== "string"}>
             {error}
           </div>
-          <div className="border-solid border-green-500 border rounded-lg mb-1 p-2" hidden={typeof success !== "string"}>
+          <div className="border-solid border-green-500 border rounded-lg w-fit mb-1 p-2" hidden={typeof success !== "string"}>
             {success}
           </div>
 

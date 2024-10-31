@@ -118,11 +118,11 @@ export default function ClientAccount() {
   return (
     <div className="flex flex-col h-full justify-between">
       <div>
-        <div className="border-solid border-red-500 border rounded-lg p-2" hidden={typeof error !== "string"}>
+        <div className="border-solid border-red-500 border rounded-lg w-fit p-2" hidden={typeof error !== "string"}>
           {error}
         </div>
 
-        <div className="border-solid border-green-500 border rounded-lg p-2" hidden={typeof success !== "string"}>
+        <div className="border-solid border-green-500 border rounded-lg w-fit p-2" hidden={typeof success !== "string"}>
           {success}
         </div>
 
