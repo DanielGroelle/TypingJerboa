@@ -7,24 +7,22 @@ export default async function AdminPanelComponent() {
   const loginToken = cookieStore.get("loginToken");
 
   if (loginToken === undefined) {
-    return <></>;
+    return;
   }
 
   const isAdmin = await userIsAdmin(loginToken.value);
+  if (!isAdmin) {
+    return;
+  }
 
-  if (isAdmin) {
-    return (
-      <div className="pb-4">
-        <div className="text-2xl">
-            <Link href="/admin">Admin</Link>
-        </div>
-        <div>
-            Administrator panel
-        </div>
+  return (
+    <div className="pb-4">
+      <div className="text-2xl">
+          <Link href="/admin">Admin</Link>
       </div>
-    );
-  }
-  else {
-    return <></>;
-  }
+      <div>
+          Administrator panel
+      </div>
+    </div>
+  );
 }

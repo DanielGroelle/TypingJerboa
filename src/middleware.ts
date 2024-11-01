@@ -219,7 +219,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const loginToken = request.cookies.get("loginToken")?.value;
   const sessionToken = request.cookies.get("sessionToken")?.value;
-  const preferences = request.cookies.get("preferences")?.value;
+  const preferences = request.cookies.get("languageScriptPreference")?.value;
 
   //if the path is /api/, could be an internal request. this check prevents infinite redirects
   if (path.startsWith("/api/")) {

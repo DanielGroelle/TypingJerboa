@@ -264,8 +264,10 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
           
           <div>
             {
-              lessonId &&
+              lessonId ?
               <input type="button" className="border-solid border-red-700 border-2 rounded-lg my-1 p-2" onClick={()=>reportLesson(lessonId, setError, setSuccess)} value="Report Lesson" />
+              :
+              ""
             }
           </div>
         </div>

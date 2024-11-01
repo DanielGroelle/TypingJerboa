@@ -37,14 +37,16 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
     <div>
       <div className="flex flex-col m-10 w-full">
         <div className="flex w-full justify-between">
-          {!scriptSelectionHidden && <ScriptSelectionComponent setRaceInfo={setRaceInfo} languageScriptPreference={languageScriptPreference} />}
-          {!timerHidden && <TimerComponent startTime={startTime} />}
+          {!scriptSelectionHidden ? <ScriptSelectionComponent setRaceInfo={setRaceInfo} languageScriptPreference={languageScriptPreference} /> : ""}
+          {!timerHidden ? <TimerComponent startTime={startTime} /> : ""}
         </div>
         <TextInputComponent raceParagraphArray={raceParagraphArray} raceId={raceId} startTime={startTime} />
         <div>
           {
-            raceId &&
+            raceId ?
             <input type="button" className="border-solid border-red-700 border-2 rounded-lg my-1 p-2" onClick={()=>reportParagraph(raceId, setError, setSuccess)} value="Report Paragraph" />
+            :
+            ""
           }
           <div className="border-solid border-red-500 border rounded-lg w-fit p-2" hidden={typeof error !== "string"}>
             {error}

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { reportParagraph } from "@/utility/utility";
+import NavigationComponent from "@/app/NavigationComponent";
 
 const Z_RESPONSE = z.object({
   user: z.string().nullable(),
@@ -59,9 +60,9 @@ export default function ClientRaceFinish() {
         raceData.user ?
         <p>User: {raceData.user}</p>
         :
-        <div className="flex">
-          <p className="flex items-center">Unregistered User</p>
-          <Link href="/register" className="border-solid border-blue-500 border rounded-lg ml-1 p-1 text-sm">Register</Link>
+        <div className="flex items-center">
+          <p>Unregistered User</p>
+          <Link href="/register" className="underline decoration-blue-500 h-fit ml-2 text-sm">Register</Link>
         </div>
       }
       {
@@ -74,8 +75,8 @@ export default function ClientRaceFinish() {
         :
         <p>Date Achieved:</p>
       }
-      <p>WPM: {!isNaN(wpm) && wpm.toFixed(1)}</p>
-      <p>Time: {!isNaN(msTime) && `${msTime / 1000}s`}</p>
+      <p>WPM: {!isNaN(wpm) ? wpm.toFixed(1) : ""}</p>
+      <p>Time: {!isNaN(msTime) ? `${msTime / 1000}s` : ""}</p>
       <p>Mistakes: {raceData.mistakes}</p>
       <p>Paragraph: {raceData.paragraph.text}</p>
       <p>Author: {raceData.paragraph.author}</p>
@@ -89,7 +90,7 @@ export default function ClientRaceFinish() {
         {success}
       </div>
       <div className="flex">
-        <Link href="/race" className="border-solid border-white border-2 rounded-lg p-2">Race again</Link>
+        <NavigationComponent name="Race again" route="/race" />
         <input type="button" className="border-solid border-green-600 border-2 rounded-lg ml-1 p-2" onClick={()=>{void navigator.clipboard.writeText(window.location.href)}} value="Copy Share Link" />
         <input type="button" className="border-solid border-red-700 border-2 rounded-lg ml-1 p-2" onClick={()=>reportParagraph(id, setError, setSuccess)} value="Report Paragraph" />
       </div>
