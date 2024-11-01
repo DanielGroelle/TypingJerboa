@@ -6,6 +6,7 @@ import FilterOptionsComponent from "../FilterOptionsComponent";
 import { LanguageScripts } from "@/js/language-scripts";
 import { Word, Z_WORD } from "@/js/types";
 import ItemCardComponent from "../ItemCardComponent";
+import CsvImportComponent from "./CsvImportComponent";
 
 const Z_RESPONSE = z.object({
   words: z.array(Z_WORD)
@@ -112,42 +113,20 @@ export default function ClientAdminWords() {
     setWords([...newWords]);
   }
 
-  function handlePageChange() {
-    const pageSelector = document.querySelector("#page-select");
-    if (!(pageSelector instanceof HTMLSelectElement)) {
-      throw "pageSelector is not of HTMLSelectElement type";
-    }
-
-    setViewPage(Number(pageSelector.value));
-  }
-
   function handleAdd(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    const wordSelector = document.querySelector("#word-input");
-    const languageScriptSelector = document.querySelector("#language-script-edit-select");
-    if (!(wordSelector instanceof HTMLInputElement) ||
-        !(languageScriptSelector instanceof HTMLSelectElement)
-    ) {
-      throw "Selected elements [wordSelector, languageScriptSelector] were of unexpected type";
-    }
-
-    const word = wordSelector.value;
-    const languageScript = languageScriptSelector.value;
-
+  
+    if (newWord === null) throw "New Word is null!";
+  
     void (async ()=>{
       try {
         const response = Z_WORD.parse(await(await fetch(`/api/admin/word`, {
           method: "POST",
-          body: JSON.stringify({
-            word,
-            languageScript,
-          }),
+          body: JSON.stringify(newWord),
           mode: "cors",
           cache: "default"
         })).json());
-
-        //rerender edits
+  
         setWords([response, ...words]);
         setNewWord(null);
       }
@@ -155,6 +134,16 @@ export default function ClientAdminWords() {
         console.error("Word add failed", e);
       }
     })();
+  }
+
+  //TODO: make all these page change handles use state
+  function handlePageChange() {
+    const pageSelector = document.querySelector("#page-select");
+    if (!(pageSelector instanceof HTMLSelectElement)) {
+      throw "pageSelector is not of HTMLSelectElement type";
+    }
+
+    setViewPage(Number(pageSelector.value));
   }
 
   const refFilteredWords: {items: Word[]} = {items: []};
@@ -176,16 +165,18 @@ export default function ClientAdminWords() {
   });
 
   return (
-    <div>
+    <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       {filterOptionsComponent}
 
-      <input type="button" className="border-solid border-blue-600 border rounded-lg p-2 mr-2" onClick={()=>setNewWord(newWord ? null : {
+      <div className="flex">
+        <input type="button" className="border-solid border-blue-600 border rounded-lg p-2 mr-2" onClick={()=>setNewWord(newWord ? null : {
           word: "",
           languageScript: {
             languageScript: Object.values(LanguageScripts)[0].internal
           }
         })} value="Add Word" />
-      <br/><br/>
+        <CsvImportComponent words={words} setWords={setWords} />
+      </div>
 
       {
         //add word form

@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from "react";
 import { LanguageScripts } from "@/js/language-scripts";
-import { Paragraph, Z_PARAGRAPH } from "@/js/types";
+import { Word, Z_WORD } from "@/js/types";
 import { z } from "zod";
 import Papa from "papaparse";
 
@@ -14,18 +14,20 @@ function handleCsvSelect(e: ChangeEvent<HTMLInputElement>) {
 }
 
 const Z_CSV_RESULTS_DATA = z.array(z.array(z.string()));
-const Z_PARAGRAPHS_ARRAY = z.object({
-  data: z.array(Z_PARAGRAPH)
+const Z_WORDS_ARRAY = z.object({
+  data: z.array(Z_WORD)
 });
 
-function importFromCsv(paragraphs: Paragraph[], setParagraphs: (paragraphs: Paragraph[]) => void, languageScript: string) {
+function importFromCsv(words: Word[], setWords: (words: Word[]) => void, languageScript: string) {
   const csvFileInput = document.getElementById("csv-import");
 
+  
   if (csvFileInput instanceof HTMLInputElement) {
     const csvFile = csvFileInput.files?.[0];
+
     if (csvFile) {
       Papa.parse(csvFile, {
-        delimiter: ",", //feel like delimiter shouldnt be specified in-case at some point a weird csv variant is used
+        delimiter: ",", //maybe delimiter shouldnt be specified in-case at some point a weird csv variant is used
         //papaparse is good at guessing anyways, it just returns an error when it has to guess
         complete: (results)=>{
           if (results.errors.length) {
@@ -33,31 +35,25 @@ function importFromCsv(paragraphs: Paragraph[], setParagraphs: (paragraphs: Para
           }
 
           const data = Z_CSV_RESULTS_DATA.parse(results.data);
-          const author = data?.[0]?.[0];
-          const source = data?.[0]?.[1];
-          const texts = data.slice(1).map(arr => arr[0]);
-          const selectable = true;
+          const csvWords = data.map(arr => arr[0]);
 
           void (async ()=>{
             try {
-              const response = Z_PARAGRAPHS_ARRAY.parse(await(await fetch(`/api/admin/paragraph/bulk`, {
+              const response = Z_WORDS_ARRAY.parse(await(await fetch(`/api/admin/word/bulk`, {
                 method: "POST",
                 body: JSON.stringify({
-                  texts,
-                  author,
-                  source,
                   languageScript,
-                  selectable
+                  words: csvWords,
                 }),
                 mode: "cors",
                 cache: "default"
               })).json());
 
-              const newParagraphs = [...response.data, ...paragraphs];
-              setParagraphs(newParagraphs);
+              const newWords = [...words, ...response.data];
+              setWords(newWords);
             }
             catch(e: unknown) {
-              console.error("Bulk paragraph add failed", e);
+              console.error("Bulk word add failed", e);
             }
           })();
         }
@@ -66,19 +62,19 @@ function importFromCsv(paragraphs: Paragraph[], setParagraphs: (paragraphs: Para
   }
 }
 
-export default function CsvImportComponent({paragraphs, setParagraphs}: {paragraphs: Paragraph[], setParagraphs: (paragraphs: Paragraph[]) => void}) {
+export default function CsvImportComponent({words, setWords}: {words: Word[], setWords: (words: Word[]) => void}) {
   const [languageScript, setLanguageScript] = useState<string>(Object.values(LanguageScripts)[0].internal);
 
   return (
     <div>
       <label htmlFor="csv-import" className="mr-1">Import From CSV</label>
       <input type="file" name="csv-import" id="csv-import" className="text-xs" accept=".csv" onChange={(e)=>handleCsvSelect(e)} />
-      <input type="button" className="border-solid border-green-600 border rounded-lg p-2" onClick={()=>importFromCsv(paragraphs, setParagraphs, languageScript)} value="Import"/>
+      <input type="button" className="border-solid border-green-600 border rounded-lg p-2" onClick={()=>importFromCsv(words, setWords, languageScript)} value="Import"/>
       <span>languageScript:</span>
       <select id="language-script-csv-select" value={languageScript} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{
         setLanguageScript(e.target.value);
       }}>
-        {Object.values(LanguageScripts).map((languageScript)=>{
+        {Object.values(LanguageScripts).map(languageScript => {
           return <option key={languageScript.internal} value={languageScript.internal}>{languageScript.internal}</option>
         })}
       </select>

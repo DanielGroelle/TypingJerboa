@@ -1,7 +1,9 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+//extracting words from paragraphs disabled
+// import { extractWordsFromTexts, insertToWordTable } from "../../../utility/utility";
+import { getLanguageScriptId } from "../../../utility/utility";
 import { z } from "zod";
-import { extractWordsFromTexts, getLanguageScriptId, insertToWordTable } from "../../../utility/utility";
 
 const Z_REQUEST = z.object({
   source: z.string(),
@@ -14,7 +16,6 @@ const Z_REQUEST = z.object({
 export async function POST(req: NextRequest) {
   const tryRequest = Z_REQUEST.safeParse(await req.json());
   if (!tryRequest.success) {
-    console.log(tryRequest.error);
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
   const request = tryRequest.data;
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
   }
 
   //format into a neat array of objects for prisma to createMany with
-  const newParagraphs = request.texts.map((text)=>{
+  const newParagraphs = request.texts.map(text => {
      return {
       source: request.source,
       author: request.author,
@@ -51,12 +52,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Paragraph creation failed"}, {status: 400});
   }
 
-  const words = extractWordsFromTexts(request.texts);
-  const response = await insertToWordTable(words, languageScriptId.id);
-  if (response === null) {
-    return NextResponse.json({error: "Word insertion failed"}, {status: 400});
-  }
-  console.log("words attempted to insert", response);
+  //disabled since the introduction of bulk inserting words
+  // const words = extractWordsFromTexts(request.texts);
+  // const response = await insertToWordTable(words, languageScriptId.id);
+  // if (response === null) {
+  //   return NextResponse.json({error: "Word insertion failed"}, {status: 400});
+  // }
+  // console.log("Words attempted to insert", response);
 
   return new NextResponse(JSON.stringify({data: [...newParagraphsReturned]}));
 }

@@ -37,11 +37,18 @@ export function extractWordsFromTexts(texts: string[]) {
 }
 
 export async function insertToWordTable(words: string[], languageScriptId: number) {
-  //insert new words in lowercase
-  const newWords = words.map((word)=>{return {word: word.toLowerCase(), languageScriptId}});
+  const newWords: {word: string, languageScriptId: number}[] = [];
+  //format words to be createMany'd
+  words.forEach(word => {
+    if (word.length > 0 && !word.includes("-") && !word.includes(" ")) {
+      //all words must be lowercased
+      newWords.push({word: word.toLowerCase(), languageScriptId});
+    }
+  });
+
   const wordInsertCount = await prisma.word.createMany({
     data: newWords,
-    skipDuplicates: true,
+    skipDuplicates: true
   });
 
   return wordInsertCount;
