@@ -33,24 +33,8 @@ function handleRegister(event: FormEvent<HTMLFormElement>, username: string, pas
       return;
     }
 
-    window.location.href=`${window.location.protocol}//${window.location.host}/`; //redirect to home
+    window.location.href=`${window.location.protocol}//${window.location.host}/login`; //redirect to login
   })();
-  void (async()=>{
-    try {
-      await (await fetch(`/api/register`, {
-        method: "POST",
-        body: JSON.stringify({
-          username: username,
-          unhashedPassword: password
-        }),
-        mode: "cors",
-        cache: "default"
-      })).json();
-    }
-    catch(e: unknown) {
-      throw "Registration failed";
-    }
-  })().then(()=>window.location.href=`${window.location.protocol}//${window.location.host}/login`); //redirect to login
 }
 
 export default function ClientRegister() {

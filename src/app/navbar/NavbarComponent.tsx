@@ -30,7 +30,7 @@ export default async function NavbarComponent() {
           return (
             <div className="flex">
               <div className="flex-2 px-4 py-2 text-center border-solid border-l-2 border-white">
-                <NavigationComponent name={user.username} route="/account" />
+                <NavigationComponent className="" name={user.username} route="/account" />
               </div>
               <div className="flex-2 px-4 py-2 text-center">
                 <LogoutButtonComponent />

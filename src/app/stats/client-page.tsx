@@ -25,7 +25,7 @@ async function getStats() {
 }
 
 export default function ClientStats() {
-  const [languageScript, setLanguageScript] = useState<string>(LanguageScripts["latin-english"].internal);
+  const [languageScript, setLanguageScript] = useState<string>("all");
   const [stats, setStats] = useState<z.infer<typeof Z_RESPONSE> | null>(null);
   const [showParagraph, setShowParagraph] = useState(false);
 

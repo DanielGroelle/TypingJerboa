@@ -90,7 +90,7 @@ export default function ClientRaceFinish() {
         {success}
       </div>
       <div className="flex">
-        <NavigationComponent name="Race again" route="/race" />
+        <NavigationComponent className="border-solid border-2 border-white rounded-lg p-2" name="Race again" route="/race" />
         <input type="button" className="border-solid border-green-600 border-2 rounded-lg ml-1 p-2" onClick={()=>{void navigator.clipboard.writeText(window.location.href)}} value="Copy Share Link" />
         <input type="button" className="border-solid border-red-700 border-2 rounded-lg ml-1 p-2" onClick={()=>reportParagraph(id, setError, setSuccess)} value="Report Paragraph" />
       </div>

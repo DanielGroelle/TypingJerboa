@@ -1,7 +1,7 @@
 "use client";
 
-export default function NavigationComponent({name, route} : {name: string, route: string}) {
+export default function NavigationComponent({name, route, className} : {name: string, route: string, className: string}) {
   return (
-    <input type="button" value={name} onClick={()=>{window.location.href = route}} />
+    <input className={className} type="button" value={name} onClick={()=>{window.location.href = route}} />
   );
 }

@@ -53,6 +53,8 @@ function generateWordExerciseLessonText(
   }
 }
 
+//TODO: make a word length limit to prevent unreasonably long words from being given to user
+
 const Z_REQUEST = z.object({
   activeLesson: z.array(z.string()),
   languageScript: z.string(),
