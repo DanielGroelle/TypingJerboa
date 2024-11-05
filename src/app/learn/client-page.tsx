@@ -231,10 +231,12 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
           <div>
             <input type="button" className="border-solid border-white border rounded-lg p-2 mr-2" onClick={()=>{
               setActiveMode("new-characters");
+              resetLesson();
             }} style={{backgroundColor: (activeMode === "new-characters") ? "rgb(39 39 42)" : ""}} value="New Characters" />
             {/*TODO: lock word exercise until enough letter new character lessons have been completed, especially for numbers and symbols*/}
             <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
               setActiveMode("word-exercise");
+              resetLesson();
             }} style={{backgroundColor: (activeMode === "word-exercise") ? "rgb(39 39 42)" : ""}} value="Word Exercise" />
           </div>
           <br/>
@@ -260,7 +262,7 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
             })}
           </div>
 
-          <textarea id="main-text-input" className="text-black resize-none font-mono min-w-full text-lg p-1" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+          <textarea id="main-text-input" className="text-black resize-none font-mono min-w-full text-lg p-1" hidden={startTime === null} placeholder="Type characters here" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
           
           <div>
             {

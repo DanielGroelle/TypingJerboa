@@ -130,7 +130,7 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
     <div className="w-1/2">
       <div>
         {/*if the race is started show wpm*/}
-        {raceParagraphArray.length !== 0 ? `${WPM.toFixed(1)}wpm` : ""}
+        {startTime !== null ? <h2 className="text-xl">{WPM.toFixed(1)}wpm</h2> : ""}
       </div>
       <div className="border-solid border-white border font-mono text-lg p-1 select-none" hidden={raceParagraphArray.length === 0} onContextMenu={handleParagraphContextMenu}>
         {raceParagraphArray.map((character, i)=>{
@@ -143,7 +143,7 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
         })}
       </div>
 
-      <textarea id="main-text-input" className="text-black resize-none font-mono text-lg min-w-full p-1" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+      <textarea id="main-text-input" className="text-black resize-none font-mono text-lg min-w-full p-1" hidden={startTime === null} placeholder="Type paragraph here" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
     </div>
   );
 }
