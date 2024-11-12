@@ -43,6 +43,10 @@ export async function POST(req: NextRequest) {
       username: request.username,
       password: hashedPassword,
       languageScriptIdPreference: firstLanguageScript.id
+    },
+    select: {
+      username: true,
+      createdAt: true
     }
   });
 

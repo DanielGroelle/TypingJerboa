@@ -2,7 +2,7 @@
 
 import { LanguageScripts } from "@/js/language-scripts";
 import { z } from "zod";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 const Z_RESPONSE = z.object({
   preferences: z.object({
@@ -76,7 +76,7 @@ function deleteAccount(setError: (error: string | null) => void, setSuccess: (su
     })).json());
 
     if (tryRequest.success) {
-      window.location.href=`${window.location.protocol}//${window.location.host}/`; //redirect to home
+      window.location.href=`/`; //redirect to home
     }
     else {
       setError("Unable to successfully delete account!");
@@ -85,8 +85,54 @@ function deleteAccount(setError: (error: string | null) => void, setSuccess: (su
   })();
 }
 
+const Z_PASSWORD_RESPONSE = z.object({
+  error: z.string().optional()
+});
+function updatePassword(event: FormEvent<HTMLFormElement>, currentPassword: string, newPassword: string, confirmNewPassword: string, setError: (error: string | null) => void, setSuccess: (success: string | null) => void) {
+  event.preventDefault();
+
+  if (confirmNewPassword !== newPassword) {
+    setError("Passwords do not match!");
+    setSuccess(null);
+    return;
+  }
+
+  void (async()=>{
+    const response = await fetch(`/api/user`, {
+      method: "POST",
+      body: JSON.stringify({
+        unhashedCurrentPassword: currentPassword,
+        unhashedNewPassword: newPassword
+      }),
+      mode: "cors",
+      cache: "default"
+    });
+
+    const tryResponse = Z_PASSWORD_RESPONSE.safeParse(await response.json());
+    
+    if (!tryResponse.success) {
+      setError("Unknown error, try again later");
+      setSuccess(null);
+      return;
+    }
+
+    if (response.status !== 200) {
+      setError(tryResponse.data.error ?? "");
+      setSuccess(null);
+      return;
+    }
+
+    setSuccess("Successfully updated password.");
+    setError(null);
+  })();
+}
+
 export default function ClientAccount({languageScriptPreference}: {languageScriptPreference: string | undefined}) {
   const [primaryLanguageScript, setPrimaryLanguageScript] = useState(languageScriptPreference ?? "");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -94,14 +140,6 @@ export default function ClientAccount({languageScriptPreference}: {languageScrip
   return (
     <div className="flex flex-col h-full justify-between">
       <div>
-        <div className="border-solid border-red-500 border rounded-lg w-fit p-2" hidden={typeof error !== "string"}>
-          {error}
-        </div>
-
-        <div className="border-solid border-green-500 border rounded-lg w-fit p-2" hidden={typeof success !== "string"}>
-          {success}
-        </div>
-
         {
           confirmation ?
           <div className="fixed left-0 top-0 w-full h-full bg-neutral-950/50 flex justify-center items-center">
@@ -137,13 +175,39 @@ export default function ClientAccount({languageScriptPreference}: {languageScrip
           </select>
         </div>
       </div>
-      
+
       <div>
+        <div className="border-solid border-red-500 border rounded-lg w-fit p-2 mb-2" hidden={typeof error !== "string"}>
+          {error}
+        </div>
+
+        <div className="border-solid border-green-500 border rounded-lg w-fit p-2 mb-2" hidden={typeof success !== "string"}>
+          {success}
+        </div>
+
         <h2 className="text-lg">Account Actions</h2>
-        <div className="flex flex-col w-1/5">
-          <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1" onClick={()=>setConfirmation("clearLessons")} value="Clear Lesson Data" />
-          <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1" onClick={()=>setConfirmation("clearRaces")} value="Clear Race Data" />
-          <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1" onClick={()=>setConfirmation("deleteAccount")} value="Delete Account" />
+        <div className="flex flex-col w-1/2">
+          <form onSubmit={e => updatePassword(e, currentPassword, newPassword, confirmNewPassword, setError, setSuccess)}>
+            <div className="flex mb-1">
+              <p style={{width: "9.5rem"}}>Current Password</p>
+              <input className="text-black p-1" type="password" id="current-password" required value={currentPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setCurrentPassword(e.target.value)} />
+            </div>
+            <div className="flex mb-1">
+              <p style={{width: "9.5rem"}}>New Password</p>
+              <input className="text-black p-1" type="password" id="new-password" required value={newPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setNewPassword(e.target.value)} />
+            </div>
+            <div className="flex mb-1">
+              <p style={{width: "9.5rem"}}>Confirm New Password</p>
+              <input className="text-black p-1" type="password" id="confirm-new-password" required value={confirmNewPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setConfirmNewPassword(e.target.value)} />
+            </div>
+            <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2 my-1" value="Update Password" />
+          </form>
+
+          <div className="w-1/2">
+            <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1 w-full" onClick={()=>setConfirmation("clearLessons")} value="Clear Lesson Data" />
+            <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1 w-full" onClick={()=>setConfirmation("clearRaces")} value="Clear Race Data" />
+            <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1 w-full" onClick={()=>setConfirmation("deleteAccount")} value="Delete Account" />
+          </div>
         </div>
       </div>
     </div>

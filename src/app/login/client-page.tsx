@@ -33,7 +33,7 @@ function handleLogin(event: FormEvent<HTMLFormElement>, username: string, passwo
       return;
     }
 
-    window.location.href=`${window.location.protocol}//${window.location.host}/`; //redirect to home
+    window.location.href=`/`; //redirect to home
   })();
 }
 
