@@ -1,7 +1,8 @@
-import React, { useState, useEffect, ChangeEvent, ClipboardEvent, MouseEvent, useRef } from "react";
+import React, { useState, useEffect, ClipboardEvent, MouseEvent, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import "../globals.css";
+import { KeyboardMap } from "@/js/language-scripts";
 
 function handleWPM(startTime: Date | null, userInput: string): number {
   if (!startTime) return 0;
@@ -34,11 +35,18 @@ function endRace(mistakes: number, raceId: string | null, router: AppRouterInsta
   router.push(`/race/finish?id=${raceId}`);
 }
 
-export default function TextInputComponent({raceParagraphArray, raceId, startTime}: {raceParagraphArray: string[], raceId: string | null, startTime: Date | null}) {
+export default function TextInputComponent({raceParagraphArray, raceId, startTime, languageScript}: {
+  raceParagraphArray: string[],
+  raceId: string | null,
+  startTime: Date | null,
+  languageScript: string
+}) {
   const router = useRouter();
 
   const [userInput, setUserInput] = useState("");
+  const [selectionRange, setSelectionRange] = useState({start: 0, end: 0});
   const userInputRef = useRef("");
+  const newUserInputRef = useRef<string | null>(null)
 
   const [mistakes, setMistakes] = useState(0);
   const [WPM, setWPM] = useState(0);
@@ -70,8 +78,20 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
     }
   }, [raceParagraphArray]);
 
-  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    const newUserInput = event.currentTarget.value;
+  //sets the users cursor where it should be on every render
+  const updateSelectionState = useCallback((node: HTMLTextAreaElement) => {
+    if (node !== null) {
+      node.setSelectionRange(selectionRange.start, selectionRange.end);
+    }
+  }, [selectionRange, userInput]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newUserInput = newUserInputRef.current ?? event.currentTarget.value;
+    if (newUserInputRef.current === null) {
+      setSelectionRange({start: event.currentTarget.selectionStart, end: event.currentTarget.selectionEnd});
+    }
+    newUserInputRef.current = null;
+
     const oldLength = userInput.length;
     const newLength = newUserInput.length;
 
@@ -102,6 +122,28 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
       setRaceFinished(true);
       endRace(mistakes, raceId, router);
     }
+  }
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    //TODO: find a way to reimplement ctrl-z
+    //good luck
+    if (event.ctrlKey && event.code === "KeyZ") {
+      event.preventDefault();
+      return;
+    }
+
+    const shiftKey = event.shiftKey ? "shift" : "noshift";
+    if (event.ctrlKey || KeyboardMap["latin-english"][shiftKey][event.code] === undefined) {
+      return;
+    }
+
+    const pos = event.currentTarget.selectionStart;
+    const endPos = event.currentTarget.selectionEnd;
+    const newUserInput = event.currentTarget.value.slice(0, pos) + KeyboardMap[languageScript][shiftKey][event.code] + event.currentTarget.value.slice(endPos);
+
+    //set newUserInputRef to be the converted value from the origin languageScript to desired languageScript
+    newUserInputRef.current = newUserInput;
+    setSelectionRange({start: pos + 1, end: pos + 1});
   }
 
   //returns the appropriate class name based on if the current raceParagraph char matches the userInput char
@@ -143,7 +185,7 @@ export default function TextInputComponent({raceParagraphArray, raceId, startTim
         })}
       </div>
 
-      <textarea id="main-text-input" className="text-black resize-none font-mono text-lg min-w-full p-1" hidden={startTime === null} placeholder="Type paragraph here" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+      <textarea id="main-text-input" className="text-black resize-none font-mono text-lg min-w-full p-1" hidden={startTime === null} placeholder="Type paragraph here" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" value={userInput} ref={updateSelectionState} onChange={handleChange} onKeyDown={handleKeyDown} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
     </div>
   );
 }

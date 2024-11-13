@@ -1,5 +1,6 @@
 "use client";
 
+import { LanguageScripts } from "@/js/language-scripts";
 import ScriptSelectionComponent from "./ScriptSelectionComponent";
 import TextInputComponent from "./TextInputComponent";
 import TimerComponent from "./TimerComponent";
@@ -16,6 +17,7 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
   const [raceParagraph, setRaceParagraph] = useState<ReturnedParagraph | null>(null);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [raceId, setRaceId] = useState<string | null>(null);
+  const [languageScript, setLanguageScript] = useState(languageScriptPreference ?? Object.values(LanguageScripts)[0].internal);
 
   const [scriptSelectionHidden, setScriptSelectionHidden] = useState(false);
   const [timerHidden, setTimerHidden] = useState(true);
@@ -37,10 +39,10 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
     <div>
       <div className="flex flex-col m-10 w-full">
         <div className="flex w-full justify-between">
-          {!scriptSelectionHidden ? <ScriptSelectionComponent setRaceInfo={setRaceInfo} languageScriptPreference={languageScriptPreference} /> : ""}
+          {!scriptSelectionHidden ? <ScriptSelectionComponent setRaceInfo={setRaceInfo} languageScript={languageScript} setLanguageScript={setLanguageScript} /> : ""}
           {!timerHidden ? <TimerComponent startTime={startTime} /> : ""}
         </div>
-        <TextInputComponent raceParagraphArray={raceParagraphArray} raceId={raceId} startTime={startTime} />
+        <TextInputComponent raceParagraphArray={raceParagraphArray} raceId={raceId} startTime={startTime} languageScript={languageScript} />
         <div>
           {
             raceId ?

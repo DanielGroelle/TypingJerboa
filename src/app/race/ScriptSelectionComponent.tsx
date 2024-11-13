@@ -43,7 +43,7 @@ async function startRace(
   }
 }
 
-export default function ScriptSelectionComponent({setRaceInfo, languageScriptPreference}: {
+export default function ScriptSelectionComponent({setRaceInfo, languageScript, setLanguageScript}: {
   setRaceInfo: (
     raceParagraph: ReturnedParagraph | null,
     startTime: Date | null,
@@ -51,17 +51,18 @@ export default function ScriptSelectionComponent({setRaceInfo, languageScriptPre
     scriptSelectionHidden: boolean,
     timerHidden: boolean
   ) => void,
-  languageScriptPreference: string | undefined
+  languageScript: string,
+  setLanguageScript: (languageScript: string) => void
 }) {
   const [error, setError] = useState<string | null>(null);
-  const [languageScript, setLanguageScript] = useState(languageScriptPreference ?? "");
 
   return (
     <div>
       <div className="border-solid border-red-500 border rounded-lg w-fit p-2" hidden={typeof error !== "string"}>
         {error}
       </div>
-      Select the script you&apos;d like to use
+      
+      <p>Select the script you&apos;d like to use</p>
       <div className="flex">
         <select name="script" id="script" value={languageScript} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>setLanguageScript(e.target.value)}>
           {Object.values(LanguageScripts).map(({internal, display})=>(
