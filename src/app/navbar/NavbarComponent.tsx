@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import LogoutButtonComponent from "./LogoutButtonComponent";
-import NavigationComponent from "../NavigationComponent";
+import NavigationComponent from "../components/NavigationComponent";
 
 export default async function NavbarComponent() {
   //get loginToken from cookie to check if the user is logged in

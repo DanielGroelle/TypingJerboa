@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { reportParagraph } from "@/utility/utility";
-import NavigationComponent from "@/app/NavigationComponent";
+import NavigationComponent from "@/app/components/NavigationComponent";
 
 const Z_RESPONSE = z.object({
   user: z.string().nullable(),
@@ -83,16 +83,16 @@ export default function ClientRaceFinish() {
       <p>Source: {raceData.paragraph.source}</p>
       <br/>
 
-      <div className="border-solid border-red-500 border rounded-lg w-fit p-2" hidden={typeof error !== "string"}>
-        {error}
-      </div>
-      <div className="border-solid border-green-500 border rounded-lg w-fit p-2" hidden={typeof success !== "string"}>
-        {success}
-      </div>
       <div className="flex">
         <NavigationComponent className="border-solid border-2 border-white rounded-lg p-2" name="Race again" route="/race" />
-        <input type="button" className="border-solid border-green-600 border-2 rounded-lg ml-1 p-2" onClick={()=>{void navigator.clipboard.writeText(window.location.href)}} value="Copy Share Link" />
+        <input type="button" className="border-solid border-green-600 border-2 rounded-lg ml-1 p-2" onClick={()=>{void navigator.clipboard.writeText(window.location.href); setSuccess("Copied share link"); setError(null)}} value="Copy Share Link" />
         <input type="button" className="border-solid border-red-700 border-2 rounded-lg ml-1 p-2" onClick={()=>reportParagraph(id, setError, setSuccess)} value="Report Paragraph" />
+      </div>
+      <div className="border-solid border-red-500 border rounded-lg w-fit mt-2 p-2" hidden={typeof error !== "string"}>
+        {error}
+      </div>
+      <div className="border-solid border-green-500 border rounded-lg w-fit mt-2 p-2" hidden={typeof success !== "string"}>
+        {success}
       </div>
     </div>
   );

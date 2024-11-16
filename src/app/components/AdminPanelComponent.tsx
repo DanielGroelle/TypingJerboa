@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { userIsAdmin } from "./api/admin/user/is-admin/route";
+import { userIsAdmin } from "../api/admin/user/is-admin/route";
 
 export default async function AdminPanelComponent() {
   const cookieStore = cookies();

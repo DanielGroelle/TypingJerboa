@@ -1,16 +1,47 @@
 "use client";
 
+import React, { useEffect, useRef, useState } from "react";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { LanguageScripts } from "@/js/language-scripts";
-import ScriptSelectionComponent from "./ScriptSelectionComponent";
-import TextInputComponent from "./TextInputComponent";
-import TimerComponent from "./TimerComponent";
 import { reportParagraph } from "@/utility/utility";
-import React, { useState } from "react";
+import ScriptSelectionComponent from "./ScriptSelectionComponent";
+import TimerComponent from "./TimerComponent";
+import TextInputComponent from "../components/TextInputComponent";
 
 export type ReturnedParagraph = {
   text: string | null,
   author: string | null,
   source: string | null
+}
+
+function handleWPM(startTime: Date | null, userInput: string): number {
+  if (!startTime) return 0;
+
+  const minutesPassed = (Date.now() - startTime.getTime()) / 1000 / 60;
+  const newWPM = (userInput.length / 5) / minutesPassed;
+
+  return newWPM;
+}
+
+function endRace(mistakes: number, raceId: string | null, router: AppRouterInstance) {
+  void (async ()=>{
+    try {
+      await (await fetch(`/api/race/finish`, {
+        method: "POST",
+        body: JSON.stringify({
+          mistakes: mistakes,
+          endTime: new Date(),
+          raceId
+        }),
+        mode: "cors",
+        cache: "default"
+      })).json();
+    }
+    catch(e: unknown) {
+      throw "Failed finishing race";
+    }
+    router.push(`/race/finish?id=${raceId}`);
+  })();
 }
 
 export default function ClientRace({languageScriptPreference}: {languageScriptPreference: string | undefined}) {
@@ -19,30 +50,68 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
   const [raceId, setRaceId] = useState<string | null>(null);
   const [languageScript, setLanguageScript] = useState(languageScriptPreference ?? Object.values(LanguageScripts)[0].internal);
 
-  const [scriptSelectionHidden, setScriptSelectionHidden] = useState(false);
-  const [timerHidden, setTimerHidden] = useState(true);
-
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function setRaceInfo(raceParagraph: ReturnedParagraph | null, startTime: Date | null, raceId: string | null, scriptSelectionHidden: boolean, timerHidden: boolean) {
+  const [userInput, setUserInput] = useState("");
+  const userInputRef = useRef("");
+  const newUserInputRef = useRef<string | null>(null);
+
+  const [WPM, setWPM] = useState(0);
+
+  const raceParagraphArray = [...raceParagraph?.text ?? ""];
+
+  useEffect(()=>{
+    //on race start
+    if (raceParagraphArray.length !== 0) {
+      //focus on the text box
+      const textInput = document.getElementById("main-text-input");
+      if (textInput) {
+        textInput.focus();
+      }
+
+      //set the wpm every 100ms
+      const intervalId = setInterval(()=>{
+        //needs to be a reference to avoid closure keeping userInput as an empty string
+        setWPM(handleWPM(startTime, userInputRef.current));
+
+        //if race finished, clear the interval
+        if (userInputRef.current === raceParagraphArray.join("")) {
+          clearInterval(intervalId);
+        }
+      }, 100);
+
+      //cleanup the interval when user leaves the page
+      return () => clearInterval(intervalId);
+    }
+  }, [raceParagraph]);
+
+  useEffect(()=>{
+    setWPM(handleWPM(startTime, userInput));
+  }, [userInput])
+
+  function setRaceInfo(raceParagraph: ReturnedParagraph | null, startTime: Date | null, raceId: string | null) {
     setRaceParagraph(raceParagraph);
     setStartTime(startTime);
     setRaceId(raceId);
-    setScriptSelectionHidden(scriptSelectionHidden);
-    setTimerHidden(timerHidden);
   }
-
-  const raceParagraphArray = [...raceParagraph?.text ?? ""];
 
   return (
     <div>
       <div className="flex flex-col m-10 w-full">
         <div className="flex w-full justify-between">
-          {!scriptSelectionHidden ? <ScriptSelectionComponent setRaceInfo={setRaceInfo} languageScript={languageScript} setLanguageScript={setLanguageScript} /> : ""}
-          {!timerHidden ? <TimerComponent startTime={startTime} /> : ""}
+          {!startTime ? <ScriptSelectionComponent setRaceInfo={setRaceInfo} languageScript={languageScript} setLanguageScript={setLanguageScript} /> : ""}
+          {startTime ? <TimerComponent startTime={startTime} /> : ""}
         </div>
-        <TextInputComponent raceParagraphArray={raceParagraphArray} raceId={raceId} startTime={startTime} languageScript={languageScript} />
+        <div className="w-1/2">
+          <div>
+            {/*if the race is started show wpm*/}
+            {startTime !== null ? <h2 className="text-xl">{WPM.toFixed(1)}wpm</h2> : ""}
+          </div>
+          
+          <TextInputComponent paragraphArray={raceParagraphArray} startTime={startTime} languageScript={languageScript} endGame={endRace} gameId={raceId} userInput={userInput} setUserInput={setUserInput} userInputRef={userInputRef} newUserInputRef={newUserInputRef} />
+        </div>
+
         <div>
           {
             raceId ?

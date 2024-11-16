@@ -1,6 +1,6 @@
 import Link from "next/link";
-import AdminPanelComponent from "./AdminPanelComponent";
-import NavigationComponent from "./NavigationComponent";
+import AdminPanelComponent from "./components/AdminPanelComponent";
+import NavigationComponent from "./components/NavigationComponent";
 
 export default function Home() {
   return (
