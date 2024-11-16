@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { LanguageScripts } from "@/js/language-scripts";
 import { reportParagraph } from "@/utility/utility";
 import ScriptSelectionComponent from "./ScriptSelectionComponent";
 import TimerComponent from "./TimerComponent";
 import TextInputComponent from "../components/TextInputComponent";
+import { useRouter } from "next/navigation";
 
 export type ReturnedParagraph = {
   text: string | null,
@@ -23,28 +23,9 @@ function handleWPM(startTime: Date | null, userInput: string): number {
   return newWPM;
 }
 
-function endRace(mistakes: number, raceId: string | null, router: AppRouterInstance) {
-  void (async ()=>{
-    try {
-      await (await fetch(`/api/race/finish`, {
-        method: "POST",
-        body: JSON.stringify({
-          mistakes: mistakes,
-          endTime: new Date(),
-          raceId
-        }),
-        mode: "cors",
-        cache: "default"
-      })).json();
-    }
-    catch(e: unknown) {
-      throw "Failed finishing race";
-    }
-    router.push(`/race/finish?id=${raceId}`);
-  })();
-}
-
 export default function ClientRace({languageScriptPreference}: {languageScriptPreference: string | undefined}) {
+  const router = useRouter();
+
   const [raceParagraph, setRaceParagraph] = useState<ReturnedParagraph | null>(null);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [raceId, setRaceId] = useState<string | null>(null);
@@ -96,6 +77,27 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
     setRaceId(raceId);
   }
 
+  function endRace(mistakes: number) {
+    void (async ()=>{
+      try {
+        await (await fetch(`/api/race/finish`, {
+          method: "POST",
+          body: JSON.stringify({
+            mistakes: mistakes,
+            endTime: new Date(),
+            raceId
+          }),
+          mode: "cors",
+          cache: "default"
+        })).json();
+      }
+      catch(e: unknown) {
+        throw "Failed finishing race";
+      }
+      router.push(`/race/finish?id=${raceId}`);
+    })();
+  }
+
   return (
     <div>
       <div className="flex flex-col m-10 w-full">
@@ -109,7 +111,7 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
             {startTime !== null ? <h2 className="text-xl">{WPM.toFixed(1)}wpm</h2> : ""}
           </div>
           
-          <TextInputComponent paragraphArray={raceParagraphArray} startTime={startTime} languageScript={languageScript} endGame={endRace} gameId={raceId} userInput={userInput} setUserInput={setUserInput} userInputRef={userInputRef} newUserInputRef={newUserInputRef} />
+          <TextInputComponent paragraphArray={raceParagraphArray} startTime={startTime} languageScript={languageScript} endGame={endRace} userInput={userInput} setUserInput={setUserInput} userInputRef={userInputRef} newUserInputRef={newUserInputRef} />
         </div>
 
         <div>

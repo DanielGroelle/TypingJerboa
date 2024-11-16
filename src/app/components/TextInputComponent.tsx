@@ -1,7 +1,5 @@
 import { KeyboardMap } from "@/js/language-scripts";
-import { useRouter } from "next/navigation";
-import { ClipboardEvent, MouseEvent, useCallback, useState } from "react";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { ClipboardEvent, MouseEvent, useCallback, useEffect, useState } from "react";
 
 function handlePaste(event: ClipboardEvent<HTMLTextAreaElement>) {
   event.preventDefault();
@@ -13,22 +11,24 @@ function handleParagraphContextMenu(event: MouseEvent<HTMLParagraphElement>) {
   event.preventDefault();
 }
 
-export default function TextInputComponent({paragraphArray, startTime, languageScript, endGame, gameId, userInput, setUserInput, userInputRef, newUserInputRef}: {
+//TODO: refactor this to pass less state
+export default function TextInputComponent({paragraphArray, startTime, languageScript, endGame, userInput, setUserInput, userInputRef, newUserInputRef}: {
   paragraphArray: string[],
   startTime: Date | null,
   languageScript: string,
-  endGame: (mistakes: number, gameId: string | null, router: AppRouterInstance) => void,
-  gameId: string | null,
+  endGame: (mistakes: number) => void,
   userInput: string,
   setUserInput: (userInput: string) => void,
   userInputRef: React.MutableRefObject<string>,
-  newUserInputRef: React.MutableRefObject<string | null>,
+  newUserInputRef: React.MutableRefObject<string | null>
 }) {
-  const router = useRouter();
-
+  const [gameFinished, setGameFinished] = useState(false);
   const [selectionRange, setSelectionRange] = useState({start: 0, end: 0});
   const [mistakes, setMistakes] = useState(0);
-  const [gameFinished, setGameFinished] = useState(false);
+
+  useEffect(() => {
+    setGameFinished(false);
+  }, [paragraphArray]);
 
   //sets the users cursor where it should be on every render
   const updateSelectionState = useCallback((node: HTMLTextAreaElement) => {
@@ -70,10 +70,11 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
     //check if the userInput is equal to the paragraph and that game has actually started in order to end the game
     if (newUserInput === paragraphArray.join("") && new Date().getTime() >= (startTime?.getTime() ?? 0)) {
       setGameFinished(true);
-      endGame(mistakes, gameId, router);
+      endGame(mistakes);
     }
   }
   
+  //maps key presses from one languageScript into desired languageScript
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     //TODO: find a way to reimplement ctrl-z
     //good luck
@@ -110,7 +111,7 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
 
   return (
     <>
-    <div className="border-solid border-white border font-mono text-lg p-1 select-none" hidden={paragraphArray.length === 0} onContextMenu={handleParagraphContextMenu}>
+    <div className="border-solid border-white border font-mono text-lg p-1 select-none" hidden={startTime === null} onContextMenu={handleParagraphContextMenu}>
       {paragraphArray.map((character, i)=>{
         return <span className={charStatus(userInput, i, paragraphArray)} key={i}>{character}</span>
       })}
@@ -123,7 +124,7 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
 
     <textarea id="main-text-input" className="text-black resize-none font-mono text-lg min-w-full p-1"
       hidden={startTime === null}
-      placeholder="Type paragraph here"
+      placeholder="Type prompt here"
       autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false"
       value={userInput}
       ref={updateSelectionState}

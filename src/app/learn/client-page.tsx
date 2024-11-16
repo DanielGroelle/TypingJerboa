@@ -1,10 +1,11 @@
 "use client";
 
 import { ManualKeyboardMap, LanguageScripts } from "@/js/language-scripts";
-import { useState, useRef, ChangeEvent, ClipboardEvent, MouseEvent, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import SidebarComponent from "./SidebarComponent";
 import { reportLesson } from "@/utility/utility";
+import TextInputComponent from "../components/TextInputComponent";
 
 //TODO: refactor this into several smaller components
 
@@ -14,10 +15,10 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
   const [lessonText, setLessonText] = useState("");
   const [userInput, setUserInput] = useState("");
   const userInputRef = useRef("");
+  const newUserInputRef = useRef<string | null>(null);
 
   const [activeMode, setActiveMode] = useState<"new-characters" | "word-exercise">("new-characters");
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
-  const [lessonFinished, setLessonFinished] = useState(false);
   const lessons = ManualKeyboardMap[languageScript];
   const [finishedLessonsNewCharacters, setFinishedLessonsNewCharacters] = useState<Set<string>>(new Set([]));
   const [finishedLessonsWordExercise, setFinishedLessonsWordExercise] = useState<Set<string>>(new Set([]));
@@ -62,41 +63,6 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
     resetLesson();
     setActiveLesson(null);
   }, [languageScript]);
-
-  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    const newUserInput = event.currentTarget.value;
-    const oldLength = userInput.length;
-    const newLength = newUserInput.length;
-
-    //make sure the user doesnt keep typing past a mistake by 5 characters
-    //newLength < oldLength means user is backspacing which is fine
-    const MISTAKE_TOLERANCE = 5;
-    if (newLength < oldLength || charStatus(newUserInput, newLength - MISTAKE_TOLERANCE - 1) !== "incorrect") {
-      //make sure the lesson has started and also isnt finished
-      if (startTime && startTime.getTime() < new Date().getTime() && !lessonFinished) {
-        setUserInput(newUserInput);
-        userInputRef.current = newUserInput;
-      }
-    }
-
-    //check if the userInput is equal to the learnText in order to end the lesson
-    if (newUserInput === lessonText) {
-      setLessonFinished(true);
-      endLesson();
-    }
-  }
-
-  //returns the appropriate class name based on if the current learnText char matches the userInput char
-  //needs to take in the userInput string in case the state variable hasnt updated yet
-  const charStatus = (userInput: string, i: number) => {
-    if (userInput[i] === undefined) {
-      return "empty";
-    }
-    if (lessonText[i] !== userInput[i]) {
-      return "incorrect";
-    }
-    return "correct";
-  }
 
   function assignLessonInfo(lessonText: string, startTime: Date | null, newLessonId: string | null) {
     setLessonText(lessonText);
@@ -181,20 +147,9 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
     setStartTime(null);
     setLessonText("");
     setUserInput("");
-    setLessonFinished(false);
     setError(null);
     setSuccess(null);
   }
-
-  const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
-    event.preventDefault();
-  };
-  const handleTextAreaContextMenu = (event: MouseEvent<HTMLTextAreaElement>) => {
-    event.preventDefault();
-  };
-  const handleParagraphContextMenu = (event: MouseEvent<HTMLParagraphElement>) => {
-    event.preventDefault();
-  };
 
   return (
     <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
@@ -251,18 +206,7 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
             ""
           }
 
-          <div className="border-solid border-white border select-none font-mono text-lg" hidden={lessonText.length === 0} onContextMenu={handleParagraphContextMenu}>
-            {[...lessonText].map((character, i)=>{
-              return <span className={charStatus(userInput, i)} key={i}>{character}</span>
-            })}
-
-            {//for inputed characters that exceed lessonText length
-            [...userInput.slice(lessonText.length)].map((_, i)=>{
-                return <span className="incorrect" key={i}>&nbsp;</span>
-            })}
-          </div>
-
-          <textarea id="main-text-input" className="text-black resize-none font-mono min-w-full text-lg p-1" hidden={startTime === null} placeholder="Type characters here" autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false" value={userInput} onChange={handleChange} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}></textarea>
+          <TextInputComponent paragraphArray={[...lessonText]} startTime={startTime} languageScript={languageScript} endGame={endLesson} userInput={userInput} setUserInput={setUserInput} userInputRef={userInputRef} newUserInputRef={newUserInputRef} />
           
           <div>
             {
