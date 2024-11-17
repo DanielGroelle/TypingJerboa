@@ -48,9 +48,10 @@ export default function ClientNews({AdminLink}: {AdminLink: React.ReactElement |
       {newsPosts.map((newsPost)=> 
         <div className="m-6" key={newsPost.id}>
           <h2 className="text-xl underline">{newsPost.title}</h2>
-          <p>Posted: {new Date(newsPost.postDate).toDateString()}</p>
-          <p>Author: {newsPost.author}</p>
-          <p>{newsPost.body}</p>
+          <p className="text-sm">Posted: {new Date(newsPost.postDate).toDateString()}</p>
+          <p className="text-sm">Author: {newsPost.author}</p>
+          <p className="text-sm">Tags: {newsPost.tags.join(", ")}</p>
+          <p className="mt-1">{newsPost.body}</p>
         </div>
       )}
       <p>{newsPosts.length === 0 ? "Nobody here but us chickens!" : ""}</p>
