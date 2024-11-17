@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { reportParagraph } from "@/utility/utility";
 import NavigationComponent from "@/app/components/NavigationComponent";
+import { LanguageScripts, Z_LANGUAGE_SCRIPT } from "@/js/language-scripts";
 
 const Z_RESPONSE = z.object({
   user: z.string().nullable(),
@@ -16,8 +17,10 @@ const Z_RESPONSE = z.object({
   paragraph: z.object({
     text: z.string(),
     author: z.string().nullable(),
-    source: z.string().nullable()
-  })
+    source: z.string().nullable(),
+    languageScript: Z_LANGUAGE_SCRIPT.nullable()
+  }),
+  newBest: z.boolean()
 });
 
 type RaceData = z.infer<typeof Z_RESPONSE>;
@@ -31,7 +34,19 @@ export default function ClientRaceFinish() {
     throw "404";
   }
 
-  const [raceData, setRaceData] = useState<RaceData>({user: "", startTime: "", endTime: "", mistakes: null, paragraph: {text: "", author: "", source: ""}});
+  const [raceData, setRaceData] = useState<RaceData>({
+    user: "",
+    startTime: "",
+    endTime: "",
+    mistakes: null,
+    paragraph: {
+      text: "",
+      author: "",
+      source: "",
+      languageScript: null
+    },
+    newBest: false
+  });
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,12 +90,16 @@ export default function ClientRaceFinish() {
         :
         <p>Date Achieved:</p>
       }
-      <p>WPM: {!isNaN(wpm) ? wpm.toFixed(1) : ""}</p>
+      <p>WPM: {!isNaN(wpm) ? wpm.toFixed(1) : ""} {raceData.newBest ?
+        <span className="text-sm new-best">New Best!</span>
+        : ""}
+      </p>
       <p>Time: {!isNaN(msTime) ? `${msTime / 1000}s` : ""}</p>
       <p>Mistakes: {raceData.mistakes}</p>
       <p>Paragraph: {raceData.paragraph.text}</p>
       <p>Author: {raceData.paragraph.author}</p>
       <p>Source: {raceData.paragraph.source}</p>
+      <p>Language Script: {raceData.paragraph.languageScript !== null ? LanguageScripts[raceData.paragraph.languageScript].display : ""}</p>
       <br/>
 
       <div className="flex">

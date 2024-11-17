@@ -104,3 +104,23 @@ option {
   left:8px;
   top:12px;
 }
+
+.new-best {
+  animation-name: rainbow;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes rainbow {
+  0%   {color: rgb(255, 0,   0  )}
+  10%  {color: rgb(255, 154, 0  )}
+  20%  {color: rgb(208, 222, 33 )}
+  30%  {color: rgb(79,  220, 74 )}
+  40%  {color: rgb(63,  218, 216)}
+  50%  {color: rgb(47,  201, 226)}
+  60%  {color: rgb(28,  127, 238)}
+  70%  {color: rgb(95,  21,  242)}
+  80%  {color: rgb(186, 12,  248)}
+  90%  {color: rgb(251, 7,   217)}
+  100% {color: rgb(255, 0,   0  )}
+}

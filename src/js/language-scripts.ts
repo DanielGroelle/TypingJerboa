@@ -1,3 +1,6 @@
+import { z } from "zod";
+
+export const Z_LANGUAGE_SCRIPT = z.union([z.literal("cyrillic-russian"), z.literal("latin-english")]);
 export const LanguageScripts = {
   "cyrillic-russian": {
     internal: "cyrillic-russian",

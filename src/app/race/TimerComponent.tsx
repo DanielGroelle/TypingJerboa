@@ -25,9 +25,9 @@ export default function TimerComponent({startTime}: {startTime: Date | null}) {
       </div>
 
       <div className="flex border-solid border-white border rounded-xl w-fit items-center m-2">
-        <span className="h-12 w-12 bg-red-600 rounded-full inline-block m-2" style={{visibility: timer < 4 ? "visible" : "hidden"}}></span>
-        <span className="h-12 w-12 bg-yellow-400 rounded-full inline-block m-2" style={{visibility: timer < 2 ? "visible" : "hidden"}}></span>
-        <span className="h-12 w-12 bg-green-600 rounded-full inline-block m-2" style={{visibility: timer <= 0 ? "visible" : "hidden"}}></span>
+        <span className="h-12 w-12 bg-red-600 rounded-full inline-block m-2" style={{opacity: timer < 4 ? "1" : ".35"}}></span>
+        <span className="h-12 w-12 bg-yellow-400 rounded-full inline-block m-2" style={{opacity: timer < 2 ? "1" : ".35"}}></span>
+        <span className="h-12 w-12 bg-green-600 rounded-full inline-block m-2" style={{opacity: timer <= 0 ? "1" : ".35"}}></span>
       </div>
     </div>
   );
