@@ -60,19 +60,19 @@ export default function ClientStats() {
           <div>
             <h1>User Stats</h1>
             <br/>
-            <p>Races: {stats?.languageScriptStats[languageScript]?.races}</p>
-            <p>Average WPM: {stats?.languageScriptStats[languageScript]?.avgWpm.toFixed(1)}<span className="ml-1 text-sm text-neutral-400 underline" title="From up to the last 50 races">?</span></p>
-            <p>Average Mistakes: {stats?.languageScriptStats[languageScript]?.avgMistakes.toFixed(1)}<span className="ml-1 text-sm text-neutral-400 underline" title="From up to the last 50 races">?</span></p>
-            <p>
+            <p className="text-lg">Races: {stats?.languageScriptStats[languageScript]?.races}</p>
+            <p className="text-lg">Average WPM: {stats?.languageScriptStats[languageScript]?.avgWpm.toFixed(1)}<span className="ml-1 text-neutral-400 underline" title="From up to the last 50 races">?</span></p>
+            <p className="text-lg">Average Mistakes: {stats?.languageScriptStats[languageScript]?.avgMistakes.toFixed(1)}<span className="ml-1 text-neutral-400 underline" title="From up to the last 50 races">?</span></p>
+            <p className="text-lg">
               Best WPM: {stats?.languageScriptStats[languageScript]?.bestWpm.toFixed(1)}
               {
                 stats?.languageScriptStats[languageScript]?.bestParagraph?.length ?
-                <input type="button" className="ml-1 underline text-sm text-blue-300" onClick={()=>{setShowParagraph(!showParagraph)}} value="Show Paragraph"/>
+                <input type="button" className="ml-1 underline text-blue-300" onClick={()=>{setShowParagraph(!showParagraph)}} value="Show Paragraph"/>
                 :
                 ""
               }
             </p>
-            <p>{showParagraph ? stats?.languageScriptStats[languageScript]?.bestParagraph : ""}</p>
+            <p className="text-lg">{showParagraph ? stats?.languageScriptStats[languageScript]?.bestParagraph : ""}</p>
             {(() => {
               const createdAt = stats?.languageScriptStats[languageScript]?.createdAt;
               if (createdAt === null || createdAt === undefined) {
@@ -81,17 +81,17 @@ export default function ClientStats() {
               
               const offset = new Date(createdAt).getTimezoneOffset();
               const createdDate = new Date(new Date(createdAt).getTime() - (offset*60*1000));
-              return <p className="mt-4">Registered: {String(createdDate.toISOString().split('T')[0])}</p>
+              return <p className="mt-4 text-lg">Registered: {String(createdDate.toISOString().split('T')[0])}</p>
             })()}
           </div>
 
           <div>
             <h1>Site Stats</h1>
             <br/>
-            <p>Unique Visitors: {stats?.siteStats.visitors}</p>
-            <p>Registered Users: {stats?.siteStats.users}</p>
-            <p>Lessons Finished: {stats?.siteStats.lessonsFinished}</p>
-            <p>Races Finished: {stats?.siteStats.racesFinished}</p>
+            <p className="text-lg">Unique Visitors: {stats?.siteStats.visitors}</p>
+            <p className="text-lg">Registered Users: {stats?.siteStats.users}</p>
+            <p className="text-lg">Lessons Finished: {stats?.siteStats.lessonsFinished}</p>
+            <p className="text-lg">Races Finished: {stats?.siteStats.racesFinished}</p>
           </div>
         </div>
       }

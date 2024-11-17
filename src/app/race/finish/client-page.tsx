@@ -76,8 +76,8 @@ export default function ClientRaceFinish() {
         <p>User: {raceData.user}</p>
         :
         <div className="flex items-center">
-          <p>Unregistered User</p>
-          <Link href="/register" className="underline decoration-blue-500 h-fit ml-2 text-sm">Register</Link>
+          <p className="text-lg">Unregistered User</p>
+          <Link href="/register" className="underline decoration-blue-500 h-fit ml-2">Register</Link>
         </div>
       }
       {
@@ -85,21 +85,22 @@ export default function ClientRaceFinish() {
         (() => {
           const offset = new Date(raceData.endTime).getTimezoneOffset();
           const createdDate = new Date(new Date(raceData.endTime).getTime() - (offset*60*1000));
-          return <p>Date Achieved: {String(createdDate.toISOString().split('T')[0])}</p>
+          return <p className="text-lg">Date Achieved: {String(createdDate.toISOString().split('T')[0])}</p>
         })()
         :
-        <p>Date Achieved:</p>
+        <p className="text-lg">Date Achieved:</p>
       }
-      <p>WPM: {!isNaN(wpm) ? wpm.toFixed(1) : ""} {raceData.newBest ?
-        <span className="text-sm new-best">New Best!</span>
+      <p className="text-lg">WPM: {!isNaN(wpm) ? wpm.toFixed(1) : ""} {raceData.newBest ?
+        <span className="new-best">New Best!</span>
         : ""}
       </p>
-      <p>Time: {!isNaN(msTime) ? `${msTime / 1000}s` : ""}</p>
-      <p>Mistakes: {raceData.mistakes}</p>
-      <p>Paragraph: {raceData.paragraph.text}</p>
-      <p>Author: {raceData.paragraph.author}</p>
-      <p>Source: {raceData.paragraph.source}</p>
-      <p>Language Script: {raceData.paragraph.languageScript !== null ? LanguageScripts[raceData.paragraph.languageScript].display : ""}</p>
+      <p className="text-lg">Time: {!isNaN(msTime) ? `${msTime / 1000}s` : ""}</p>
+      <p className="text-lg">Mistakes: {raceData.mistakes}</p>
+      <br/>
+      <p className="text-lg">Paragraph: {raceData.paragraph.text}</p>
+      <p className="text-lg">Author: {raceData.paragraph.author}</p>
+      <p className="text-lg">Source: {raceData.paragraph.source}</p>
+      <p className="text-lg">Language Script: {raceData.paragraph.languageScript !== null ? LanguageScripts[raceData.paragraph.languageScript].display : ""}</p>
       <br/>
 
       <div className="flex">

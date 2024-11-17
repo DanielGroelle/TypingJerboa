@@ -111,7 +111,7 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
 
   return (
     <>
-    <div className="border-solid border-white border font-mono text-lg p-1 select-none" hidden={startTime === null} onContextMenu={handleParagraphContextMenu}>
+    <div className="border-solid border-white border font-mono text-xl p-1 select-none" hidden={startTime === null} onContextMenu={handleParagraphContextMenu}>
       {paragraphArray.map((character, i)=>{
         return <span className={charStatus(userInput, i, paragraphArray)} key={i}>{character}</span>
       })}

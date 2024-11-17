@@ -195,8 +195,7 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
             }} style={{backgroundColor: (activeMode === "word-exercise") ? "rgb(39 39 42)" : ""}} value="Word Exercise" />
           </div>
           <br/>
-          Selected: {activeLesson ?? "None"}
-          <br/>
+          <p className="text-lg">Selected: {activeLesson?.split("").join(" ") ?? "None"}</p>
 
           {!startTime ? 
             <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
