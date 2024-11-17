@@ -49,14 +49,25 @@ export async function GET(req: NextRequest) {
     createdAt: Date | null;
   };
 
-  const languageScriptStats: Partial<Record<keyof typeof LanguageScripts, Stats>> & {all: Stats} = {
-    all: {
-      races: 0,
-      avgWpm: 0,
-      avgMistakes: 0,
-      bestWpm: 0,
-      bestParagraph: null,
-      createdAt: null
+  const languageScriptStats: {
+    languageScriptStats: Partial<Record<keyof typeof LanguageScripts, Stats>> & {all: Stats},
+    siteStats: {visitors: number, users: number, lessonsFinished: number, racesFinished: number}
+  } = {
+    languageScriptStats: {
+      all: {
+        races: 0,
+        avgWpm: 0,
+        avgMistakes: 0,
+        bestWpm: 0,
+        bestParagraph: null,
+        createdAt: null
+      }
+    },
+    siteStats: {
+      visitors: 0,
+      users: 0,
+      lessonsFinished: 0,
+      racesFinished: 0
     }
   };
 
@@ -67,7 +78,7 @@ export async function GET(req: NextRequest) {
 
     //in case user has no finished races, return 0 for everything
     if (raceCount === 0) {
-      languageScriptStats[value.internal] = {races: 0, avgWpm: 0, avgMistakes: 0, bestWpm: 0, bestParagraph: null, createdAt};
+      languageScriptStats.languageScriptStats[value.internal] = {races: 0, avgWpm: 0, avgMistakes: 0, bestWpm: 0, bestParagraph: null, createdAt};
       continue;
     }
 
@@ -103,7 +114,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    languageScriptStats[value.internal] = {
+    languageScriptStats.languageScriptStats[value.internal] = {
       races: raceCount,
       avgWpm,
       avgMistakes,
@@ -112,6 +123,15 @@ export async function GET(req: NextRequest) {
       createdAt
     };
   }
+
+  languageScriptStats.siteStats.users = await prisma.user.count();
+  languageScriptStats.siteStats.visitors = await prisma.visitor.count();
+  languageScriptStats.siteStats.lessonsFinished = await prisma.lesson.count({
+    where: {NOT: {endTime: null}}
+  });
+  languageScriptStats.siteStats.racesFinished = await prisma.race.count({
+    where: {NOT: {endTime: null}}
+  });
 
   return new NextResponse(JSON.stringify(languageScriptStats));
 }

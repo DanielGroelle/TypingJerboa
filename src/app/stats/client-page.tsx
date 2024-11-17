@@ -5,7 +5,15 @@ import { Z_STATS } from "@/js/types";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 
-const Z_RESPONSE = z.record(z.string(), Z_STATS);
+const Z_RESPONSE = z.object({
+  languageScriptStats: z.record(z.string(), Z_STATS),
+  siteStats: z.object({
+    users: z.number(),
+    visitors: z.number(),
+    lessonsFinished: z.number(),
+    racesFinished: z.number()
+  })
+});
 
 async function getStats() {
   let response;
@@ -34,7 +42,7 @@ export default function ClientStats() {
   }, []);
 
   return (
-    <div>
+    <div className="h-full">
       <div className="flex justify-end">
         <p>Language Script:</p>
         <select name="script-select" id="script-select" value={languageScript} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{
@@ -46,33 +54,47 @@ export default function ClientStats() {
           <option value="all">All Scripts</option>
         </select>
       </div>
+      
+      {!stats ? "Loading stats..." : 
+        <div className="flex flex-col justify-between" style={{height: "96%"}}>
+          <div>
+            <h1>User Stats</h1>
+            <br/>
+            <p>Races: {stats?.languageScriptStats[languageScript]?.races}</p>
+            <p>Average WPM: {stats?.languageScriptStats[languageScript]?.avgWpm.toFixed(1)}<span className="ml-1 text-sm text-neutral-400 underline" title="From up to the last 50 races">?</span></p>
+            <p>Average Mistakes: {stats?.languageScriptStats[languageScript]?.avgMistakes.toFixed(1)}<span className="ml-1 text-sm text-neutral-400 underline" title="From up to the last 50 races">?</span></p>
+            <p>
+              Best WPM: {stats?.languageScriptStats[languageScript]?.bestWpm.toFixed(1)}
+              {
+                stats?.languageScriptStats[languageScript]?.bestParagraph?.length ?
+                <input type="button" className="ml-1 underline text-sm text-blue-300" onClick={()=>{setShowParagraph(!showParagraph)}} value="Show Paragraph"/>
+                :
+                ""
+              }
+            </p>
+            <p>{showParagraph ? stats?.languageScriptStats[languageScript]?.bestParagraph : ""}</p>
+            {(() => {
+              const createdAt = stats?.languageScriptStats[languageScript]?.createdAt;
+              if (createdAt === null || createdAt === undefined) {
+                return;
+              }
+              
+              const offset = new Date(createdAt).getTimezoneOffset();
+              const createdDate = new Date(new Date(createdAt).getTime() - (offset*60*1000));
+              return <p className="mt-4">Registered: {String(createdDate.toISOString().split('T')[0])}</p>
+            })()}
+          </div>
 
-      <h1>Stats</h1>
-      <br/>
-      <p>Races: {stats?.[languageScript]?.races}</p>
-      <p>Average WPM: {stats?.[languageScript]?.avgWpm.toFixed(1)}<span className="ml-1 text-sm text-neutral-400 underline" title="From up to the last 50 races">?</span></p>
-      <p>Average Mistakes: {stats?.[languageScript]?.avgMistakes.toFixed(1)}<span className="ml-1 text-sm text-neutral-400 underline" title="From up to the last 50 races">?</span></p>
-      <p>
-        Best WPM: {stats?.[languageScript]?.bestWpm.toFixed(1)}
-        {
-          stats?.[languageScript]?.bestParagraph?.length ?
-          <input type="button" className="ml-1 underline text-sm text-blue-300" onClick={()=>{setShowParagraph(!showParagraph)}} value="Show Paragraph"/>
-          :
-          ""
-        }
-      </p>
-      <p>{showParagraph ? stats?.[languageScript]?.bestParagraph : ""}</p>
-      {(() => {
-        const createdAt = stats?.[languageScript]?.createdAt;
-        if (createdAt === null || createdAt === undefined) {
-          return;
-        }
-        
-        const offset = new Date(createdAt).getTimezoneOffset();
-        const createdDate = new Date(new Date(createdAt).getTime() - (offset*60*1000));
-        return <p className="mt-4">Registered: {String(createdDate.toISOString().split('T')[0])}</p>
-      })()}
-      {!stats ? "Loading stats..." : ""}
+          <div>
+            <h1>Site Stats</h1>
+            <br/>
+            <p>Unique Visitors: {stats?.siteStats.visitors}</p>
+            <p>Registered Users: {stats?.siteStats.users}</p>
+            <p>Lessons Finished: {stats?.siteStats.lessonsFinished}</p>
+            <p>Races Finished: {stats?.siteStats.racesFinished}</p>
+          </div>
+        </div>
+      }
     </div>
   );
 }

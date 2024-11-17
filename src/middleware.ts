@@ -119,6 +119,23 @@ async function validateSessionToken(request: NextRequest, sessionToken: string) 
   }
 }
 
+async function addToVisitorTable(ip: string) {
+  try {
+    await (await fetch(new URL("/api/admin/visitors", process.env.BASE_URL), {
+      method: "POST",
+      body: JSON.stringify({
+        secret: process.env.TOKEN_SECRET,
+        ip
+      }),
+      mode: "cors",
+      cache: "default"
+    })).json();
+  }
+  catch(e: unknown) {
+    console.error("Add to visitor table error", e);
+  }
+}
+
 const Z_PREFERENCE_RESPONSE = z.object({
   preferences: z.object({
     languageScript: z.object({
@@ -184,7 +201,7 @@ async function moveSessionDataToUser(request: NextRequest, sessionToken: string,
     })).json();
   }
   catch(e: unknown) {
-    console.error("remove sessionToken from lessons error", e);
+    console.error("Remove sessionToken from lessons error", e);
   }
 
   return response;
@@ -221,13 +238,26 @@ export async function middleware(request: NextRequest) {
   const sessionToken = request.cookies.get("sessionToken")?.value;
   const preferences = request.cookies.get("languageScriptPreference")?.value;
 
+  //if not an internal /api/ request, and not logged in user, add ip to visitor table
+  if (!path.startsWith("/api/") && !loginToken) {
+    const forwardedIp = request.headers.get('x-forwarded-for');
+    //these are alternatives that might work but also might not
+    // const realIp = request.headers.get('x-real-ip');
+    // const geo = request.geo;
+    // const ipAddress = request.ip;
+    if (forwardedIp) {
+      await addToVisitorTable(forwardedIp);
+    }
+  }
+
   //if the path is /api/, could be an internal request. this check prevents infinite redirects
   if (path.startsWith("/api/")) {
     //allow internal requests being made to login-token or session-token api routes
     //these routes check if the token secret sent in the body is correct
     if (path === "/api/admin/user/login-token" ||
       path === "/api/admin/user/session-token" ||
-      path === "/api/admin/user/session-token/create"
+      path === "/api/admin/user/session-token/create" ||
+      path === "/api/admin/visitors"
     ) {
       return NextResponse.next();
     }

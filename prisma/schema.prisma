@@ -160,3 +160,8 @@ model Newspost {
   tags     String[]
   @@map(name: "newsposts")
 }
+
+model Visitor {
+  ip String @id
+  @@map(name: "visitors")
+}

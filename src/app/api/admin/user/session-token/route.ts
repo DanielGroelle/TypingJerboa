@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (request.secret !== process.env.TOKEN_SECRET) {
-    return NextResponse.json({error: "Not authorized for this action"}, {status: 400});
+    return NextResponse.json({error: "Not authorized for this action"}, {status: 401});
   }
 
   const expiry = await prisma.session.findFirst({
