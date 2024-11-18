@@ -19,7 +19,7 @@ export async function register() {
               }
             });
             if (!deletedTokens) {
-              console.log("Error deleting sessionTokens");
+              console.error("Error deleting sessionTokens");
             }
   
             console.log("Ran session token cleanup", deletedTokens);
@@ -31,7 +31,7 @@ export async function register() {
         console.log("Started cron job");
       }
       catch(e: unknown) {
-        console.log("Instrumentation error", e);
+        console.error("Instrumentation error", e);
       }
     })();
   }

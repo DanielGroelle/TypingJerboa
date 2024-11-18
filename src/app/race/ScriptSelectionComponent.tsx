@@ -38,6 +38,7 @@ async function startRace(
     }
   }
   catch(e: unknown) {
+    console.error(e)
     setError("Unknown error occurred when starting race!");
     throw "startRace failed";
   }

@@ -2,15 +2,13 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 //extracting words from paragraphs disabled
 // import { extractWordsFromTexts, insertToWordTable } from "../../../utility/utility";
-import { getLanguageScriptId } from "../../../utility/utility";
+import { getLanguageScriptId } from "../../../../utility/utility";
 import { z } from "zod";
 
 const Z_REQUEST = z.object({
-  texts: z.array(z.object({
-    text: z.string(),
-    source: z.string().nullable(),
-    author: z.string().nullable()
-  })),
+  source: z.string().nullable(),
+  author: z.string().nullable(),
+  texts: z.array(z.string()),
   languageScript: z.string(),
   selectable: z.boolean()
 });
@@ -28,11 +26,11 @@ export async function POST(req: NextRequest) {
   }
 
   //format into a neat array of objects for prisma to createMany with
-  const newParagraphs = request.texts.map(paragraph => {
+  const newParagraphs = request.texts.map(text => {
      return {
-      source: paragraph.source,
-      author: paragraph.author,
-      text: paragraph.text,
+      source: request.source,
+      author: request.author,
+      text: text,
       languageScriptId: languageScriptId.id,
       selectable: request.selectable
     };
@@ -63,30 +61,4 @@ export async function POST(req: NextRequest) {
   // console.log("Words attempted to insert", response);
 
   return new NextResponse(JSON.stringify({data: [...newParagraphsReturned]}));
-}
-
-const Z_DELETE_REQUEST = z.object({
-  ids: z.array(z.number())
-});
-//bulk delete paragraphs
-export async function DELETE(req: NextRequest) {
-  let request;
-  try {
-    request = Z_DELETE_REQUEST.parse(await req.json());
-  }
-  catch(e: unknown) {
-    return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
-  }
-
-  const deletedParagraphCount = await prisma.paragraph.deleteMany({
-    where: {
-      id: {in: request.ids}
-    }
-  });
-
-  if (deletedParagraphCount === null) {
-    return NextResponse.json({error: "Paragraph ID does not exist"}, {status: 400});
-  }
-  
-  return NextResponse.json({status: 200});
 }

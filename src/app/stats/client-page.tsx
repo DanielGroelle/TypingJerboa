@@ -25,7 +25,7 @@ async function getStats() {
     })).json());
   }
   catch(e: unknown) {
-    console.log(e);
+    console.error(e);
     throw "getStats failed";
   }
 

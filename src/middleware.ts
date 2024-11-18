@@ -26,7 +26,7 @@ async function createNewSession(request: NextRequest) {
     })).json());
   }
   catch(e: unknown) {
-    console.log("createNewSession error", e);
+    console.error("createNewSession error", e);
     return NextResponse.redirect(new URL("/", request.url));
   }
 
@@ -83,7 +83,7 @@ async function validateLoginToken(request: NextRequest, loginToken: string) {
       })).json());
     }
     catch(e: unknown) {
-      console.log("loginToken expiry", e);
+      console.error("loginToken expiry error", e);
       return NextResponse.redirect(new URL("/", request.url));
     }
 
@@ -107,7 +107,7 @@ async function validateSessionToken(request: NextRequest, sessionToken: string) 
   }
   catch(e: unknown) {
     //if theres an error its probably because the sessionToken doesnt exist so just delete it from the users cookies
-    console.log("validate sessionToken error", e)
+    console.error("Validate sessionToken error", e)
     const errorResponse = NextResponse.redirect(new URL("/", request.url));
     errorResponse.cookies.delete("sessionToken");
     return errorResponse;
@@ -221,7 +221,7 @@ async function checkUserIsAdmin(loginToken: string) {
     })).json());
   }
   catch(e: unknown) {
-    console.log("admin api error", e);
+    console.error("Admin api error", e);
     return NextResponse.json({error: "Unknown api error"}, {status: 500});
   }
 
@@ -326,7 +326,7 @@ export async function middleware(request: NextRequest) {
       })).json());
     }
     catch(e: unknown) {
-      console.log("admin error", e);
+      console.error("Access admin page error", e);
       return NextResponse.redirect(new URL("/", request.url));
     }
 

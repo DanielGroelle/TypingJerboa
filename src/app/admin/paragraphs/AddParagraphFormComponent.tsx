@@ -52,14 +52,14 @@ export default function AddParagraphFormComponent({paragraphs, setParagraphs, ne
 
             <div className="flex">
               <span>author:</span>
-              <input type="text" id="author-input" className="w-full" value={newParagraph.author} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+              <input type="text" id="author-input" className="w-full" value={newParagraph.author ?? ""} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
                 setNewParagraph({...newParagraph, author: e.target.value});
               }}/><br/>
             </div>
 
             <div className="flex">
               <span>source:</span>
-              <input type="text" id="source-input" className="w-full" value={newParagraph.source} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+              <input type="text" id="source-input" className="w-full" value={newParagraph.source  ?? ""} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
                 setNewParagraph({...newParagraph, source: e.target.value});
               }}/><br/>
             </div>

@@ -8,8 +8,8 @@ const Z_PARAGRAPH = z.object({
   id: z.number(),
   text: z.string(),
   language_script_id: z.number(),
-  author: z.string(),
-  source: z.string()
+  author: z.string().nullable(),
+  source: z.string().nullable()
 });
 
 const Z_REQUEST = z.object({
@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
     chosenParagraph = Z_PARAGRAPH.parse(randomParagraph);
   }
   catch(e: unknown) {
+    console.error("Select paragraph error", e);
     return NextResponse.json({error: "Paragraph selection failed"}, {status: 400});
   }
 

@@ -21,7 +21,7 @@ async function getLessons() {
     })).json());
   }
   catch(e: unknown) {
-    console.log(e);
+    console.error(e);
     throw "getLessons failed";
   }
 

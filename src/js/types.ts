@@ -32,8 +32,8 @@ export type Race = z.infer<typeof Z_RACE>;
 export const Z_PARAGRAPH = z.object({
   id: z.number(),
   text: z.string(),
-  author: z.string(),
-  source: z.string(),
+  author: z.string().nullable(),
+  source: z.string().nullable(),
   languageScript: z.object({
     languageScript: z.string()
   }),

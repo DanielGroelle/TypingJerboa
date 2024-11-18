@@ -73,7 +73,7 @@ export default function ClientRaceFinish() {
     <div>
       {
         raceData.user ?
-        <p>User: {raceData.user}</p>
+        <p className="text-lg">User: {raceData.user}</p>
         :
         <div className="flex items-center">
           <p className="text-lg">Unregistered User</p>
@@ -98,8 +98,8 @@ export default function ClientRaceFinish() {
       <p className="text-lg">Mistakes: {raceData.mistakes}</p>
       <br/>
       <p className="text-lg">Paragraph: {raceData.paragraph.text}</p>
-      <p className="text-lg">Author: {raceData.paragraph.author}</p>
-      <p className="text-lg">Source: {raceData.paragraph.source}</p>
+      {raceData.paragraph.author !== null ? <p className="text-lg">Author: {raceData.paragraph.author}</p> : ""}
+      {raceData.paragraph.source !== null ? <p className="text-lg">Source: {raceData.paragraph.source}</p> : ""}
       <p className="text-lg">Language Script: {raceData.paragraph.languageScript !== null ? LanguageScripts[raceData.paragraph.languageScript].display : ""}</p>
       <br/>
 

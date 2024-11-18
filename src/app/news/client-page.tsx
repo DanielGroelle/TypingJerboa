@@ -27,7 +27,7 @@ async function getNewsPosts() {
     })).json());
   }
   catch(e: unknown) {
-    console.log(e);
+    console.error(e);
     throw "getNewsPosts failed";
   }
 
