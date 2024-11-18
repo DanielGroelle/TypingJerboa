@@ -216,25 +216,27 @@ export default function ClientAdminWords() {
         </div>
       </div>
       <br/>
-      {refFilteredWords.items.slice(viewPage * wordsPerPage - wordsPerPage, viewPage * wordsPerPage).map((word)=>
-        (
-          <ItemCardComponent
-            item={word}
-            itemFields={{
-              "id": {getter: (word: Word) => word.id, editType: null, options: null},
-              "word": {getter: (word: Word) => word.word, editType: "text", options: null},
-              "languageScript": {getter: (word: Word) => word.languageScript.languageScript, editType: "languageScript", options: null}
-            }}
-            editParams={{
-              items: words,
-              setItems: setWords,
-              saveItem: handleSave
-            }}
-            deleteItem={handleDelete}
-            key={word.id}
-          />
-        )
-      )}
+      <div className="flex flex-col overflow-y-auto">  
+        {refFilteredWords.items.slice(viewPage * wordsPerPage - wordsPerPage, viewPage * wordsPerPage).map((word)=>
+          (
+            <ItemCardComponent
+              item={word}
+              itemFields={{
+                "id": {getter: (word: Word) => word.id, editType: null, options: null},
+                "word": {getter: (word: Word) => word.word, editType: "text", options: null},
+                "languageScript": {getter: (word: Word) => word.languageScript.languageScript, editType: "languageScript", options: null}
+              }}
+              editParams={{
+                items: words,
+                setItems: setWords,
+                saveItem: handleSave
+              }}
+              deleteItem={handleDelete}
+              key={word.id}
+            />
+          )
+        )}
+      </div>
       {refFilteredWords.items.length === 0 ? "No words found" : ""}
     </div>
   );

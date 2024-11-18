@@ -78,15 +78,19 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  const deletedParagraphCount = await prisma.paragraph.deleteMany({
-    where: {
-      id: {in: request.ids}
-    }
-  });
+  let deletedParagraphCount = 0;
+  //in case bulk paragraph deletion exceeds 30,000 words, break into 30k chunks
+  for (let i = 0; i < request.ids.length; i += 30000) {
+    const ids = request.ids.slice(i, i + 30000);
+    const batchDeletedParagraphs = await prisma.paragraph.deleteMany({
+      where: {
+        id: {in: ids}
+      }
+    });
 
-  if (deletedParagraphCount === null) {
-    return NextResponse.json({error: "Paragraph ID does not exist"}, {status: 400});
+    deletedParagraphCount += batchDeletedParagraphs.count;
   }
-  
+
+  console.log("Paragraphs deleted", deletedParagraphCount);
   return NextResponse.json({status: 200});
 }

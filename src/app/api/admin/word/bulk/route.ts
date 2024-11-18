@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "LanguageScript does not exist"}, {status: 400});
   }
 
+  console.log(request.words.length)
   const response = await insertToWordTable(request.words, languageScriptId.id);
   if (response === null) {
     return NextResponse.json({error: "Word insertion failed"}, {status: 400});
@@ -50,15 +51,19 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  const deletedWordCount = await prisma.word.deleteMany({
-    where: {
-      id: {in: request.ids}
-    }
-  });
+  let deletedWordCount = 0;
+  //in case bulk word deletion exceeds 30,000 words, break into 30k chunks
+  for (let i = 0; i < request.ids.length; i += 30000) {
+    const ids = request.ids.slice(i, i + 30000);
+    const batchDeletedWords = await prisma.word.deleteMany({
+      where: {
+        id: {in: ids}
+      }
+    });
 
-  if (deletedWordCount === null) {
-    return NextResponse.json({error: "Word ID does not exist"}, {status: 400});
+    deletedWordCount += batchDeletedWords.count;
   }
-  
+
+  console.log("Words deleted", deletedWordCount);
   return NextResponse.json({status: 200});
 }
