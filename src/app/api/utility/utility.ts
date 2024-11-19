@@ -1,3 +1,4 @@
+import { LanguageScripts } from "@/js/language-scripts";
 import prisma from "@/lib/prisma";
 
 //convert a language script to its corresponding id
@@ -97,7 +98,10 @@ export function shuffle<T>(array: T[]) {
 export async function findUniqueFinishedLessons(options: {userId?: number | undefined, sessionToken?: string | undefined}) {
   const newCharacters = await prisma.lesson.findMany({
     select: {
-      lessonCharacters: true
+      lessonCharacters: true,
+      languageScript: {
+        select: {languageScript: true}
+      }
     },
     where: {
       mode: "new-characters",
@@ -110,7 +114,10 @@ export async function findUniqueFinishedLessons(options: {userId?: number | unde
 
   const wordExercise = await prisma.lesson.findMany({
     select: {
-      lessonCharacters: true
+      lessonCharacters: true,
+      languageScript: {
+        select: {languageScript: true}
+      }
     },
     where: {
       mode: "word-exercise",
@@ -121,5 +128,18 @@ export async function findUniqueFinishedLessons(options: {userId?: number | unde
     distinct: ["lessonCharacters"]
   });
 
-  return {newCharacters, wordExercise}
+  const lessonByLanguageScript: {[key: string]: {newCharacters: string[], wordExercise: string[]}} = {};
+  //initialize all languageScripts
+  for (const languageScript of Object.keys(LanguageScripts)) {
+    lessonByLanguageScript[languageScript] = {newCharacters: [], wordExercise: []};
+  }
+
+  for(const lesson of newCharacters) {
+    lessonByLanguageScript[lesson.languageScript.languageScript].newCharacters.push(lesson.lessonCharacters);
+  }
+  for(const lesson of wordExercise) {
+    lessonByLanguageScript[lesson.languageScript.languageScript].wordExercise.push(lesson.lessonCharacters);
+  }
+
+  return {...lessonByLanguageScript};
 }

@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 export const Z_LANGUAGE_SCRIPT = z.union([z.literal("cyrillic-russian"), z.literal("latin-english")]);
+export type LanguageScriptLiterals = z.infer<typeof Z_LANGUAGE_SCRIPT>;
+
 export const LanguageScripts = {
   "cyrillic-russian": {
     internal: "cyrillic-russian",
@@ -288,4 +290,9 @@ export const KeyboardMap: KeyboardMapping = {
       "Slash": ","
     }
   }
+};
+
+export const LanguageVowels = {
+  [LanguageScripts["latin-english"].internal]: ["a", "e", "i", "o", "u", "y"],
+  [LanguageScripts["cyrillic-russian"].internal]: ["а", "е", "э", "ы", "у", "и", "я", "о", "ю", "ё"]
 };

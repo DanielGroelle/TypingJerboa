@@ -76,10 +76,6 @@ export async function POST(req: NextRequest) {
   }
   const request = tryRequest.data;
 
-  if (request.activeLesson === null) {
-    return NextResponse.json({error: "No lesson chosen"}, {status: 400});
-  }
-
   const startTime = new Date();
   const user = await findUserFromLoginToken(loginToken);
   const languageScriptId = await getLanguageScriptId(request.languageScript)
@@ -88,7 +84,7 @@ export async function POST(req: NextRequest) {
   }
 
   const wordsByChar: {[activeChar: string]: string[]} = {}; //words grouped by char in the active lesson
-  //initialize to empty array in case the mode is not word-exercise
+  //initialize to empty arrays in case the mode is not word-exercise
   for(const activeChar of request.activeLesson) {
     wordsByChar[activeChar] = [];
   }
@@ -103,12 +99,13 @@ export async function POST(req: NextRequest) {
     
     // find all the lessons user has done and add the characters from those lessons in both modes to the learnedChars set
     const finishedLessons = await findUniqueFinishedLessons({userId: user?.id, sessionToken: sessionToken});
+
     if (finishedLessons) {
-      const newCharacterLearnedChars = finishedLessons.newCharacters.reduce((accumulator, lesson)=>{
-        return accumulator.concat([...lesson.lessonCharacters.split("")]);
+      const newCharacterLearnedChars = finishedLessons[request.languageScript].newCharacters.reduce((accumulator, lesson)=>{
+        return accumulator.concat([...lesson.split("")]);
       }, [] as string[]);
-      const wordExerciseLearnedChars = finishedLessons.wordExercise.reduce((accumulator, lesson)=>{
-        return accumulator.concat([...lesson.lessonCharacters.split("")]);
+      const wordExerciseLearnedChars = finishedLessons[request.languageScript].wordExercise.reduce((accumulator, lesson)=>{
+        return accumulator.concat([...lesson.split("")]);
       }, [] as string[]);
       learnedChars = new Set([...newCharacterLearnedChars, ...wordExerciseLearnedChars]);
     }
@@ -147,7 +144,7 @@ export async function POST(req: NextRequest) {
       wordsForChar = [...wordsForChar, ...wordsForChar];
     }
 
-    //if still not enough words, generate new "words" with random characters
+    //if still not enough words, as a last resort generate new "words" with random characters
     while (wordsForChar.length < wordsPerChar) {
       const length = Math.floor((Math.random() * lengthRange) + minimumLength);
       wordsForChar.push(generateRandomWord(request.activeLesson, activeChar, length));

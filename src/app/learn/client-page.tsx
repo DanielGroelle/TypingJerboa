@@ -1,6 +1,6 @@
 "use client";
 
-import { ManualKeyboardMap, LanguageScripts } from "@/js/language-scripts";
+import { ManualKeyboardMap, LanguageScripts, LanguageVowels, LanguageScriptLiterals } from "@/js/language-scripts";
 import { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import SidebarComponent from "./SidebarComponent";
@@ -20,49 +20,66 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
   const [activeMode, setActiveMode] = useState<"new-characters" | "word-exercise">("new-characters");
   const [activeLesson, setActiveLesson] = useState<string | null>(null);
   const lessons = ManualKeyboardMap[languageScript];
-  const [finishedLessonsNewCharacters, setFinishedLessonsNewCharacters] = useState<Set<string>>(new Set([]));
-  const [finishedLessonsWordExercise, setFinishedLessonsWordExercise] = useState<Set<string>>(new Set([]));
+  const [finishedLessons, setFinishedLessons] = useState<Record<string, {newCharacters: string[], wordExercise: string[]}> | null>(null);
   const [lessonId, setLessonId] = useState<string | null>(null);
   
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const [unlockedWordExercise, setUnlockedWordExercise] = useState(false);
+
   const Z_FINISHED_LESSONS_RESPONSE = z.object({
-    finishedLessons: z.object({
-      newCharacters: z.array(
-        z.object({
-          lessonCharacters: z.string()
-        }
-      )),
-      wordExercise: z.array(
-        z.object({
-          lessonCharacters: z.string()
-        }
-      ))
-    })
+    finishedLessons: z.record(
+      z.string(), z.object({
+        newCharacters: z.array(z.string()),
+        wordExercise: z.array(z.string())
+      })
+    )
   });
   useEffect(()=>{
     void (async()=>{
       try {
-        //fetch finished lessons and assign them to finishedLessons state variable
+        //fetch finished lessons for each language script
         const response = Z_FINISHED_LESSONS_RESPONSE.parse(await (await fetch(`/api/lesson`, {
           method: "GET",
           mode: "cors",
           cache: "default"
         })).json());
-        const newCharactersFinishedLessons = response.finishedLessons.newCharacters.map((lesson)=>lesson.lessonCharacters);
-        setFinishedLessonsNewCharacters(new Set([...newCharactersFinishedLessons]));
-        const wordExerciseFinishedLessons = response.finishedLessons.wordExercise.map((lesson)=>lesson.lessonCharacters);
-        setFinishedLessonsWordExercise(new Set([...wordExerciseFinishedLessons]));
+
+        setFinishedLessons(response.finishedLessons);
+        determineWordExerciseUnlocked(response.finishedLessons);
       }
       catch(e: unknown) {
         throw "Fetch finishedLessons failed";
       }
     })();
+  }, []);
+
+  useEffect(()=>{
+    determineWordExerciseUnlocked();
 
     resetLesson();
     setActiveLesson(null);
   }, [languageScript]);
+  
+  function determineWordExerciseUnlocked(finishedLessonsInternal: Record<string, {newCharacters: string[], wordExercise: string[]}> | null = finishedLessons) {
+    const letterRegex = /\p{L}/u;
+    const finishedLetterLessons = new Set(finishedLessonsInternal?.[languageScript].newCharacters.filter(
+      letters => [...letters].some(letter => letterRegex.test(letter))
+    ).map(letters => letters.toLowerCase())) ?? new Set([]);
+
+    const finishedVowels = [...finishedLetterLessons].map(lesson => [...lesson]).flatMap(array => array).filter(
+      letter => LanguageVowels[languageScript as LanguageScriptLiterals].some(vowel => vowel === letter)
+    );
+
+    const minLetterLessons = 4;
+    const minVowels = 2;
+
+    const unlocked = finishedLetterLessons.size >= minLetterLessons && finishedVowels.length >= minVowels;
+
+    if (!unlocked) setActiveMode("new-characters");
+    setUnlockedWordExercise(unlocked);
+  }
 
   function assignLessonInfo(lessonText: string, startTime: Date | null, newLessonId: string | null) {
     setLessonText(lessonText);
@@ -132,11 +149,16 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
     })();
 
     if (activeLesson) {
+      const newFinishedLessons = {...finishedLessons};
       if (activeMode === "new-characters") {
-        setFinishedLessonsNewCharacters(new Set([...finishedLessonsNewCharacters, activeLesson]));
+        newFinishedLessons[languageScript].newCharacters.push(activeLesson);
+        setFinishedLessons(newFinishedLessons);
+        determineWordExerciseUnlocked(newFinishedLessons);
       }
       else {
-        setFinishedLessonsWordExercise(new Set([...finishedLessonsWordExercise, activeLesson]));
+        newFinishedLessons[languageScript].wordExercise.push(activeLesson);
+        setFinishedLessons(newFinishedLessons);
+        determineWordExerciseUnlocked(newFinishedLessons);
       }
     }
     resetLesson();
@@ -151,12 +173,16 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
     setSuccess(null);
   }
 
+  const selectedModeColor = "rgb(7 89 133)";
+
   return (
     <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       {/* script selection */}
       <div className="flex justify-end">
         Language Script:
-        <select name="script-select" id="script-select" value={languageScript} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>setLanguageScript(e.target.value)}>
+        <select name="script-select" id="script-select" value={languageScript} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=> {
+          setLanguageScript(e.target.value);
+        }}>
           Language Script
           {Object.values(LanguageScripts).map(({internal, display})=>(
             <option key={internal} value={internal}>{display}</option>
@@ -169,8 +195,8 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
           lessons={lessons}
           activeLesson={activeLesson}
           setActiveLesson={setActiveLesson}
-          finishedLessonsNewCharacters={finishedLessonsNewCharacters}
-          finishedLessonsWordExercise={finishedLessonsWordExercise}
+          finishedLessonsNewCharacters={new Set(finishedLessons?.[languageScript].newCharacters) ?? new Set([])}
+          finishedLessonsWordExercise={new Set(finishedLessons?.[languageScript].wordExercise) ?? new Set([])}
           resetLesson={resetLesson}
         />
         
@@ -187,18 +213,28 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
             <input type="button" className="border-solid border-white border rounded-lg p-2 mr-2" onClick={()=>{
               setActiveMode("new-characters");
               resetLesson();
-            }} style={{backgroundColor: (activeMode === "new-characters") ? "rgb(39 39 42)" : ""}} value="New Characters" />
-            {/*TODO: lock word exercise until enough letter new character lessons have been completed, especially for numbers and symbols*/}
-            <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
-              setActiveMode("word-exercise");
-              resetLesson();
-            }} style={{backgroundColor: (activeMode === "word-exercise") ? "rgb(39 39 42)" : ""}} value="Word Exercise" />
+            }} style={{backgroundColor: (activeMode === "new-characters") ? selectedModeColor : ""}} value="New Characters" />
+
+            {
+              /* conditionally allow Word Exercise as a mode if user has completed enough letter lessons and has enough vowels */
+              unlockedWordExercise ?
+              <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
+                setActiveMode("word-exercise");
+                resetLesson();
+              }} style={{backgroundColor: (activeMode === "word-exercise") ? selectedModeColor : ""}} value="Word Exercise" />
+              :
+              <input type="button" className="border-dashed border-gray-400 text-gray-500 border rounded-lg p-2" disabled={true}
+                style={{cursor: "not-allowed", backgroundColor: (activeMode === "word-exercise") ? selectedModeColor : ""}}
+                value="Word Exercise"
+              />
+            }
           </div>
           <br/>
+
           <p className="text-lg">Selected: {activeLesson?.split("").join(" ") ?? "None"}</p>
 
           {!startTime ? 
-            <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
+            <input type="button" className="border-solid border-white border-2 rounded-lg p-2" onClick={()=>{
               void (async ()=>await startLesson(assignLessonInfo, setError))();
             }} value="Begin Lesson" />
             :

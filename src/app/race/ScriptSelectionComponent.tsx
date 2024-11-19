@@ -70,7 +70,7 @@ export default function ScriptSelectionComponent({setRaceInfo, languageScript, s
             <option key={internal} value={internal}>{display}</option>
           ))}
         </select>
-        <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={() => {
+        <input type="button" className="border-solid border-white border-2 rounded-lg p-2" onClick={() => {
           void (async ()=>await startRace(languageScript, setRaceInfo, setError))();
         }} value="Start Race"/>
       </div>

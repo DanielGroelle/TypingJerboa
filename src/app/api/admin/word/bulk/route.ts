@@ -20,7 +20,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "LanguageScript does not exist"}, {status: 400});
   }
 
-  console.log(request.words.length)
   const response = await insertToWordTable(request.words, languageScriptId.id);
   if (response === null) {
     return NextResponse.json({error: "Word insertion failed"}, {status: 400});

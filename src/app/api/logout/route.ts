@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({message: "Login token not valid"}, {status: 400});
   }
 
-  const response = NextResponse.redirect(new URL("/", req.nextUrl.origin));
+  const response = new NextResponse();
   response.cookies.delete("loginToken");
   return response;
 }
