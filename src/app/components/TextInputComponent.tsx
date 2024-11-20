@@ -25,6 +25,12 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
   const [gameFinished, setGameFinished] = useState(false);
   const [selectionRange, setSelectionRange] = useState({start: 0, end: 0});
   const [mistakes, setMistakes] = useState(0);
+  const [caretPosition, setCaretPosition] = useState({left: 0, top: 0});
+
+  useEffect(() => {
+    //needs to be a reference to avoid closure keeping it as 0
+    window.addEventListener("resize", ()=>moveCaretPosition(userInputRef.current.length), true);
+  }, []);
 
   useEffect(() => {
     setGameFinished(false);
@@ -32,7 +38,7 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
 
   //sets the users cursor where it should be on every render
   const updateSelectionState = useCallback((node: HTMLTextAreaElement) => {
-    if (node !== null) {
+    if (node !== null && !gameFinished) {
       node.setSelectionRange(selectionRange.start, selectionRange.end);
     }
   }, [selectionRange, userInput]);
@@ -55,6 +61,7 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
       if (startTime && startTime.getTime() < new Date().getTime() && !gameFinished) {
         setUserInput(newUserInput);
         userInputRef.current = newUserInput;
+        moveCaretPosition(newUserInput.length);
       }
     }
   
@@ -94,7 +101,25 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
   
     //set newUserInputRef to be the converted value from the origin languageScript to desired languageScript
     newUserInputRef.current = newUserInput;
-    setSelectionRange({start: pos + 1, end: pos + 1});
+
+    if (!gameFinished) {
+      setSelectionRange({start: pos + 1, end: pos + 1});
+    }
+  }
+
+  function moveCaretPosition(newUserInputLength: number) {
+    const currentCharacter = document.getElementById(`char-${newUserInputLength - 1}`);
+    if (currentCharacter) {
+      const rect = currentCharacter.getBoundingClientRect();
+      setCaretPosition({left: rect.left + 5, top: rect.top - 3});
+    }
+    else {
+      const currentCharacter = document.getElementById(`char-0`);
+      if (currentCharacter) {
+        const rect = currentCharacter.getBoundingClientRect();
+        setCaretPosition({left: rect.left - 7, top: rect.top - 3});
+      }
+    }
   }
   
   //returns the appropriate class name based on if the current paragraph char matches the userInput char
@@ -111,18 +136,22 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
 
   return (
     <>
-    <div className="border-solid border-white border font-mono text-xl p-1 select-none" hidden={startTime === null} onContextMenu={handleParagraphContextMenu}>
-      {paragraphArray.map((character, i)=>{
-        return <span className={charStatus(userInput, i, paragraphArray)} key={i}>{character}</span>
-      })}
-
-      {//for inputed characters that exceed paragraph length
-      [...userInput.slice(paragraphArray.length)].map((_, i)=>{
-          return <span className="incorrect" key={i}>&nbsp;</span>
-      })}
+    <div className="absolute font-mono text-xl select-none" hidden={startTime === null} style={{left: caretPosition.left, top: caretPosition.top}}>
+      |
     </div>
 
-    <textarea id="main-text-input" className="text-black resize-none font-mono text-lg min-w-full p-1"
+    <div className="border-solid border-white border font-mono text-xl p-3 select-none whitespace-pre-wrap" hidden={startTime === null} onContextMenu={handleParagraphContextMenu}>
+      {paragraphArray.map((character, i)=>
+        <span className={charStatus(userInput, i, paragraphArray)} id={`char-${i}`} key={i}>{character}</span>
+      )}
+
+      {//for inputed characters that exceed paragraph length
+      [...userInput.slice(paragraphArray.length)].map((_, i)=>
+        <span className="incorrect" key={i}>&nbsp;</span>
+      )}
+    </div>
+      
+    <textarea id="main-text-input" className="text-black resize-none font-mono text-xl min-w-full p-1"
       hidden={startTime === null}
       placeholder="Type prompt here"
       autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck="false"
@@ -130,6 +159,7 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
       ref={updateSelectionState}
       onChange={handleChange} onKeyDown={handleKeyDown} onPaste={handlePaste} onContextMenu={handleTextAreaContextMenu}>
     </textarea>
+
     </>
   );
 }

@@ -27,6 +27,7 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
   const router = useRouter();
 
   const [raceParagraph, setRaceParagraph] = useState<ReturnedParagraph | null>(null);
+  const [raceParagraphArray, setRaceParagraphArray] = useState<string[]>([]);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [raceId, setRaceId] = useState<string | null>(null);
   const [languageScript, setLanguageScript] = useState(languageScriptPreference ?? Object.values(LanguageScripts)[0].internal);
@@ -40,9 +41,9 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
 
   const [WPM, setWPM] = useState(0);
 
-  const raceParagraphArray = [...raceParagraph?.text ?? ""];
-
   useEffect(()=>{
+    setRaceParagraphArray([...raceParagraph?.text ?? ""]);
+
     //on race start
     if (raceParagraphArray.length !== 0) {
       //focus on the text box

@@ -64,11 +64,9 @@ option {
 .empty {
   color: auto;
 }
-
 .correct {
   color: green;
 }
-
 .incorrect {
   color: red;
   background-color: darkred;
@@ -84,7 +82,6 @@ option {
   -webkit-transform: rotate(45deg); /* Chrome, Safari, Opera */
   transform: rotate(45deg);
 }
-
 .checkmark:before {
   content: "";
   position: absolute;
