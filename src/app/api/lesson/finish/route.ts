@@ -18,6 +18,13 @@ export async function POST(req: NextRequest) {
 
   //update the lesson with the endTime
   const lessonFinishResult = await prisma.lesson.update({
+    select: {
+      id: true,
+      lessonText: true,
+      mode: true,
+      startTime: true,
+      endTime: true
+    },
     where: {id: request.lessonId},
     data: {
       endTime: new Date(request.endTime)

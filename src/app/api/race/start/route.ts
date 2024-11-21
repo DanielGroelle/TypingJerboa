@@ -71,9 +71,5 @@ export async function POST(req: NextRequest) {
     }
   });
 
-  if (createResult === null) {
-    return NextResponse.json({error: "Race creation failed"}, {status: 400});
-  }
-
   return new NextResponse(JSON.stringify({startTime, paragraph: {text: chosenParagraph.text, author: chosenParagraph.author, source: chosenParagraph.source}, raceId: createResult.id}));
 }
