@@ -34,7 +34,12 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
 
   useEffect(() => {
     setGameFinished(false);
+    moveCaretPosition(userInput.length);
   }, [paragraphArray]);
+
+  useEffect(() => {
+    moveCaretPosition(userInput.length);
+  }, [startTime]);
 
   //sets the users cursor where it should be on every render
   const updateSelectionState = useCallback((node: HTMLTextAreaElement) => {
@@ -125,18 +130,14 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
   //returns the appropriate class name based on if the current paragraph char matches the userInput char
   //needs to take in the userInput string in case the state variable hasnt updated yet
   function charStatus(userInput: string, i: number, paragraphArray: string[]) {
-    if (userInput[i] === undefined) {
-      return "empty";
-    }
-    if (paragraphArray[i] !== userInput[i]) {
-      return "incorrect";
-    }
+    if (userInput[i] === undefined) return "empty";
+    if (paragraphArray[i] !== userInput[i]) return "incorrect";
     return "correct";
   }
 
   return (
     <>
-    <div className="absolute font-mono text-xl select-none" hidden={startTime === null} style={{left: caretPosition.left, top: caretPosition.top}}>
+    <div id="typing-caret" className="absolute font-mono text-xl select-none" hidden={startTime === null} style={{left: caretPosition.left, top: caretPosition.top}}>
       |
     </div>
 
