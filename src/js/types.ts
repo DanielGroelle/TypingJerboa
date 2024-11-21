@@ -112,12 +112,13 @@ export const Z_LESSON_REPORT = z.object({
 });
 export type LessonReport = z.infer<typeof Z_LESSON_REPORT>;
 
-export const Z_STATS = z.object({
+export const Z_LANGUAGESCRIPT_STATS = z.object({
   races: z.number(),
   avgWpm: z.number(),
   avgMistakes: z.number(),
   bestWpm: z.number(),
   bestParagraph: z.string().nullable(),
-  createdAt: z.string().nullable()
+  createdAt: z.string().nullable(),
+  lessons: z.number()
 });
-export type Stats = z.infer<typeof Z_STATS>;
+export type LanguageScriptStats = z.infer<typeof Z_LANGUAGESCRIPT_STATS>;

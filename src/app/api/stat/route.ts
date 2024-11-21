@@ -36,21 +36,35 @@ export async function GET(req: NextRequest) {
       endTime: {not: null}
     }
   });
-  if (fetchedFinishedRaces === null) {
-    return NextResponse.json({error: "No race stats found"}, {status: 404});
-  }
 
-  type Stats = {
+  const fetchedFinishedLessons = await prisma.lesson.findMany({
+    select: {
+      languageScript: true
+    },
+    orderBy: {
+      endTime: "desc"
+    },
+    where: {
+      OR: [
+        {userId: user?.id},
+        {sessionToken: sessionToken}
+      ],
+      endTime: {not: null}
+    }
+  })
+
+  type LanguageScriptStats = {
     races: number;
     avgWpm: number;
     avgMistakes: number;
     bestWpm: number;
     bestParagraph: string | null;
     createdAt: Date | null;
+    lessons: number;
   };
 
-  const languageScriptStats: {
-    languageScriptStats: Partial<Record<keyof typeof LanguageScripts, Stats>> & {all: Stats},
+  const userStats: {
+    languageScriptStats: Partial<Record<keyof typeof LanguageScripts, LanguageScriptStats>> & {all: LanguageScriptStats},
     siteStats: {visitors: number, users: number, lessonsFinished: number, racesFinished: number}
   } = {
     languageScriptStats: {
@@ -60,7 +74,8 @@ export async function GET(req: NextRequest) {
         avgMistakes: 0,
         bestWpm: 0,
         bestParagraph: null,
-        createdAt: null
+        createdAt: null,
+        lessons: 0
       }
     },
     siteStats: {
@@ -72,13 +87,16 @@ export async function GET(req: NextRequest) {
   };
 
   //iterate over languageScripts to compute stat values for the respective languageScript
-  for (const value of [...Object.values(LanguageScripts), {internal: "all"} as const]) {
-    const filteredRaces = fetchedFinishedRaces.filter(race => value.internal === "all" || race.paragraph.languageScript.languageScript === value.internal);
+  for (const languageScript of [...Object.values(LanguageScripts), {internal: "all"} as const]) {
+    const filteredRaces = fetchedFinishedRaces.filter(race => languageScript.internal === "all" || race.paragraph.languageScript.languageScript === languageScript.internal);
     const raceCount = filteredRaces.length;
+
+    const filteredLessons = fetchedFinishedLessons.filter(lesson => languageScript.internal === "all" || lesson.languageScript.languageScript === languageScript.internal);
+    const lessonCount = filteredLessons.length;
 
     //in case user has no finished races, return 0 for everything
     if (raceCount === 0) {
-      languageScriptStats.languageScriptStats[value.internal] = {races: 0, avgWpm: 0, avgMistakes: 0, bestWpm: 0, bestParagraph: null, createdAt};
+      userStats.languageScriptStats[languageScript.internal] = {races: 0, avgWpm: 0, avgMistakes: 0, bestWpm: 0, bestParagraph: null, createdAt, lessons: lessonCount};
       continue;
     }
 
@@ -114,24 +132,25 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    languageScriptStats.languageScriptStats[value.internal] = {
+    userStats.languageScriptStats[languageScript.internal] = {
       races: raceCount,
       avgWpm,
       avgMistakes,
       bestWpm,
       bestParagraph,
-      createdAt
+      createdAt,
+      lessons: lessonCount
     };
   }
 
-  languageScriptStats.siteStats.users = await prisma.user.count();
-  languageScriptStats.siteStats.visitors = await prisma.visitor.count();
-  languageScriptStats.siteStats.lessonsFinished = await prisma.lesson.count({
+  userStats.siteStats.users = await prisma.user.count();
+  userStats.siteStats.visitors = await prisma.visitor.count();
+  userStats.siteStats.lessonsFinished = await prisma.lesson.count({
     where: {NOT: {endTime: null}}
   });
-  languageScriptStats.siteStats.racesFinished = await prisma.race.count({
+  userStats.siteStats.racesFinished = await prisma.race.count({
     where: {NOT: {endTime: null}}
   });
 
-  return new NextResponse(JSON.stringify(languageScriptStats));
+  return new NextResponse(JSON.stringify(userStats));
 }

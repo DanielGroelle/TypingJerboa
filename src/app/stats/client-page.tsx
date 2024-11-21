@@ -1,12 +1,12 @@
 "use client";
 
 import { LanguageScripts } from "@/js/language-scripts";
-import { Z_STATS } from "@/js/types";
+import { Z_LANGUAGESCRIPT_STATS } from "@/js/types";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 
 const Z_RESPONSE = z.object({
-  languageScriptStats: z.record(z.string(), Z_STATS),
+  languageScriptStats: z.record(z.string(), Z_LANGUAGESCRIPT_STATS),
   siteStats: z.object({
     users: z.number(),
     visitors: z.number(),
@@ -14,7 +14,6 @@ const Z_RESPONSE = z.object({
     racesFinished: z.number()
   })
 });
-
 async function getStats() {
   let response;
   try {
@@ -60,7 +59,8 @@ export default function ClientStats() {
           <div>
             <h1>User Stats</h1>
             <br/>
-            <p className="text-lg">Races: {stats?.languageScriptStats[languageScript]?.races}</p>
+            <p className="text-lg">Completed Lessons: {stats?.languageScriptStats[languageScript]?.lessons}</p>
+            <p className="text-lg">Completed Races: {stats?.languageScriptStats[languageScript]?.races}</p>
             <p className="text-lg">Average WPM: {stats?.languageScriptStats[languageScript]?.avgWpm.toFixed(1)}<span className="ml-1 text-neutral-400 underline" title="From up to the last 50 races">?</span></p>
             <p className="text-lg">Average Mistakes: {stats?.languageScriptStats[languageScript]?.avgMistakes.toFixed(1)}<span className="ml-1 text-neutral-400 underline" title="From up to the last 50 races">?</span></p>
             <p className="text-lg">
