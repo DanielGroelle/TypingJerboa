@@ -76,8 +76,8 @@ export const Z_PARAGRAPH_REPORT = z.object({
   paragraph: z.object({
     id: z.number(),
     text: z.string(),
-    author: z.string(),
-    source: z.string()
+    author: z.string().nullable(),
+    source: z.string().nullable()
   }).nullable(),
   paragraphText: z.string(),
   user: z.object({

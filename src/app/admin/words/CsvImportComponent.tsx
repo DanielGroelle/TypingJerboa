@@ -4,6 +4,7 @@ import { Word, Z_WORD } from "@/js/types";
 import { z } from "zod";
 import Papa from "papaparse";
 
+//TODO: fix issue where everything that existed before import, is duplicated on import. also check if issue is in paragraph csv import
 function handleCsvSelect(e: ChangeEvent<HTMLInputElement>) {
   //dont allow upload of files other than csv
   if (e) {

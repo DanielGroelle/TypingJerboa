@@ -143,7 +143,7 @@ export default function ClientAdminLessonReports() {
   //TODO: have some way to delete lessons or go to /admin/lessons page filtered on the specific lesson to handle the report
 
   return (
-    <div>
+    <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       {filterOptionsComponent}
       
       <ConfirmationComponent confirmation={confirmation} setConfirmation={setConfirmation} />
@@ -153,28 +153,30 @@ export default function ClientAdminLessonReports() {
         <PageSelectComponent itemsLength={refFilteredReports.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={reportsPerPage} />
       </div>
       
-      {refFilteredReports.items.slice(viewPage * reportsPerPage - reportsPerPage, viewPage * reportsPerPage).map(report =>
-        (<ItemCardComponent
-          item={report}
-          itemFields={{
-            "id": {getter: (report: LessonReport) => report.id, editType: null, options: null},
-            "lessonId": {getter: (report: LessonReport) => report.lesson?.id ?? null, editType: null, options: null},
-            "lessonCharacters": {getter: (report: LessonReport) => report.lesson?.lessonCharacters ?? null, editType: null, options: null},
-            "lessonText": {getter: (report: LessonReport) => report.lessonText, editType: null, options: null},
-            "user": {getter: (report: LessonReport) => report.user ? `${String(report.user?.username)} - ${String(report.user?.id)}` : null, editType: null, options: null},
-            "session": {getter: (report: LessonReport) => report.session?.token ? `${String(report.session?.token)}` : null, editType: null, options: null},
-            "resolved": {getter: (report: LessonReport) => String(report.resolved), editType: "checkbox", options: null},
-            "createdAt": {getter: (report: LessonReport) => report.createdAt, editType: null, options: null},
-          }}
-          editParams={{
-            items: reports,
-            setItems: setReports,
-            saveItem: handleSave
-          }}
-          deleteItem={handleDelete}
-          key={report.id}
-        />)
-      )}
+      <div className="flex flex-col overflow-y-auto">
+        {refFilteredReports.items.slice(viewPage * reportsPerPage - reportsPerPage, viewPage * reportsPerPage).map(report =>
+          (<ItemCardComponent
+            item={report}
+            itemFields={{
+              "id": {getter: (report: LessonReport) => report.id, editType: null, options: null},
+              "lessonId": {getter: (report: LessonReport) => report.lesson?.id ?? null, editType: null, options: null},
+              "lessonCharacters": {getter: (report: LessonReport) => report.lesson?.lessonCharacters ?? null, editType: null, options: null},
+              "lessonText": {getter: (report: LessonReport) => report.lessonText, editType: null, options: null},
+              "user": {getter: (report: LessonReport) => report.user ? `${String(report.user?.username)} - ${String(report.user?.id)}` : null, editType: null, options: null},
+              "session": {getter: (report: LessonReport) => report.session?.token ? `${String(report.session?.token)}` : null, editType: null, options: null},
+              "resolved": {getter: (report: LessonReport) => String(report.resolved), editType: "checkbox", options: null},
+              "createdAt": {getter: (report: LessonReport) => report.createdAt, editType: null, options: null},
+            }}
+            editParams={{
+              items: reports,
+              setItems: setReports,
+              saveItem: handleSave
+            }}
+            deleteItem={handleDelete}
+            key={report.id}
+          />)
+        )}
+      </div>
       {refFilteredReports.items.length === 0 ? "No reports found" : ""}
     </div>
   );

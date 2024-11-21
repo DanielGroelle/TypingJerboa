@@ -44,7 +44,7 @@ export default function ClientNews({AdminLink}: {AdminLink: React.ReactElement |
   return (
     <div>
       {AdminLink}
-      <h1>Posts</h1>
+      <h1>News Posts</h1>
       {newsPosts.map((newsPost)=> 
         <div className="m-6" key={newsPost.id}>
           <h2 className="text-xl underline">{newsPost.title}</h2>

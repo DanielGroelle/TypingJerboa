@@ -142,7 +142,7 @@ export default function ClientAdminParagraphReports() {
   //TODO: have some way to delete paragraphs or go to /admin/paragraphs page filtered on the specific paragraph to handle the report
 
   return (
-    <div>
+    <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       {filterOptionsComponent}
 
       <ConfirmationComponent confirmation={confirmation} setConfirmation={setConfirmation} />
@@ -152,29 +152,31 @@ export default function ClientAdminParagraphReports() {
         <PageSelectComponent itemsLength={refFilteredReports.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={reportsPerPage} />
       </div>
 
-      {refFilteredReports.items.slice(viewPage * reportsPerPage - reportsPerPage, viewPage * reportsPerPage).map(report =>
-        (<ItemCardComponent
-          item={report}
-          itemFields={{
-            "id": {getter: (report: ParagraphReport) => report.id, editType: null, options: null},
-            "paragraphId": {getter: (report: ParagraphReport) => report.paragraph?.id ?? null, editType: null, options: null},
-            "paragraphText": {getter: (report: ParagraphReport) => report.paragraphText, editType: null, options: null},
-            "paragraphAuthor": {getter: (report: ParagraphReport) => report.paragraph?.author ?? null, editType: null, options: null},
-            "paragraphSource": {getter: (report: ParagraphReport) => report.paragraph?.source ?? null, editType: null, options: null},
-            "user": {getter: (report: ParagraphReport) => report.user ? `${String(report.user?.username)} - ${String(report.user?.id)}` : null, editType: null, options: null},
-            "session": {getter: (report: ParagraphReport) => report.session?.token ? `${String(report.session?.token)}` : null, editType: null, options: null},
-            "resolved": {getter: (report: ParagraphReport) => String(report.resolved), editType: "checkbox", options: null},
-            "createdAt": {getter: (report: ParagraphReport) => report.createdAt, editType: null, options: null},
-          }}
-          editParams={{
-            items: reports,
-            setItems: setReports,
-            saveItem: handleSave
-          }}
-          deleteItem={handleDelete}
-          key={report.id}
-        />)
-      )}
+      <div className="flex flex-col overflow-y-auto">
+        {refFilteredReports.items.slice(viewPage * reportsPerPage - reportsPerPage, viewPage * reportsPerPage).map(report =>
+          (<ItemCardComponent
+            item={report}
+            itemFields={{
+              "id": {getter: (report: ParagraphReport) => report.id, editType: null, options: null},
+              "paragraphId": {getter: (report: ParagraphReport) => report.paragraph?.id ?? null, editType: null, options: null},
+              "paragraphText": {getter: (report: ParagraphReport) => report.paragraphText, editType: null, options: null},
+              "paragraphAuthor": {getter: (report: ParagraphReport) => report.paragraph?.author ?? null, editType: null, options: null},
+              "paragraphSource": {getter: (report: ParagraphReport) => report.paragraph?.source ?? null, editType: null, options: null},
+              "user": {getter: (report: ParagraphReport) => report.user ? `${String(report.user?.username)} - ${String(report.user?.id)}` : null, editType: null, options: null},
+              "session": {getter: (report: ParagraphReport) => report.session?.token ? `${String(report.session?.token)}` : null, editType: null, options: null},
+              "resolved": {getter: (report: ParagraphReport) => String(report.resolved), editType: "checkbox", options: null},
+              "createdAt": {getter: (report: ParagraphReport) => report.createdAt, editType: null, options: null},
+            }}
+            editParams={{
+              items: reports,
+              setItems: setReports,
+              saveItem: handleSave
+            }}
+            deleteItem={handleDelete}
+            key={report.id}
+          />)
+        )}
+      </div>
       {refFilteredReports.items.length === 0 ? "No reports found" : ""}
     </div>
   );

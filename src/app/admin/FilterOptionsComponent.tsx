@@ -129,7 +129,7 @@ export default function FilterOptionsComponent<T>({
         }
         <div>
           Search:
-          <input id="item-search" type="text" onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+          <input id="item-search" className="mx-1" type="text" onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
             setSearchText(e.target.value);
           }}/>
         </div>
