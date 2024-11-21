@@ -1,5 +1,7 @@
 # TypingJerboa
 
+[TypingJerboa.com](https://typingjerboa.com/)
+
 # Building
 
 Docker is required to be installed in order for building to succeed.
@@ -23,3 +25,6 @@ The Learn section focuses on teaching a user where the characters for the select
 The Race section puts a users current typing ability to the test by requiring them to type out an entire paragraph in the selected language as quickly as possible. The words per minute and mistakes are displayed at the end of the race.
 
 If you&apos;d like to keep track of your progress, it is possible and encouraged to register a completely free account, with no email necessary.
+
+# Images
+

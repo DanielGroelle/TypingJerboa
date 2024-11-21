@@ -2,7 +2,7 @@
 
 import { LanguageScripts } from "@/js/language-scripts";
 import { z } from "zod";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 
 const Z_RESPONSE = z.object({
   preferences: z.object({
@@ -88,9 +88,14 @@ function deleteAccount(setError: (error: string | null) => void, setSuccess: (su
 const Z_PASSWORD_RESPONSE = z.object({
   error: z.string().optional()
 });
-function updatePassword(event: FormEvent<HTMLFormElement>, currentPassword: string, newPassword: string, confirmNewPassword: string, setError: (error: string | null) => void, setSuccess: (success: string | null) => void) {
-  event.preventDefault();
-
+function updatePassword(
+  currentPassword: string,
+  newPassword: string,
+  confirmNewPassword: string,
+  setError: (error: string | null) => void,
+  setSuccess: (success: string | null) => void,
+  setPasswordUpdated: (passwordUpdated: boolean) => void
+) {
   if (confirmNewPassword !== newPassword) {
     setError("Passwords do not match!");
     setSuccess(null);
@@ -110,6 +115,7 @@ function updatePassword(event: FormEvent<HTMLFormElement>, currentPassword: stri
 
     const tryResponse = Z_PASSWORD_RESPONSE.safeParse(await response.json());
     
+    setPasswordUpdated(false);
     if (!tryResponse.success) {
       setError("Unknown error, try again later");
       setSuccess(null);
@@ -136,6 +142,8 @@ export default function ClientAccount({languageScriptPreference}: {languageScrip
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const [passwordUpdated, setPasswordUpdated] = useState(false);
 
   return (
     <div className="flex flex-col h-full justify-between">
@@ -187,7 +195,7 @@ export default function ClientAccount({languageScriptPreference}: {languageScrip
 
         <h2 className="text-lg">Account Actions</h2>
         <div className="flex flex-col w-fit sm:w-1/2">
-          <form onSubmit={e => updatePassword(e, currentPassword, newPassword, confirmNewPassword, setError, setSuccess)}>
+          <form>
             <div className="sm:flex mb-1">
               <p style={{width: "9.5rem"}}>Current Password</p>
               <input className="text-black p-1" type="password" id="current-password" required value={currentPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setCurrentPassword(e.target.value)} />
@@ -200,7 +208,10 @@ export default function ClientAccount({languageScriptPreference}: {languageScrip
               <p style={{width: "9.5rem"}}>Confirm New Password</p>
               <input className="text-black p-1" type="password" id="confirm-new-password" required value={confirmNewPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setConfirmNewPassword(e.target.value)} />
             </div>
-            <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2 my-1" value="Update Password" />
+            <input type="button" className="border-solid border-green-700 border-2 rounded-lg p-2 my-1" disabled={passwordUpdated} onClick={()=>{
+              setPasswordUpdated(true);
+              updatePassword(currentPassword, newPassword, confirmNewPassword, setError, setSuccess, setPasswordUpdated);
+            }} value="Update Password" />
           </form>
 
           <div className="w-fit sm:w-1/2">
