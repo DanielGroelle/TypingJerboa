@@ -207,20 +207,21 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
           finishedLessonsNewCharacters={new Set(finishedLessons?.[languageScript].newCharacters) ?? new Set([])}
           finishedLessonsWordExercise={new Set(finishedLessons?.[languageScript].wordExercise) ?? new Set([])}
           resetLesson={resetLesson}
+          startTime={startTime}
         />
         
         {/* center area */}
         <div className="m-4">
-          <div className="border-solid border-red-500 border rounded-lg w-fit mb-1 p-2" hidden={typeof error !== "string"}>
+          <div className="border-solid border-red-500 border rounded-lg mb-1 p-2" hidden={typeof error !== "string"}>
             {error}
           </div>
-          <div className="border-solid border-green-500 border rounded-lg w-fit mb-1 p-2" hidden={typeof success !== "string"}>
+          <div className="border-solid border-green-500 border rounded-lg mb-1 p-2" hidden={typeof success !== "string"}>
             {success}
           </div>
 
-          <div className="flex">
+          <div className="sm:flex">
             <div data-tooltip="Learn where the characters are on the keyboard">
-              <input type="button" className="border-solid border-white border rounded-lg p-2 mr-2" onClick={()=>{
+              <input type="button" className="border-solid border-white border rounded-lg p-2 sm:mr-2 mb-1 sm:mb-0" onClick={()=>{
                 setActiveMode("new-characters");
                 resetLesson();
               }} style={{backgroundColor: (activeMode === "new-characters") ? selectedModeColor : ""}} value="New Characters" />
@@ -256,14 +257,16 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
           }
 
           <TextInputComponent paragraphArray={[...lessonText]} startTime={startTime} languageScript={languageScript} endGame={endLesson} userInput={userInput} setUserInput={setUserInput} userInputRef={userInputRef} newUserInputRef={newUserInputRef} />
-          
-          <div>
-            {
-              lessonId ?
+
+          <div className="flex">
+            {lessonId ?
+              <>
+              <input type="button" className="border-solid border-red-700 border-2 rounded-lg my-1 mr-1 p-2" onClick={()=>resetLesson()} value="End Lesson" />
               <input type="button" className="border-solid border-red-700 border-2 rounded-lg my-1 p-2" disabled={lessonReported} onClick={()=>{
                 setLessonReported(true);
                 reportLesson(lessonId, setError, setSuccess);
               }} value="Report Lesson" />
+              </>
               :
               ""
             }

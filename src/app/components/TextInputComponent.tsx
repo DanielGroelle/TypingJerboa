@@ -113,6 +113,7 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
   }
 
   function moveCaretPosition(newUserInputLength: number) {
+    //TODO: make this factor in scroll position
     const currentCharacter = document.getElementById(`char-${newUserInputLength - 1}`);
     if (currentCharacter) {
       const rect = currentCharacter.getBoundingClientRect();

@@ -109,12 +109,12 @@ export default function ClientRaceFinish() {
       <p className="text-lg">Language Script: {raceData.paragraph.languageScript !== null ? LanguageScripts[raceData.paragraph.languageScript].display : ""}</p>
       <br/>
 
-      <div className="flex">
+      <div className="flex flex-col sm:flex-row">
         <NavigationComponent className="border-solid border-2 border-white rounded-lg p-2" name="Race again" route="/race" />
-        <input type="button" className="border-solid border-green-600 border-2 rounded-lg ml-1 p-2" onClick={()=>{
+        <input type="button" className="border-solid border-green-600 border-2 rounded-lg mt-1 sm:mt-0 sm:ml-1 p-2" onClick={()=>{
           void navigator.clipboard.writeText(window.location.href); setSuccess("Copied share link"); setError(null)
         }} value="Copy Share Link" />
-        <input type="button" className="border-solid border-red-700 border-2 rounded-lg ml-1 p-2" disabled={raceReported} onClick={()=>{
+        <input type="button" className="border-solid border-red-700 border-2 rounded-lg mt-1 sm:mt-0 sm:ml-1 p-2" disabled={raceReported} onClick={()=>{
           setRaceReported(true);
           reportParagraph(id, setError, setSuccess);
         }} value="Report Paragraph" />

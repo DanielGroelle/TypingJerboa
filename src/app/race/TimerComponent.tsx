@@ -19,9 +19,9 @@ export default function TimerComponent({startTime}: {startTime: Date | null}) {
   }, [startTime]);
 
   return (
-    <div className="flex w-1/2">
+    <div className="sm:flex w-1/2">
       <div className="flex text-4xl w-32 items-center m-2">
-        <span className="h-fit p-6">{timer.toFixed(2)}</span>
+        <span className="h-fit sm:p-6">{timer.toFixed(2)}</span>
       </div>
 
       <div className="flex border-solid border-white border rounded-xl w-fit items-center m-2">

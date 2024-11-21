@@ -1,12 +1,13 @@
 import { ManualKeyboardMapping } from "@/js/language-scripts";
 
-export default function SidebarComponent({lessons, activeLesson, setActiveLesson, finishedLessonsNewCharacters, finishedLessonsWordExercise, resetLesson}: {
+export default function SidebarComponent({lessons, activeLesson, setActiveLesson, finishedLessonsNewCharacters, finishedLessonsWordExercise, resetLesson, startTime}: {
   lessons: ManualKeyboardMapping,
   activeLesson: string | null,
   setActiveLesson: (activeLesson: string | null)=>void,
   finishedLessonsNewCharacters: Set<string>,
   finishedLessonsWordExercise: Set<string>,
-  resetLesson: ()=>void
+  resetLesson: ()=>void,
+  startTime: Date | null
 }) {
   function displaySidebarCharsByType(lessonType: keyof ManualKeyboardMapping) {
     const lessonsList = [] as string[];
@@ -48,7 +49,7 @@ export default function SidebarComponent({lessons, activeLesson, setActiveLesson
   }
 
   return (
-    <div className="flex flex-col overflow-y-hidden min-w-fit">
+    <div className={"flex flex-col overflow-y-hidden min-w-fit" + (startTime ? " sm-hidden" : "")}>
       <h1>Lessons</h1>
       <div className="flex flex-col border-solid border-r-2 rounded border-white p-2 overflow-y-scroll">
         <h4><strong>Letters</strong></h4>

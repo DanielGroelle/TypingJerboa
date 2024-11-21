@@ -107,12 +107,12 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
 
   return (
     <div>
-      <div className="flex flex-col m-10 w-full">
+      <div className="flex flex-col sm:m-10 w-full">
         <div className="flex w-full justify-between">
           {!startTime ? <ScriptSelectionComponent setRaceInfo={setRaceInfo} languageScript={languageScript} setLanguageScript={setLanguageScript} /> : ""}
           {startTime ? <TimerComponent startTime={startTime} /> : ""}
         </div>
-        <div className="w-1/2">
+        <div className="sm:w-1/2">
           <div>
             {/*if the race is started show wpm*/}
             {startTime !== null ? <h2 className="text-xl">{WPM.toFixed(1)}wpm</h2> : ""}

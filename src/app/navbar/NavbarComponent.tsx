@@ -12,14 +12,14 @@ export default async function NavbarComponent() {
 
   return (
     <nav className="flex border-solid border-b-2 border-white">
-      <div className="flex-2 px-4 py-2 text-center border-solid border-r-2 border-white">
+      <div className="flex-2 px-4 py-2 text-center border-solid border-r-0 sm:border-r-2 border-white">
         <Link href="/">TypingJerboa</Link>
       </div>
 
       <ClientNavbarComponent />
 
-      <div className="flex-grow px-4 py-2 border-solid border-r-2 border-white">
-      </div>
+      <div className="flex-grow sm:px-4 sm:py-2"></div>
+
       {await (async ()=>{
         //if user logged in
         if (loginToken !== undefined) {

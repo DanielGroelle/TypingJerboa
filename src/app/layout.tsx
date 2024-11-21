@@ -21,7 +21,7 @@ export default function RootLayout({
       <body className={`flex flex-col h-full ${inter.className}`}>
         <NavbarComponent />
 
-        <div className="grow py-4 sm:px-16 px-8">
+        <div className="grow py-4 sm:px-16 px-8 layout">
           {children}
         </div>
 

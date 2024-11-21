@@ -20,6 +20,17 @@ h1 {
   }
 }
 
+@media (max-width: 480px) {
+  .layout {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .sm-hidden {
+    display: none;
+  }
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -122,7 +133,7 @@ option {
   100% {color: rgb(255, 0,   0  )}
 }
 
-[data-tooltip]:hover::after {
+[data-tooltip]:hover::after, [data-tooltip]:active::after {
   display: block;
   position: absolute;
   height: fit-content;
@@ -137,4 +148,5 @@ option {
   border: 1px solid white;
   background: black;
   padding: .25em;
+  z-index: 50;
 }
