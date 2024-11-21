@@ -186,24 +186,24 @@ export default function ClientAccount({languageScriptPreference}: {languageScrip
         </div>
 
         <h2 className="text-lg">Account Actions</h2>
-        <div className="flex flex-col w-1/2">
+        <div className="flex flex-col w-fit sm:w-1/2">
           <form onSubmit={e => updatePassword(e, currentPassword, newPassword, confirmNewPassword, setError, setSuccess)}>
-            <div className="flex mb-1">
+            <div className="sm:flex mb-1">
               <p style={{width: "9.5rem"}}>Current Password</p>
               <input className="text-black p-1" type="password" id="current-password" required value={currentPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setCurrentPassword(e.target.value)} />
             </div>
-            <div className="flex mb-1">
+            <div className="sm:flex mb-1">
               <p style={{width: "9.5rem"}}>New Password</p>
               <input className="text-black p-1" type="password" id="new-password" required value={newPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setNewPassword(e.target.value)} />
             </div>
-            <div className="flex mb-1">
+            <div className="sm:flex mb-1">
               <p style={{width: "9.5rem"}}>Confirm New Password</p>
               <input className="text-black p-1" type="password" id="confirm-new-password" required value={confirmNewPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setConfirmNewPassword(e.target.value)} />
             </div>
             <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2 my-1" value="Update Password" />
           </form>
 
-          <div className="w-1/2">
+          <div className="w-fit sm:w-1/2">
             <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1 w-full" onClick={()=>setConfirmation("clearLessons")} value="Clear Lesson Data" />
             <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1 w-full" onClick={()=>setConfirmation("clearRaces")} value="Clear Race Data" />
             <input type="button" className="border-solid border-red-700 border-2 rounded-lg p-2 my-1 w-full" onClick={()=>setConfirmation("deleteAccount")} value="Delete Account" />
