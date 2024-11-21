@@ -50,6 +50,12 @@ export default function ClientRaceFinish() {
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [raceReported, setRaceReported] = useState(false);
+
+  useEffect(()=>{
+    setRaceReported(false);
+  }, [error]);
+
   useEffect(()=>{
     void fetch(`/api/race`, {
       method: "POST",
@@ -105,9 +111,15 @@ export default function ClientRaceFinish() {
 
       <div className="flex">
         <NavigationComponent className="border-solid border-2 border-white rounded-lg p-2" name="Race again" route="/race" />
-        <input type="button" className="border-solid border-green-600 border-2 rounded-lg ml-1 p-2" onClick={()=>{void navigator.clipboard.writeText(window.location.href); setSuccess("Copied share link"); setError(null)}} value="Copy Share Link" />
-        <input type="button" className="border-solid border-red-700 border-2 rounded-lg ml-1 p-2" onClick={()=>reportParagraph(id, setError, setSuccess)} value="Report Paragraph" />
+        <input type="button" className="border-solid border-green-600 border-2 rounded-lg ml-1 p-2" onClick={()=>{
+          void navigator.clipboard.writeText(window.location.href); setSuccess("Copied share link"); setError(null)
+        }} value="Copy Share Link" />
+        <input type="button" className="border-solid border-red-700 border-2 rounded-lg ml-1 p-2" disabled={raceReported} onClick={()=>{
+          setRaceReported(true);
+          reportParagraph(id, setError, setSuccess);
+        }} value="Report Paragraph" />
       </div>
+
       <div className="border-solid border-red-500 border rounded-lg w-fit mt-2 p-2" hidden={typeof error !== "string"}>
         {error}
       </div>

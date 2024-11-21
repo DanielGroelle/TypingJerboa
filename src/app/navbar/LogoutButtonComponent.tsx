@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 function handleLogout() {
   void fetch(`/api/logout`, {
     method: "GET",
@@ -11,7 +13,12 @@ function handleLogout() {
 }
 
 export default function LogoutButtonComponent() {
+  const [loggingOut, setLoggingOut] = useState(false);
+
   return (
-    <input type="button" onClick={handleLogout} value="Logout" />
+    <input type="button" disabled={loggingOut} onClick={()=>{
+      setLoggingOut(true);
+      handleLogout();
+    }} value="Logout" />
   );
 }

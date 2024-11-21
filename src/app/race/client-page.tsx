@@ -41,6 +41,12 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
 
   const [WPM, setWPM] = useState(0);
 
+  const [raceReported, setRaceReported] = useState(false);
+
+  useEffect(()=>{
+    setRaceReported(false);
+  }, [error]);
+
   useEffect(()=>{
     setRaceParagraphArray([...raceParagraph?.text ?? ""]);
 
@@ -118,7 +124,10 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
         <div>
           {
             raceId ?
-            <input type="button" className="border-solid border-red-700 border-2 rounded-lg my-1 p-2" onClick={()=>reportParagraph(raceId, setError, setSuccess)} value="Report Paragraph" />
+            <input type="button" className="border-solid border-red-700 border-2 rounded-lg my-1 p-2" disabled={raceReported} onClick={()=>{
+              setRaceReported(true);
+              reportParagraph(raceId, setError, setSuccess);
+            }} value="Report Paragraph" />
             :
             ""
           }

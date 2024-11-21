@@ -27,6 +27,8 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
   const [success, setSuccess] = useState<string | null>(null);
 
   const [unlockedWordExercise, setUnlockedWordExercise] = useState(false);
+  const [lessonStarted, setLessonStarted] = useState(false);
+  const [lessonReported, setLessonReported] = useState(false);
 
   const Z_FINISHED_LESSONS_RESPONSE = z.object({
     finishedLessons: z.record(
@@ -54,6 +56,11 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
       }
     })();
   }, []);
+
+  useEffect(()=>{
+    setLessonStarted(false);
+    setLessonReported(false);
+  }, [error]);
 
   useEffect(()=>{
     determineWordExerciseUnlocked();
@@ -171,6 +178,8 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
     setUserInput("");
     setError(null);
     setSuccess(null);
+    setLessonStarted(false);
+    setLessonReported(false);
   }
 
   const selectedModeColor = "rgb(7 89 133)";
@@ -234,7 +243,8 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
           <p className="text-lg">Selected: {activeLesson?.split("").join(" ") ?? "None"}</p>
 
           {!startTime ? 
-            <input type="button" className="border-solid border-white border-2 rounded-lg p-2" onClick={()=>{
+            <input type="button" className="border-solid border-white border-2 rounded-lg p-2" disabled={lessonStarted} onClick={()=>{
+              setLessonStarted(true);
               void (async ()=>await startLesson(assignLessonInfo, setError))();
             }} value="Begin Lesson" />
             :
@@ -246,7 +256,10 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
           <div>
             {
               lessonId ?
-              <input type="button" className="border-solid border-red-700 border-2 rounded-lg my-1 p-2" onClick={()=>reportLesson(lessonId, setError, setSuccess)} value="Report Lesson" />
+              <input type="button" className="border-solid border-red-700 border-2 rounded-lg my-1 p-2" disabled={lessonReported} onClick={()=>{
+                setLessonReported(true);
+                reportLesson(lessonId, setError, setSuccess);
+              }} value="Report Lesson" />
               :
               ""
             }

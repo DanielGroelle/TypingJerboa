@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { LanguageScripts } from "@/js/language-scripts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ReturnedParagraph } from "./client-page";
 
 const Z_RESPONSE = z.object({
@@ -56,6 +56,11 @@ export default function ScriptSelectionComponent({setRaceInfo, languageScript, s
   setLanguageScript: (languageScript: string) => void
 }) {
   const [error, setError] = useState<string | null>(null);
+  const [raceStarted, setRaceStarted] = useState(false);
+
+  useEffect(()=>{
+    setRaceStarted(false);
+  }, [error]);
 
   return (
     <div>
@@ -70,7 +75,8 @@ export default function ScriptSelectionComponent({setRaceInfo, languageScript, s
             <option key={internal} value={internal}>{display}</option>
           ))}
         </select>
-        <input type="button" className="border-solid border-white border-2 rounded-lg p-2" onClick={() => {
+        <input type="button" className="border-solid border-white border-2 rounded-lg p-2" disabled={raceStarted} onClick={() => {
+          setRaceStarted(true);
           void (async ()=>await startRace(languageScript, setRaceInfo, setError))();
         }} value="Start Race"/>
       </div>
