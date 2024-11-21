@@ -218,25 +218,29 @@ export default function ClientLearn({languageScriptPreference}: {languageScriptP
             {success}
           </div>
 
-          <div>
-            <input type="button" className="border-solid border-white border rounded-lg p-2 mr-2" onClick={()=>{
-              setActiveMode("new-characters");
-              resetLesson();
-            }} style={{backgroundColor: (activeMode === "new-characters") ? selectedModeColor : ""}} value="New Characters" />
-
-            {
-              /* conditionally allow Word Exercise as a mode if user has completed enough letter lessons and has enough vowels */
-              unlockedWordExercise ?
-              <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
-                setActiveMode("word-exercise");
+          <div className="flex">
+            <div data-tooltip="Learn where the characters are on the keyboard">
+              <input type="button" className="border-solid border-white border rounded-lg p-2 mr-2" onClick={()=>{
+                setActiveMode("new-characters");
                 resetLesson();
-              }} style={{backgroundColor: (activeMode === "word-exercise") ? selectedModeColor : ""}} value="Word Exercise" />
-              :
-              <input type="button" className="border-dashed border-gray-400 text-gray-500 border rounded-lg p-2" disabled={true}
-                style={{cursor: "not-allowed", backgroundColor: (activeMode === "word-exercise") ? selectedModeColor : ""}}
-                value="Word Exercise"
-              />
-            }
+              }} style={{backgroundColor: (activeMode === "new-characters") ? selectedModeColor : ""}} value="New Characters" />
+            </div>
+
+            <div data-tooltip={unlockedWordExercise ? "Type full words to solidify your learning" : "Complete more lessons to unlock this mode!\n\nType full words to solidify your learning"}>
+              {
+                /* conditionally allow Word Exercise as a mode if user has completed enough letter lessons and has enough vowels */
+                unlockedWordExercise ?
+                <input type="button" className="border-solid border-white border rounded-lg p-2" onClick={()=>{
+                  setActiveMode("word-exercise");
+                  resetLesson();
+                }} style={{backgroundColor: (activeMode === "word-exercise") ? selectedModeColor : ""}} value="Word Exercise" />
+                :
+                <input type="button" className="border-dashed border-gray-400 text-gray-500 border rounded-lg p-2" disabled={true}
+                  style={{cursor: "not-allowed", backgroundColor: (activeMode === "word-exercise") ? selectedModeColor : ""}}
+                  value="Word Exercise"
+                />
+              }
+            </div>
           </div>
           <br/>
 
