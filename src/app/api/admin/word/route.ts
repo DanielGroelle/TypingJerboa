@@ -31,7 +31,7 @@ export async function GET() {
 
 const Z_REQUEST = z.object({
   word: z.string(),
-  languageScript: z.string()
+  languageScript: z.object({languageScript: z.string()})
 });
 //create word
 export async function POST(req: NextRequest) {
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({error: "Request was structured incorrectly"}, {status: 400});
   }
 
-  const languageScriptId = await getLanguageScriptId(request.languageScript);
+  const languageScriptId = await getLanguageScriptId(request.languageScript.languageScript);
   if (languageScriptId === null) {
     return NextResponse.json({error: "LanguageScript does not exist"}, {status: 400});
   }

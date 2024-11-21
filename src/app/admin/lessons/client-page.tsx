@@ -7,6 +7,7 @@ import { Lesson, Z_LESSON } from "@/js/types";
 import { LanguageScripts } from "@/js/language-scripts";
 import ItemCardComponent from "../ItemCardComponent";
 import PageSelectComponent from "../PageSelectComponent";
+import ConfirmationComponent from "../ConfirmationComponent";
 
 const Z_RESPONSE = z.object({
   lessons: z.array(Z_LESSON)
@@ -34,57 +35,63 @@ export default function ClientAdminLessons() {
   const [viewPage, setViewPage] = useState(1);
   const lessonsPerPage = 25;
 
+  const [confirmation, setConfirmation] = useState<(() => void) | null>(null);
+
   useEffect(()=>{
     void (async ()=>setLessons(await getLessons()))();
   },[]);
 
   function handleDelete(lessonId: string) {
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/lesson`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            id: lessonId
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
-  
-    const i = lessons.findIndex((lesson)=>lesson.id === lessonId);
-    const newLessons = lessons.toSpliced(i, 1);
+    setConfirmation(() => () => {
+      void (async ()=>{
+        try {
+          await fetch(`/api/admin/lesson`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              id: lessonId
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
+    
+      const i = lessons.findIndex((lesson)=>lesson.id === lessonId);
+      const newLessons = lessons.toSpliced(i, 1);
 
-    setLessons([...newLessons]);
+      setLessons([...newLessons]);
+    });
   }
 
   function deleteManyLessons(deleteLessons: Lesson[]) {
-    const lessonIds = deleteLessons.map(lesson => lesson.id);
+    setConfirmation(() => () => {
+      const lessonIds = deleteLessons.map(lesson => lesson.id);
+      
+      void (async ()=>{
+        try {
+          await fetch(`/api/admin/lesson/bulk`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              ids: lessonIds
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
     
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/lesson/bulk`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            ids: lessonIds
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
-  
-    const newLessons = lessons.filter((lesson)=>{
-      return !lessonIds.includes(lesson.id)
-    });
+      const newLessons = lessons.filter((lesson)=>{
+        return !lessonIds.includes(lesson.id)
+      });
 
-    setLessons([...newLessons]);
+      setLessons([...newLessons]);
+    });
   }
 
   const refFilteredLessons: {items: Lesson[]} = {items: []};
@@ -125,6 +132,8 @@ export default function ClientAdminLessons() {
     <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       {filterOptionsComponent}
 
+      <ConfirmationComponent confirmation={confirmation} setConfirmation={setConfirmation} />
+
       <div className="flex justify-between">
         <h1>Lessons</h1>
         <PageSelectComponent itemsLength={refFilteredLessons.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={lessonsPerPage} />
@@ -156,5 +165,3 @@ export default function ClientAdminLessons() {
     </div>
   );
 }
-
-//TODO: make the delete button show a confirmation

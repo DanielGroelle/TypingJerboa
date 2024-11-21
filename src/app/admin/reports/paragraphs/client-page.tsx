@@ -6,6 +6,7 @@ import FilterOptionsComponent from "../../FilterOptionsComponent";
 import { ParagraphReport, Z_PARAGRAPH_REPORT } from "@/js/types";
 import ItemCardComponent from "../../ItemCardComponent";
 import PageSelectComponent from "../../PageSelectComponent";
+import ConfirmationComponent from "../../ConfirmationComponent";
 
 const Z_RESPONSE = z.object({
   reports: z.array(Z_PARAGRAPH_REPORT)
@@ -31,6 +32,8 @@ export default function ClientAdminParagraphReports() {
   const [reports, setReports] = useState<ParagraphReport[]>([]);
   const [viewPage, setViewPage] = useState(1);
   const reportsPerPage = 25;
+
+  const [confirmation, setConfirmation] = useState<(() => void) | null>(null);
 
   useEffect(()=>{
     void (async ()=>{
@@ -62,52 +65,56 @@ export default function ClientAdminParagraphReports() {
   }
 
   function handleDelete(reportId: number) {
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/paragraph/report`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            id: reportId
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
-  
-    const i = reports.findIndex((report)=>report.id === reportId);
-    const newReports = reports.toSpliced(i, 1);
+    setConfirmation(() => () => {
+      void (async ()=>{
+        try {
+          await fetch(`/api/admin/paragraph/report`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              id: reportId
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
+    
+      const i = reports.findIndex((report)=>report.id === reportId);
+      const newReports = reports.toSpliced(i, 1);
 
-    setReports([...newReports]);
+      setReports([...newReports]);
+    });
   }
 
   function deleteManyReports(deleteReports: ParagraphReport[]) {
-    const reportIds = deleteReports.map(report => report.id);
+    setConfirmation(() => () => {
+      const reportIds = deleteReports.map(report => report.id);
+      
+      void (async ()=>{
+        try {
+          await fetch(`/api/admin/paragraph/report/bulk`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              ids: reportIds
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
     
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/paragraph/report/bulk`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            ids: reportIds
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
-  
-    const newReports = reports.filter((report)=>{
-      return !reportIds.includes(report.id)
-    });
+      const newReports = reports.filter((report)=>{
+        return !reportIds.includes(report.id)
+      });
 
-    setReports([...newReports]);
+      setReports([...newReports]);
+    });
   }
 
   const refFilteredReports: {items: ParagraphReport[]} = {items: []};
@@ -137,13 +144,14 @@ export default function ClientAdminParagraphReports() {
   return (
     <div>
       {filterOptionsComponent}
-      <br/>
+
+      <ConfirmationComponent confirmation={confirmation} setConfirmation={setConfirmation} />
 
       <div className="flex justify-between">
         <h1>Reports</h1>
         <PageSelectComponent itemsLength={refFilteredReports.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={reportsPerPage} />
       </div>
-      <br/>
+
       {refFilteredReports.items.slice(viewPage * reportsPerPage - reportsPerPage, viewPage * reportsPerPage).map(report =>
         (<ItemCardComponent
           item={report}

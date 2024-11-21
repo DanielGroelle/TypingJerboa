@@ -6,6 +6,7 @@ import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
 import ItemCardComponent from "../ItemCardComponent";
 import PageSelectComponent from "../PageSelectComponent";
+import ConfirmationComponent from "../ConfirmationComponent";
 
 const Z_RESPONSE = z.object({
   users: z.array(Z_USER)
@@ -32,31 +33,35 @@ export default function ClientAdminUsers() {
   const [viewPage, setViewPage] = useState(1);
   const usersPerPage = 25;
 
+  const [confirmation, setConfirmation] = useState<(() => void) | null>(null);
+
   useEffect(()=>{
     void (async ()=>setUsers(await getUsers()))();
   },[]);
 
   function handleDelete(userId: number) {
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/user`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            id: userId
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
-  
-    const i = users.findIndex((user)=>user.id === userId);
-    const newUsers = users.toSpliced(i, 1);
+    setConfirmation(() => () => {
+      void (async ()=>{
+        try {
+          await fetch(`/api/admin/user`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              id: userId
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
+    
+      const i = users.findIndex((user)=>user.id === userId);
+      const newUsers = users.toSpliced(i, 1);
 
-    setUsers([...newUsers]);
+      setUsers([...newUsers]);
+    });
   }
 
   function handleSave(editUser: User) {
@@ -104,10 +109,13 @@ export default function ClientAdminUsers() {
     <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       {filterOptionsComponent}
 
+      <ConfirmationComponent confirmation={confirmation} setConfirmation={setConfirmation} message={"Are you sure? All data for this user will be lost. This action is not reversible!"} />
+
       <div className="flex justify-between">
         <h1>Users</h1>
         <PageSelectComponent itemsLength={refFilteredUsers.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={usersPerPage} />
       </div>
+
       <div className="flex flex-col overflow-y-auto">
         {refFilteredUsers.items.slice(viewPage * usersPerPage - usersPerPage, viewPage * usersPerPage).map((user)=>
           (<ItemCardComponent

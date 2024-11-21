@@ -7,6 +7,7 @@ import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
 import ItemCardComponent from "../ItemCardComponent";
 import PageSelectComponent from "../PageSelectComponent";
+import ConfirmationComponent from "../ConfirmationComponent";
 
 const Z_RESPONSE = z.object({
   races: z.array(Z_RACE)
@@ -33,57 +34,63 @@ export default function ClientAdminRaces() {
   const [viewPage, setViewPage] = useState(1);
   const racesPerPage = 25;
 
+  const [confirmation, setConfirmation] = useState<(() => void) | null>(null);
+
   useEffect(()=>{
     void (async ()=>setRaces(await getRaces()))();
   },[]);
 
   function handleDelete(raceId: string) {
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/race`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            id: raceId
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
-  
-    const i = races.findIndex((race)=>race.id === raceId);
-    const newRaces = races.toSpliced(i, 1);
+    setConfirmation(() => () => {
+      void (async ()=>{
+        try {
+          await fetch(`/api/admin/race`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              id: raceId
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
+    
+      const i = races.findIndex((race)=>race.id === raceId);
+      const newRaces = races.toSpliced(i, 1);
 
-    setRaces([...newRaces]);
+      setRaces([...newRaces]);
+    });
   }
 
   function deleteManyRaces(deleteRaces: Race[]) {
-    const raceIds = deleteRaces.map(race => race.id);
+    setConfirmation(() => () => {
+      const raceIds = deleteRaces.map(race => race.id);
+      
+      void (async ()=>{
+        try {
+          await fetch(`/api/admin/race/bulk`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              ids: raceIds
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
     
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/race/bulk`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            ids: raceIds
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
-  
-    const newRaces = races.filter((race)=>{
-      return !raceIds.includes(race.id)
-    });
+      const newRaces = races.filter((race)=>{
+        return !raceIds.includes(race.id)
+      });
 
-    setRaces([...newRaces]);
+      setRaces([...newRaces]);
+    });
   }
 
   const refFilteredRaces: {items: Race[]} = {items: []};
@@ -117,6 +124,8 @@ export default function ClientAdminRaces() {
   return (
     <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       {filterOptionsComponent}
+
+      <ConfirmationComponent confirmation={confirmation} setConfirmation={setConfirmation} />
 
       <div className="flex justify-between">
         <h1>Races</h1>

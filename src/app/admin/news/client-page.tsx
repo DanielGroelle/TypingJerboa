@@ -5,6 +5,7 @@ import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
 import ItemCardComponent from "../ItemCardComponent";
 import PageSelectComponent from "../PageSelectComponent";
+import ConfirmationComponent from "../ConfirmationComponent";
 
 const Z_NEWSPOST = z.object({
   id: z.number(),
@@ -43,6 +44,8 @@ export default function ClientAdminNews() {
   const newsPostsPerPage = 25;
 
   const [newNewsPost, setNewNewsPost] = useState<Omit<NewsPost, "id" | "postDate"> | null>(null);
+
+  const [confirmation, setConfirmation] = useState<(() => void) | null>(null);
 
   useEffect(()=>{
     void (async ()=>setNewsPosts(await getNewsPosts()))();
@@ -93,26 +96,28 @@ export default function ClientAdminNews() {
   }
 
   function handleDelete(newsPostId: number) {
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/news`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            id: newsPostId
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
-  
-    const i = newsPosts.findIndex((newsPost)=>newsPost.id === newsPostId);
-    const newNewsPosts = newsPosts.toSpliced(i, 1);
+    setConfirmation(() => () => {
+      void (async ()=>{
+        try {
+          await fetch(`/api/admin/news`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              id: newsPostId
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
+    
+      const i = newsPosts.findIndex((newsPost)=>newsPost.id === newsPostId);
+      const newNewsPosts = newsPosts.toSpliced(i, 1);
 
-    setNewsPosts([...newNewsPosts]);
+      setNewsPosts([...newNewsPosts]);
+    });
   }
 
   const refFilteredNewsPosts: {items: NewsPost[]} = {items: []};
@@ -134,6 +139,8 @@ export default function ClientAdminNews() {
   return (
     <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       {filterOptionsComponent}
+
+      <ConfirmationComponent confirmation={confirmation} setConfirmation={setConfirmation} />
 
       <div>
         <input type="button" className="border-solid border-blue-600 border rounded-lg p-2 mr-2" onClick={()=>setNewNewsPost(newNewsPost ? null : {
@@ -186,6 +193,7 @@ export default function ClientAdminNews() {
         :
         ""
       }
+      
       <div className="flex flex-col overflow-y-auto">
         {refFilteredNewsPosts.items.slice(viewPage * newsPostsPerPage - newsPostsPerPage, viewPage * newsPostsPerPage).map((newsPost)=>
           (<ItemCardComponent

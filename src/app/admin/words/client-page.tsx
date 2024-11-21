@@ -8,6 +8,7 @@ import { Word, Z_WORD } from "@/js/types";
 import ItemCardComponent from "../ItemCardComponent";
 import CsvImportComponent from "./CsvImportComponent";
 import PageSelectComponent from "../PageSelectComponent";
+import ConfirmationComponent from "../ConfirmationComponent";
 
 const Z_RESPONSE = z.object({
   words: z.array(Z_WORD)
@@ -35,6 +36,8 @@ export default function ClientAdminWords() {
   const wordsPerPage = 25;
 
   const [newWord, setNewWord] = useState<Omit<Word, "id"> | null>(null);
+
+  const [confirmation, setConfirmation] = useState<(() => void) | null>(null);
 
   useEffect(()=>{
     void (async ()=>{
@@ -66,52 +69,56 @@ export default function ClientAdminWords() {
   }
 
   function handleDelete(wordId: number) {
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/word`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            id: wordId
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
-  
-    const i = words.findIndex((word)=>word.id === wordId);
-    const newWords = words.toSpliced(i, 1);
+    setConfirmation(() => () => {
+      void (async ()=>{
+        try {
+          await fetch(`/api/admin/word`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              id: wordId
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
+    
+      const i = words.findIndex((word)=>word.id === wordId);
+      const newWords = words.toSpliced(i, 1);
 
-    setWords([...newWords]);
+      setWords([...newWords]);
+    });
   }
 
   function deleteManyWords(deleteWords: Word[]) {
-    const wordIds = deleteWords.map(word => word.id);
+    setConfirmation(() => () => {
+      const wordIds = deleteWords.map(word => word.id);
 
-    void (async ()=>{
-      try {
-        await fetch(`/api/admin/word/bulk`, {
-          method: "DELETE",
-          body: JSON.stringify({
-            ids: wordIds
-          }),
-          mode: "cors",
-          cache: "default"
-        });
-      }
-      catch(e: unknown) {
-        throw "Delete failed";
-      }
-    })();
-  
-    const newWords = words.filter((word)=>{
-      return !wordIds.includes(word.id)
+      void (async ()=>{
+        try {
+          await fetch(`/api/admin/word/bulk`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              ids: wordIds
+            }),
+            mode: "cors",
+            cache: "default"
+          });
+        }
+        catch(e: unknown) {
+          throw "Delete failed";
+        }
+      })();
+    
+      const newWords = words.filter((word)=>{
+        return !wordIds.includes(word.id)
+      });
+
+      setWords([...newWords]);
     });
-
-    setWords([...newWords]);
   }
 
   function handleAdd(event: FormEvent<HTMLFormElement>) {
@@ -159,6 +166,8 @@ export default function ClientAdminWords() {
     <div className="flex flex-col overflow-y-hidden" style={{height: "85vh"}}>
       {filterOptionsComponent}
 
+      <ConfirmationComponent confirmation={confirmation} setConfirmation={setConfirmation} />
+
       <div className="flex">
         <input type="button" className="border-solid border-blue-600 border rounded-lg p-2 mr-2" onClick={()=>setNewWord(newWord ? null : {
           word: "",
@@ -176,9 +185,13 @@ export default function ClientAdminWords() {
           <form onSubmit={handleAdd}>
               <div className="flex">
                 <span>word:</span>
-                <input type="text" id="word-input" className="w-full"/><br/>
+                <input type="text" id="word-input" className="w-full" onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{
+                  setNewWord({...newWord, word: e.target.value});
+                }}/><br/>
               </div>
-              languageScript:<select id="language-script-edit-select">
+              languageScript:<select id="language-script-edit-select" onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{
+                setNewWord({...newWord, languageScript: {languageScript: e.target.value}});
+              }}>
                 {
                   Object.values(LanguageScripts).map((languageScript)=>{
                     return <option key={languageScript.internal} defaultValue={languageScript.internal}>{languageScript.internal}</option>
@@ -199,7 +212,7 @@ export default function ClientAdminWords() {
         <h1>Words</h1>
         <PageSelectComponent itemsLength={refFilteredWords.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={wordsPerPage} />
       </div>
-      <br/>
+
       <div className="flex flex-col overflow-y-auto">  
         {refFilteredWords.items.slice(viewPage * wordsPerPage - wordsPerPage, viewPage * wordsPerPage).map((word)=>
           (<ItemCardComponent
