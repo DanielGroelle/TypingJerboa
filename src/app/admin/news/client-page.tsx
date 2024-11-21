@@ -4,6 +4,7 @@ import React, { FormEvent, useEffect, useState } from "react";
 import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
 import ItemCardComponent from "../ItemCardComponent";
+import PageSelectComponent from "../PageSelectComponent";
 
 const Z_NEWSPOST = z.object({
   id: z.number(),
@@ -123,7 +124,7 @@ export default function ClientAdminNews() {
       "id": { getter: (newsPost: NewsPost) => newsPost.id },
       "postDate": { getter: (newsPost: NewsPost) => newsPost.postDate },
       "title": { getter: (newsPost: NewsPost) => newsPost.title },
-      // "tags": { getter: (newsPost: NewsPost) => newsPost.tags },
+      // "tags": { getter: (newsPost: NewsPost) => newsPost.tags }, //TODO: string[] unimplemented
       "body": { getter: (newsPost: NewsPost) => newsPost.body }
     },
     setViewPage: setViewPage,
@@ -145,14 +146,7 @@ export default function ClientAdminNews() {
 
       <div className="flex justify-between">
         <h1>News Posts</h1>
-        <div className="flex mr-10">
-          <p className="leading-10">Page:</p>
-          <select onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{setViewPage(Number(e.target.value))}} value={viewPage} id="page-select">
-            {Array.from(Array(Math.ceil(refFilteredNewsPosts.items.length / newsPostsPerPage))).map((_, i)=>{
-              return <option key={i + 1}>{i + 1}</option>
-            })}
-          </select>
-        </div>
+        <PageSelectComponent itemsLength={refFilteredNewsPosts.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={newsPostsPerPage} />
       </div>
 
       {
@@ -194,26 +188,24 @@ export default function ClientAdminNews() {
       }
       <div className="flex flex-col overflow-y-auto">
         {refFilteredNewsPosts.items.slice(viewPage * newsPostsPerPage - newsPostsPerPage, viewPage * newsPostsPerPage).map((newsPost)=>
-          (
-            <ItemCardComponent
-              item={newsPost}
-              itemFields={{
-                "id": {getter: (newsPost: NewsPost) => newsPost.id, editType: null, options: null},
-                "title": {getter: (newsPost: NewsPost) => newsPost.title, editType: "text", options: null},
-                "author": {getter: (newsPost: NewsPost) => newsPost.author, editType: "text", options: null},
-                "tags": {getter: (newsPost: NewsPost) => newsPost.tags, editType: "array", options: null},
-                "postDate": {getter: (newsPost: NewsPost) => newsPost.postDate, editType: null, options: null},
-                "body": {getter: (newsPost: NewsPost) => newsPost.body, editType: "textarea", options: null}
-              }}
-              editParams={{
-                items: newsPosts,
-                setItems: setNewsPosts,
-                saveItem: handleSave
-              }}
-              deleteItem={handleDelete}
-              key={newsPost.id}
-            />
-          )
+          (<ItemCardComponent
+            item={newsPost}
+            itemFields={{
+              "id": {getter: (newsPost: NewsPost) => newsPost.id, editType: null, options: null},
+              "title": {getter: (newsPost: NewsPost) => newsPost.title, editType: "text", options: null},
+              "author": {getter: (newsPost: NewsPost) => newsPost.author, editType: "text", options: null},
+              "tags": {getter: (newsPost: NewsPost) => newsPost.tags, editType: "array", options: null},
+              "postDate": {getter: (newsPost: NewsPost) => newsPost.postDate, editType: null, options: null},
+              "body": {getter: (newsPost: NewsPost) => newsPost.body, editType: "textarea", options: null}
+            }}
+            editParams={{
+              items: newsPosts,
+              setItems: setNewsPosts,
+              saveItem: handleSave
+            }}
+            deleteItem={handleDelete}
+            key={newsPost.id}
+          />)
         )}
       </div>
       {refFilteredNewsPosts.items.length === 0 ? "Nobody here but us chickens!" : ""}

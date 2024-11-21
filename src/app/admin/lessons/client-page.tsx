@@ -6,6 +6,7 @@ import FilterOptionsComponent from "../FilterOptionsComponent";
 import { Lesson, Z_LESSON } from "@/js/types";
 import { LanguageScripts } from "@/js/language-scripts";
 import ItemCardComponent from "../ItemCardComponent";
+import PageSelectComponent from "../PageSelectComponent";
 
 const Z_RESPONSE = z.object({
   lessons: z.array(Z_LESSON)
@@ -126,14 +127,7 @@ export default function ClientAdminLessons() {
 
       <div className="flex justify-between">
         <h1>Lessons</h1>
-        <div className="flex mr-10">
-          <p className="leading-10">Page:</p>
-          <select onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{setViewPage(Number(e.target.value))}} value={viewPage} id="page-select">
-            {Array.from(Array(Math.ceil(refFilteredLessons.items.length / lessonsPerPage))).map((_, i)=>{
-              return <option key={i + 1}>{i + 1}</option>
-            })}
-          </select>
-        </div>
+        <PageSelectComponent itemsLength={refFilteredLessons.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={lessonsPerPage} />
       </div>
 
       <div className="flex flex-col overflow-y-auto">
@@ -164,4 +158,3 @@ export default function ClientAdminLessons() {
 }
 
 //TODO: make the delete button show a confirmation
-//TODO: genericize page select into a component

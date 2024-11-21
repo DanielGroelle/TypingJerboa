@@ -7,6 +7,7 @@ import { LanguageScripts } from "@/js/language-scripts";
 import { Word, Z_WORD } from "@/js/types";
 import ItemCardComponent from "../ItemCardComponent";
 import CsvImportComponent from "./CsvImportComponent";
+import PageSelectComponent from "../PageSelectComponent";
 
 const Z_RESPONSE = z.object({
   words: z.array(Z_WORD)
@@ -136,16 +137,6 @@ export default function ClientAdminWords() {
     })();
   }
 
-  //TODO: make all these page change handles use state
-  function handlePageChange() {
-    const pageSelector = document.querySelector("#page-select");
-    if (!(pageSelector instanceof HTMLSelectElement)) {
-      throw "pageSelector is not of HTMLSelectElement type";
-    }
-
-    setViewPage(Number(pageSelector.value));
-  }
-
   const refFilteredWords: {items: Word[]} = {items: []};
   const filterOptionsComponent = FilterOptionsComponent<Word>({
     items: words,
@@ -206,35 +197,26 @@ export default function ClientAdminWords() {
 
       <div className="flex justify-between">
         <h1>Words</h1>
-        <div className="flex mr-10">
-          <p className="leading-10">Page:</p>
-          <select onChange={handlePageChange} id="page-select">
-            {Array.from(Array(Math.ceil(refFilteredWords.items.length / wordsPerPage))).map((_, i)=>{
-              return <option key={i + 1}>{i + 1}</option>
-            })}
-          </select>
-        </div>
+        <PageSelectComponent itemsLength={refFilteredWords.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={wordsPerPage} />
       </div>
       <br/>
       <div className="flex flex-col overflow-y-auto">  
         {refFilteredWords.items.slice(viewPage * wordsPerPage - wordsPerPage, viewPage * wordsPerPage).map((word)=>
-          (
-            <ItemCardComponent
-              item={word}
-              itemFields={{
-                "id": {getter: (word: Word) => word.id, editType: null, options: null},
-                "word": {getter: (word: Word) => word.word, editType: "text", options: null},
-                "languageScript": {getter: (word: Word) => word.languageScript.languageScript, editType: "languageScript", options: null}
-              }}
-              editParams={{
-                items: words,
-                setItems: setWords,
-                saveItem: handleSave
-              }}
-              deleteItem={handleDelete}
-              key={word.id}
-            />
-          )
+          (<ItemCardComponent
+            item={word}
+            itemFields={{
+              "id": {getter: (word: Word) => word.id, editType: null, options: null},
+              "word": {getter: (word: Word) => word.word, editType: "text", options: null},
+              "languageScript": {getter: (word: Word) => word.languageScript.languageScript, editType: "languageScript", options: null}
+            }}
+            editParams={{
+              items: words,
+              setItems: setWords,
+              saveItem: handleSave
+            }}
+            deleteItem={handleDelete}
+            key={word.id}
+          />)
         )}
       </div>
       {refFilteredWords.items.length === 0 ? "No words found" : ""}

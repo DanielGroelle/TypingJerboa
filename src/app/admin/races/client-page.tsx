@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
 import ItemCardComponent from "../ItemCardComponent";
+import PageSelectComponent from "../PageSelectComponent";
 
 const Z_RESPONSE = z.object({
   races: z.array(Z_RACE)
@@ -119,14 +120,7 @@ export default function ClientAdminRaces() {
 
       <div className="flex justify-between">
         <h1>Races</h1>
-        <div className="flex mr-10">
-          <p className="leading-10">Page:</p>
-          <select onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{setViewPage(Number(e.target.value))}} value={viewPage} id="page-select">
-            {Array.from(Array(Math.ceil(refFilteredRaces.items.length / racesPerPage))).map((_, i)=>{
-              return <option key={i + 1}>{i + 1}</option>
-            })}
-          </select>
-        </div>
+        <PageSelectComponent itemsLength={refFilteredRaces.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={racesPerPage} />
       </div>
 
       <div className="flex flex-col overflow-y-auto">

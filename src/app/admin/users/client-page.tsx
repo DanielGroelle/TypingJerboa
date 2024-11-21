@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { z } from "zod";
 import FilterOptionsComponent from "../FilterOptionsComponent";
 import ItemCardComponent from "../ItemCardComponent";
+import PageSelectComponent from "../PageSelectComponent";
 
 const Z_RESPONSE = z.object({
   users: z.array(Z_USER)
@@ -105,35 +106,26 @@ export default function ClientAdminUsers() {
 
       <div className="flex justify-between">
         <h1>Users</h1>
-        <div className="flex mr-10">
-          <p className="leading-10">Page:</p>
-          <select onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{setViewPage(Number(e.target.value))}} value={viewPage} id="page-select">
-            {Array.from(Array(Math.ceil(refFilteredUsers.items.length / usersPerPage))).map((_, i)=>{
-              return <option key={i + 1}>{i + 1}</option>
-            })}
-          </select>
-        </div>
+        <PageSelectComponent itemsLength={refFilteredUsers.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={usersPerPage} />
       </div>
       <div className="flex flex-col overflow-y-auto">
         {refFilteredUsers.items.slice(viewPage * usersPerPage - usersPerPage, viewPage * usersPerPage).map((user)=>
-          (
-            <ItemCardComponent
-              item={user}
-              itemFields={{
-                "id": {getter: (user: User) => user.id, editType: null, options: null},
-                "username": {getter: (user: User) => user.username, editType: "text", options: null},
-                "admin": {getter: (user: User) => String(user.admin), editType: "checkbox", options: null},
-                "createdAt": {getter: (user: User) => user.createdAt, editType: null, options: null}
-              }}
-              editParams={{
-                items: users,
-                setItems: setUsers,
-                saveItem: handleSave
-              }}
-              deleteItem={handleDelete}
-              key={user.id}
-            />
-          )
+          (<ItemCardComponent
+            item={user}
+            itemFields={{
+              "id": {getter: (user: User) => user.id, editType: null, options: null},
+              "username": {getter: (user: User) => user.username, editType: "text", options: null},
+              "admin": {getter: (user: User) => String(user.admin), editType: "checkbox", options: null},
+              "createdAt": {getter: (user: User) => user.createdAt, editType: null, options: null}
+            }}
+            editParams={{
+              items: users,
+              setItems: setUsers,
+              saveItem: handleSave
+            }}
+            deleteItem={handleDelete}
+            key={user.id}
+          />)
         )}
       </div>
       {refFilteredUsers.items.length === 0 ? "No users found" : ""}

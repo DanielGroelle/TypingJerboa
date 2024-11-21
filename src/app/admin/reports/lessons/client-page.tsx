@@ -5,6 +5,7 @@ import { z } from "zod";
 import FilterOptionsComponent from "../../FilterOptionsComponent";
 import { LessonReport, Z_LESSON_REPORT } from "@/js/types";
 import ItemCardComponent from "../../ItemCardComponent";
+import PageSelectComponent from "../../PageSelectComponent";
 
 const Z_RESPONSE = z.object({
   reports: z.array(Z_LESSON_REPORT)
@@ -109,15 +110,6 @@ export default function ClientAdminLessonReports() {
     setReports([...newReports]);
   }
 
-  function handlePageChange() {
-    const pageSelector = document.querySelector("#page-select");
-    if (!(pageSelector instanceof HTMLSelectElement)) {
-      throw "pageSelector is not of HTMLSelectElement type";
-    }
-
-    setViewPage(Number(pageSelector.value));
-  }
-
   const refFilteredReports: {items: LessonReport[]} = {items: []};
   const filterOptionsComponent = FilterOptionsComponent<LessonReport>({
     items: reports,
@@ -150,39 +142,30 @@ export default function ClientAdminLessonReports() {
 
       <div className="flex justify-between">
         <h1>Reports</h1>
-        <div className="flex mr-10">
-          <p className="leading-10">Page:</p>
-          <select onChange={handlePageChange} id="page-select">
-            {Array.from(Array(Math.ceil(refFilteredReports.items.length / reportsPerPage))).map((_, i)=>{
-              return <option key={i + 1}>{i + 1}</option>
-            })}
-          </select>
-        </div>
+        <PageSelectComponent itemsLength={refFilteredReports.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={reportsPerPage} />
       </div>
       <br/>
       {refFilteredReports.items.slice(viewPage * reportsPerPage - reportsPerPage, viewPage * reportsPerPage).map(report =>
-        (
-          <ItemCardComponent
-            item={report}
-            itemFields={{
-              "id": {getter: (report: LessonReport) => report.id, editType: null, options: null},
-              "lessonId": {getter: (report: LessonReport) => report.lesson?.id ?? null, editType: null, options: null},
-              "lessonCharacters": {getter: (report: LessonReport) => report.lesson?.lessonCharacters ?? null, editType: null, options: null},
-              "lessonText": {getter: (report: LessonReport) => report.lessonText, editType: null, options: null},
-              "user": {getter: (report: LessonReport) => report.user ? `${String(report.user?.username)} - ${String(report.user?.id)}` : null, editType: null, options: null},
-              "session": {getter: (report: LessonReport) => report.session?.token ? `${String(report.session?.token)}` : null, editType: null, options: null},
-              "resolved": {getter: (report: LessonReport) => String(report.resolved), editType: "checkbox", options: null},
-              "createdAt": {getter: (report: LessonReport) => report.createdAt, editType: null, options: null},
-            }}
-            editParams={{
-              items: reports,
-              setItems: setReports,
-              saveItem: handleSave
-            }}
-            deleteItem={handleDelete}
-            key={report.id}
-          />
-        )
+        (<ItemCardComponent
+          item={report}
+          itemFields={{
+            "id": {getter: (report: LessonReport) => report.id, editType: null, options: null},
+            "lessonId": {getter: (report: LessonReport) => report.lesson?.id ?? null, editType: null, options: null},
+            "lessonCharacters": {getter: (report: LessonReport) => report.lesson?.lessonCharacters ?? null, editType: null, options: null},
+            "lessonText": {getter: (report: LessonReport) => report.lessonText, editType: null, options: null},
+            "user": {getter: (report: LessonReport) => report.user ? `${String(report.user?.username)} - ${String(report.user?.id)}` : null, editType: null, options: null},
+            "session": {getter: (report: LessonReport) => report.session?.token ? `${String(report.session?.token)}` : null, editType: null, options: null},
+            "resolved": {getter: (report: LessonReport) => String(report.resolved), editType: "checkbox", options: null},
+            "createdAt": {getter: (report: LessonReport) => report.createdAt, editType: null, options: null},
+          }}
+          editParams={{
+            items: reports,
+            setItems: setReports,
+            saveItem: handleSave
+          }}
+          deleteItem={handleDelete}
+          key={report.id}
+        />)
       )}
       {refFilteredReports.items.length === 0 ? "No reports found" : ""}
     </div>

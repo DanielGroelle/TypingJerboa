@@ -8,6 +8,7 @@ import FilterOptionsComponent from "../FilterOptionsComponent";
 import CsvImportComponent from "./CsvImportComponent";
 import AddParagraphFormComponent from "./AddParagraphFormComponent";
 import ItemCardComponent from "../ItemCardComponent";
+import PageSelectComponent from "../PageSelectComponent";
 
 const Z_PARAGRAPH_RESPONSE = z.object({
   paragraphs: z.array(Z_PARAGRAPH)
@@ -189,38 +190,29 @@ export default function ClientAdminParagraphs() {
 
       <div className="flex justify-between">
         <h1>Paragraphs</h1>
-        <div className="flex mr-10">
-          <p className="leading-10">Page:</p>
-          <select onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{setViewPage(Number(e.target.value))}} value={viewPage} id="page-select">
-            {Array.from(Array(Math.ceil(refFilteredParagraphs.items.length / paragraphsPerPage))).map((_, i)=>{
-              return <option key={i + 1}>{i + 1}</option>
-            })}
-          </select>
-        </div>
+        <PageSelectComponent itemsLength={refFilteredParagraphs.items.length} viewPage={viewPage} setViewPage={setViewPage} itemsPerPage={paragraphsPerPage} />
       </div>
       
       <div className="flex flex-col overflow-y-auto">
         {refFilteredParagraphs.items.slice(viewPage * paragraphsPerPage - paragraphsPerPage, viewPage * paragraphsPerPage).map((paragraph)=>
-          (
-            <ItemCardComponent
-              item={paragraph}
-              itemFields={{
-                "id": {getter: (paragraph: Paragraph) => paragraph.id, editType: null, options: null},
-                "author": {getter: (paragraph: Paragraph) => paragraph.author, editType: "text", options: null},
-                "source": {getter: (paragraph: Paragraph) => paragraph.source, editType: "text", options: null},
-                "text": {getter: (paragraph: Paragraph) => paragraph.text, editType: "text", options: null},
-                "languageScript": {getter: (paragraph: Paragraph) => paragraph.languageScript.languageScript, editType: "languageScript", options: null},
-                "selectable": {getter: (paragraph: Paragraph) => String(paragraph.selectable), editType: "checkbox", options: null}
-              }}
-              editParams={{
-                items: paragraphs,
-                setItems: setParagraphs,
-                saveItem: handleSave
-              }}
-              deleteItem={handleDelete}
-              key={paragraph.id}
-            />
-          )
+          (<ItemCardComponent
+            item={paragraph}
+            itemFields={{
+              "id": {getter: (paragraph: Paragraph) => paragraph.id, editType: null, options: null},
+              "author": {getter: (paragraph: Paragraph) => paragraph.author, editType: "text", options: null},
+              "source": {getter: (paragraph: Paragraph) => paragraph.source, editType: "text", options: null},
+              "text": {getter: (paragraph: Paragraph) => paragraph.text, editType: "text", options: null},
+              "languageScript": {getter: (paragraph: Paragraph) => paragraph.languageScript.languageScript, editType: "languageScript", options: null},
+              "selectable": {getter: (paragraph: Paragraph) => String(paragraph.selectable), editType: "checkbox", options: null}
+            }}
+            editParams={{
+              items: paragraphs,
+              setItems: setParagraphs,
+              saveItem: handleSave
+            }}
+            deleteItem={handleDelete}
+            key={paragraph.id}
+          />)
         )}
         {/*if there are no paragraphs to show, display not found message*/}
         {refFilteredParagraphs.items.length === 0 ? "No paragraphs found" : ""}
