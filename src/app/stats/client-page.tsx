@@ -2,6 +2,7 @@
 
 import { LanguageScripts } from "@/js/language-scripts";
 import { Z_LANGUAGESCRIPT_STATS } from "@/js/types";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 
@@ -75,8 +76,13 @@ export default function ClientStats() {
             <p className="text-lg">{showParagraph ? stats?.languageScriptStats[languageScript]?.bestParagraph : ""}</p>
             {(() => {
               const createdAt = stats?.languageScriptStats[languageScript]?.createdAt;
-              if (createdAt === null || createdAt === undefined) {
-                return;
+              if (createdAt === null) {
+                return (
+                  <div className="flex items-center mt-4">
+                    <p className="text-lg">Unregistered User</p>
+                    <Link href="/register" className="underline decoration-blue-500 h-fit ml-2">Register</Link>
+                  </div>
+                );
               }
               
               const offset = new Date(createdAt).getTimezoneOffset();
