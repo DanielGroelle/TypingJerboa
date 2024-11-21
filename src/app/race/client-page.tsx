@@ -51,12 +51,6 @@ export default function ClientRace({languageScriptPreference}: {languageScriptPr
   useEffect(()=>{
     //on race start
     if (raceParagraphArray.length !== 0) {
-      //focus on the text box
-      const textInput = document.getElementById("main-text-input");
-      if (textInput) {
-        textInput.focus();
-      }
-
       //set the wpm every 100ms
       const intervalId = setInterval(()=>{
         //needs to be a reference to avoid closure keeping userInput as an empty string

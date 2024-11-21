@@ -35,6 +35,11 @@ export default function TextInputComponent({paragraphArray, startTime, languageS
   useEffect(() => {
     setGameFinished(false);
     moveCaretPosition(userInput.length);
+
+    const textInput = document.getElementById("main-text-input");
+    if (textInput) {
+      textInput.focus();
+    }
   }, [paragraphArray]);
 
   useEffect(() => {
