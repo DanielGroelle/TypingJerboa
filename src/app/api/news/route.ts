@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getNewsPosts } from "../utility/utility";
 
+//need to force dynamic since next tries to do static optimization
+export const dynamic = "force-dynamic";
+
 //fetch all news posts
 export async function GET() {
   const newsPosts = await getNewsPosts();
