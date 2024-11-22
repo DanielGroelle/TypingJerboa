@@ -143,3 +143,41 @@ export async function findUniqueFinishedLessons(options: {userId?: number | unde
 
   return {...lessonByLanguageScript};
 }
+
+export async function getNewsPosts() {
+  return await prisma.newspost.findMany({
+    select: {
+      id: true,
+      title: true,
+      author: true,
+      body: true,
+      postDate: true,
+      tags: true
+    }
+  });
+}
+
+//return if a single user is an admin based on loginToken
+export async function userIsAdmin(token: string) {
+  const user = await prisma.user.findUnique({
+    select: {id: true, admin: true},
+    where: {loginToken: token}
+  });
+
+  //no user found
+  if (user === null) {
+    return false;
+  }
+
+  return user.admin;
+}
+
+export async function findUserFromLoginToken(loginToken: string | undefined) {
+  if (loginToken === undefined) return null;
+
+  const user = await prisma.user.findFirst({
+    where: {loginToken: loginToken}
+  });
+  
+  return user;
+}

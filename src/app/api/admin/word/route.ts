@@ -3,7 +3,7 @@ import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { getLanguageScriptId } from "../../utility/utility";
 
-export async function getWords() {
+async function getWords() {
   const returnedWords = await prisma.word.findMany({
     select: {
       id: true,

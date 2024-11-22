@@ -1,21 +1,6 @@
+import { userIsAdmin } from "@/app/api/utility/utility";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import prisma from "@/lib/prisma";
-
-//return if a single user is an admin based on loginToken
-export async function userIsAdmin(token: string) {
-  const user = await prisma.user.findUnique({
-    select: {id: true, admin: true},
-    where: {loginToken: token}
-  });
-
-  //no user found
-  if (user === null) {
-    return false;
-  }
-
-  return user.admin;
-}
 
 //sending the loginToken in the POST body because it comes from middleware
 const Z_REQUEST = z.object({

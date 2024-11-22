@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { findUserFromLoginToken } from "../../admin/user/route";
+import { findUserFromLoginToken } from "../../utility/utility";
 
 const Z_REQUEST = z.object({
   raceId: z.string()

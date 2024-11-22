@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findUserFromLoginToken } from "../admin/user/route";
-import { findUniqueFinishedLessons } from "../utility/utility";
+import { findUniqueFinishedLessons, findUserFromLoginToken } from "../utility/utility";
 
 //fetch and return completed lessons by loginToken or sessionToken
 export async function GET(req: NextRequest) {

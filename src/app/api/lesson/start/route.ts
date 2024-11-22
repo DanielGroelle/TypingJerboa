@@ -1,8 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { findUserFromLoginToken } from "../../admin/user/route";
-import { findUniqueFinishedLessons, generateRandomWord, getLanguageScriptId, shuffle } from "../../utility/utility";
+import { findUniqueFinishedLessons, findUserFromLoginToken, generateRandomWord, getLanguageScriptId, shuffle } from "../../utility/utility";
 
 //generates the lesson text when the selected mode is word-exercise
 function generateWordExerciseLessonText(

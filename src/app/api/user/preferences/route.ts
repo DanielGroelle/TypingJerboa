@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findUserFromLoginToken } from "../../admin/user/route";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { getLanguageScriptId, getLanguageScriptString } from "../../utility/utility";
+import { findUserFromLoginToken, getLanguageScriptId, getLanguageScriptString } from "../../utility/utility";
 
 //if no preferences assigned yet for userId, initialize languageScript to first in db
 async function initializeUserPreferences(userId: number) {

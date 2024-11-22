@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getNewsPosts } from "../admin/news/route";
+import { getNewsPosts } from "../utility/utility";
 
 //fetch all news posts
 export async function GET() {

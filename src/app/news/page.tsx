@@ -1,7 +1,7 @@
 import ClientNews from "./client-page";
-import { userIsAdmin } from "../api/admin/user/is-admin/route";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { userIsAdmin } from "../api/utility/utility";
 
 export default async function News() {
   const isAdmin = await userIsAdmin(cookies().get("loginToken")?.value ?? "");

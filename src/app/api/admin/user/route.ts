@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 
-export async function getUsers() {
+async function getUsers() {
   const returnedUsers = await prisma.user.findMany({
     select: {
       id: true,
@@ -48,14 +48,4 @@ export async function DELETE(req: NextRequest) {
   }
 
   return NextResponse.json({deleteResult});
-}
-
-export async function findUserFromLoginToken(loginToken: string | undefined) {
-  if (loginToken === undefined) return null;
-
-  const user = await prisma.user.findFirst({
-    where: {loginToken: loginToken}
-  });
-  
-  return user;
 }

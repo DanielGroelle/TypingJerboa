@@ -1,8 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { selectRandomParagraph } from "../../utility/utility";
-import { findUserFromLoginToken } from "../../admin/user/route";
+import { findUserFromLoginToken, selectRandomParagraph } from "../../utility/utility";
 
 const Z_PARAGRAPH = z.object({
   id: z.number(),

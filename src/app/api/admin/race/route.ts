@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 
-export async function getRaces() {
+async function getRaces() {
   const returnedRaces = await prisma.race.findMany({
     select: {
       id: true,

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findUserFromLoginToken } from "../admin/user/route";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { comparePassword, hashPassword } from "@/lib/bcrypt";
+import { findUserFromLoginToken } from "../utility/utility";
 
 //delete user and all associated data from db
 export async function DELETE(req: NextRequest) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findUserFromLoginToken } from "../admin/user/route";
+import { findUserFromLoginToken } from "../utility/utility";
 
 //fetch user
 export async function GET(req: NextRequest) {

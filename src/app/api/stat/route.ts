@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
-import { findUserFromLoginToken } from "../admin/user/route";
 import { NextRequest, NextResponse } from "next/server";
 import { LanguageScripts } from "@/js/language-scripts";
+import { findUserFromLoginToken } from "../utility/utility";
 
 //fetch user stats
 export async function GET(req: NextRequest) {

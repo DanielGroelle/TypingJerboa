@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { extractWordsFromTexts, getLanguageScriptId, insertToWordTable } from "../../utility/utility";
 
-export async function getParagraphs() {
+async function getParagraphs() {
   return await prisma.paragraph.findMany({
     select: {
       id: true,

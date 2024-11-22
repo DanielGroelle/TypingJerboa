@@ -1,19 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { getNewsPosts } from "../../utility/utility";
 import { z } from "zod";
-
-export async function getNewsPosts() {
-  return await prisma.newspost.findMany({
-    select: {
-      id: true,
-      title: true,
-      author: true,
-      body: true,
-      postDate: true,
-      tags: true
-    }
-  });
-}
 
 //return all newsPosts
 export async function GET() {

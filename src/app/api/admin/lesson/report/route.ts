@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 
-export async function getReports() {
+async function getReports() {
   const returnedReports = await prisma.lessonReport.findMany({
     select: {
       id: true,
