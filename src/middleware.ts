@@ -250,6 +250,35 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  //if user tries to access admin page
+  if (path.startsWith("/admin")) {
+    //if no loginToken, user isnt logged in, so cant be an admin
+    if (!loginToken) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    let response;
+    try {
+      //must be an api fetch because PrismaClient cant run in vercel edge functions
+      response = Z_ADMIN_RESPONSE.parse(await (await fetch(new URL("/api/admin/user/is-admin", process.env.BASE_URL), {
+        method: "POST",
+        body: JSON.stringify({
+          loginToken: loginToken
+        }),
+        mode: "cors",
+        cache: "default"
+      })).json());
+    }
+    catch(e: unknown) {
+      console.error("Access admin page error", e);
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    if (!response.isAdmin) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   //if the path is /api/, could be an internal request. this check prevents infinite redirects
   if (path.startsWith("/api/")) {
     //allow internal requests being made to login-token or session-token api routes
@@ -304,35 +333,6 @@ export async function middleware(request: NextRequest) {
   //if user not logged in and tries to access account page
   if (path.startsWith("/account") && !loginToken) {
     return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  //if user tries to access admin page
-  if (path.startsWith("/admin")) {
-    //if no loginToken, user isnt logged in, so cant be an admin
-    if (!loginToken) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
-    let response;
-    try {
-      //must be an api fetch because PrismaClient cant run in vercel edge functions
-      response = Z_ADMIN_RESPONSE.parse(await (await fetch(new URL("/api/admin/user/is-admin", process.env.BASE_URL), {
-        method: "POST",
-        body: JSON.stringify({
-          loginToken: loginToken
-        }),
-        mode: "cors",
-        cache: "default"
-      })).json());
-    }
-    catch(e: unknown) {
-      console.error("Access admin page error", e);
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
-    if (!response.isAdmin) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
   }
 
   //fetch and assign user preferences to cookie
