@@ -57,7 +57,7 @@ export default function ClientLogin() {
           <p style={{width: "5.5rem"}}>Password</p>
           <input className="text-black p-1" type="password" id="password" required value={password} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setPassword(e.target.value)} />
         </div>
-        <input type="button" className="border-solid border-white border rounded-lg p-2" disabled={loggingIn} onClick={()=>{
+        <input type="submit" className="border-solid border-white border rounded-lg p-2" disabled={loggingIn} onClick={()=>{
            setLoggingIn(true);
            handleLogin(username, password, setError, setLoggingIn);
         }} value="Login" />

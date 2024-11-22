@@ -68,7 +68,7 @@ export default function ClientRegister() {
           <p style={{width: "5.5rem"}}>Confirm Password</p>
           <input className="text-black p-1" type="password" id="confirm-password" required value={confirmPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setConfirmPassword(e.target.value)} />
         </div>
-        <input type="button" className="border-solid border-white border rounded-lg p-2" disabled={registered} onClick={()=>{
+        <input type="submit" className="border-solid border-white border rounded-lg p-2" disabled={registered} onClick={()=>{
           setRegistered(true);
           handleRegister(username, password, confirmPassword, setError, setRegistered);
         }} value="Register Account"/>

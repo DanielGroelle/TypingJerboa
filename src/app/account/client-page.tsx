@@ -208,7 +208,7 @@ export default function ClientAccount({languageScriptPreference}: {languageScrip
               <p style={{width: "9.5rem"}}>Confirm New Password</p>
               <input className="text-black p-1" type="password" id="confirm-new-password" required value={confirmNewPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setConfirmNewPassword(e.target.value)} />
             </div>
-            <input type="button" className="border-solid border-green-700 border-2 rounded-lg p-2 my-1" disabled={passwordUpdated} onClick={()=>{
+            <input type="submit" className="border-solid border-green-700 border-2 rounded-lg p-2 my-1" disabled={passwordUpdated} onClick={()=>{
               setPasswordUpdated(true);
               updatePassword(currentPassword, newPassword, confirmNewPassword, setError, setSuccess, setPasswordUpdated);
             }} value="Update Password" />
