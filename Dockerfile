@@ -21,8 +21,7 @@ RUN rm -rf src
 CMD npx prisma migrate dev && npm run dev
 
 FROM typingjerboa-node-base AS typingjerboa-node-prod
-RUN npm run build
-CMD npm run start
+CMD npx prisma migrate deploy && npm run build && npm run start
 
 # postgres
 FROM postgres:16-alpine AS typingjerboa-postgres-base

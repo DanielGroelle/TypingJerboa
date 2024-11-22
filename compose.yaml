@@ -41,7 +41,7 @@ services:
       - POSTGRES_PRISMA_URL=${POSTGRES_PROD_PRISMA_INTERNAL_URL}
       - POSTGRES_URL_NON_POOLING=${POSTGRES_PROD_INTERNAL_URL_NON_POOLING}
     ports:
-      - "3000:80"
+      - "3000:3000"
   
   postgres-test:
     build:
@@ -98,4 +98,4 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PROD_PASSWORD}
       - POSTGRES_DB=${POSTGRES_PROD_DB}
     ports:
-      - "5432:5432"
+      - "2345:5432"
