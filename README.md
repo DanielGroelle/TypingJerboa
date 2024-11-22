@@ -28,3 +28,13 @@ If you&apos;d like to keep track of your progress, it is possible and encouraged
 
 # Images
 
+![Home page](./src/app/images/Home.png "Home Page")
+![Learning to type new characters](./src/app/images/LearnNewCharacters.png "Learning to type new characters")
+![Learning to type full words](./src/app/images/LearnWordExercise.png "Learning to type full words")
+![Racing in English](./src/app/images/Race1.png "Racing in English")
+![Racing in Russian](./src/app/images/Race2.png "Racing in Russian")
+![Stats page](./src/app/images/StatsPage.png "Stats Page")
+![News page](./src/app/images/NewsPage.png "News Page")
+![Login page](./src/app/images/LoginPage.png "Login Page")
+![Account page](./src/app/images/AccountPage.png "Account Page")
+![A robust admin panel](./src/app/images/AdminPanel.png "A robust admin panel")
