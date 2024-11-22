@@ -87,7 +87,7 @@ services:
       target: typingjerboa-postgres-prod
     image: typingjerboa-postgres-prod
     volumes:
-      - /var/lib/postgres/data
+      - /var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_PROD_DB} -U ${POSTGRES_PROD_USER}"]
       interval: 5s
