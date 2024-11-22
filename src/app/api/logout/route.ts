@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const loginToken = req.cookies.get("loginToken")?.value;
@@ -6,7 +7,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({message: "No login token found"}, {status: 400});
   }
 
-  const updatedUser = await prisma?.user.update({
+  const updatedUser = await prisma.user.update({
     where: {loginToken: loginToken},
     data: {
       loginToken: null,

@@ -24,7 +24,7 @@ const Z_RESPONSE = z.object({
 async function getNewsPosts() {
   let response;
   try {
-    response = Z_RESPONSE.parse(await (await fetch(`/api/news`, {
+    response = Z_RESPONSE.parse(await (await fetch(`/api/admin/news`, {
       method: "GET",
       mode: "cors",
       cache: "default"
